@@ -71,3 +71,48 @@ CREATE TABLE Person(
    age INT
 );
 ```
+
+## Avro Schema
+
+### Avro schema
+```scala
+
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.AvroSchema)
+```
+
+```json
+{
+   "namespace": "com.datawizards.dmg.examples",
+   "type": "record",
+   "name": "Person",
+   "fields": [
+      {"name": "name", "type": "string"},
+      {"name": "age", "type": "int"}
+   ]
+}
+```
+
+### Avro schema for Avro Schema Registry
+
+```scala
+
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
+```
+
+```json
+{"schema":
+"{
+   \"namespace\": \"com.datawizards.dmg.examples\",
+   \"type\": \"record\",
+   \"name\": \"Person\",
+   \"fields\": [
+      {\"name\": \"name\", \"type\": \"string\"},
+      {\"name\": \"age\", \"type\": \"int\"}
+   ]
+}"
+}
+```

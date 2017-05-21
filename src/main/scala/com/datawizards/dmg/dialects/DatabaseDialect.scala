@@ -1,13 +1,18 @@
 package com.datawizards.dmg.dialects
 
+import com.datawizards.dmg.ClassMetaData
+
 trait DatabaseDialect extends Dialect {
 
-  override def generateDataModel(table: String, fields: Array[FieldWithType]): String = {
-    val columnsExpressions = fields.map(f => f.field + " " + f.targetType).mkString(",\n   ")
+  override def generateDataModel(classMetaData: ClassMetaData): String = {
+    val columnsExpression = generateColumnsExpression(classMetaData)
 
-    s"CREATE TABLE $table(\n" +
-      s"   $columnsExpressions" +
+    s"CREATE TABLE ${classMetaData.className}(\n" +
+      s"   $columnsExpression" +
       s"\n);"
   }
+
+  private def generateColumnsExpression(classMetaData: ClassMetaData): String =
+    classMetaData.fields.map(f => f.name + " " + f.targetType).mkString(",\n   ")
 
 }
