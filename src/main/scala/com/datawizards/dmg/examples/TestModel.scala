@@ -1,7 +1,6 @@
-package com.datawizards.dmg
+package com.datawizards.dmg.examples
 
-import java.sql.Timestamp
-import java.sql.Date
+import java.sql.{Date, Timestamp}
 
 object TestModel {
   case class Person(name: String, age: Int)

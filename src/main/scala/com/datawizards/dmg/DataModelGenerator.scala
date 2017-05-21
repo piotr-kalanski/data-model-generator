@@ -1,19 +1,18 @@
 package com.datawizards.dmg
 
+import com.datawizards.dmg.dialects.Dialect
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+
 import scala.reflect.ClassTag
+import scala.reflect.runtime.universe.TypeTag
 
 object DataModelGenerator {
-  def generate[T: ClassTag](dialect: Dialect): String = {
+  def generate[T: ClassTag: TypeTag](dialect: Dialect): String = {
     val klass = implicitly[ClassTag[T]].runtimeClass
     val table = klass.getSimpleName
-    val columns = klass
-      .getDeclaredFields
-      .map(f => f.getName -> dialect.mapScalaType(f.getType))
+    val encoder = ExpressionEncoder[T]
 
-    val columnsExpressions = columns.map(p => p._1 + " " + p._2).mkString(",\n   ")
-    s"CREATE TABLE $table(\n" +
-      s"   $columnsExpressions" +
-      s"\n);"
+    dialect.generateDataModel(table, encoder.schema)
   }
 
 }

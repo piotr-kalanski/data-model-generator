@@ -27,7 +27,7 @@ developers := List(
 )
 
 libraryDependencies ++= Seq(
-  "com.chuusai" %% "shapeless" % "2.3.2",
+  "org.apache.spark" %% "spark-sql" % "2.1.0",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "junit" % "junit" % "4.10" % "test"
 )
