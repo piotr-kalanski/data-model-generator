@@ -1,7 +1,7 @@
-package com.datawizards.dmg
+package com.datawizards.dmg.dialects
 
+import com.datawizards.dmg.DataModelGenerator
 import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person}
-import com.datawizards.dmg.dialects.AvroSchemaRegistryDialect
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

@@ -1,6 +1,7 @@
 package com.datawizards.dmg
 
 import com.datawizards.dmg.dialects.Dialect
+import com.datawizards.dmg.model.{ClassMetaData, FieldMetaData}
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 
 import scala.reflect.ClassTag

@@ -82,7 +82,7 @@ case class Person(name: String, age: Int)
 DataModelGenerator.generate[Person](dialects.AvroSchema)
 ```
 
-```javascript
+```json
 {
    "namespace": "com.datawizards.dmg.examples",
    "type": "record",
@@ -103,7 +103,7 @@ case class Person(name: String, age: Int)
 DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
 ```
 
-```javascript
+```json
 {"schema":
 "{
    \"namespace\": \"com.datawizards.dmg.examples\",
@@ -117,6 +117,32 @@ DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
 }
 ```
 
+## Registering Avro schema to Avro schema registry
+
+```scala
+import com.datawizards.dmg.service.AvroSchemaRegistryServiceImpl
+
+case class Person(name: String, age: Int)
+
+object RegisterAvroSchema extends App {
+  val service = new AvroSchemaRegistryServiceImpl("http://localhost:8081")
+  service.registerSchema[Person]("person")
+
+  println("Subjects:")
+  println(service.subjects())
+
+  println("Registered schema:")
+  println(service.fetchSchema("person"))
+}
+```
+
+```scala
+"Subjects:"
+["person"]
+"Registered schema:"
+{"type":"record","name":"Person","namespace":"com.datawizards.dmg.examples","fields":[{"name":"name","type":"string"},{"name":"age","type":"int"}]}
+```
+
 ## Elasticsearch
 
 ### Elasticsearch mapping
@@ -128,7 +154,7 @@ case class Person(name: String, age: Int)
 DataModelGenerator.generate[Person](dialects.Elasticsearch)
 ```
 
-```javascript
+```json
 {
    "mappings": {
       "Person": {

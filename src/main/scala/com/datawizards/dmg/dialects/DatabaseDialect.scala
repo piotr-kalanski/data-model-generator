@@ -1,6 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.ClassMetaData
+import com.datawizards.dmg.model.ClassMetaData
 
 trait DatabaseDialect extends Dialect {
 
