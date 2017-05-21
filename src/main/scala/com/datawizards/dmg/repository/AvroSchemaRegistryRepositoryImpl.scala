@@ -2,7 +2,7 @@ package com.datawizards.dmg.repository
 
 import scalaj.http._
 import org.json4s._
-import org.json4s.jackson.JsonMethods._
+import org.json4s.native.JsonMethods._
 
 class AvroSchemaRegistryRepositoryImpl(url: String) extends AvroSchemaRegistryRepository {
   override def registerSchema(subject: String, schema: String): Unit = {
