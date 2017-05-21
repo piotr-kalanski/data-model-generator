@@ -72,7 +72,7 @@ CREATE TABLE Person(
 );
 ```
 
-## Avro Schema
+## Avro
 
 ### Avro schema
 ```scala
@@ -82,7 +82,7 @@ case class Person(name: String, age: Int)
 DataModelGenerator.generate[Person](dialects.AvroSchema)
 ```
 
-```json
+```javascript
 {
    "namespace": "com.datawizards.dmg.examples",
    "type": "record",
@@ -103,7 +103,7 @@ case class Person(name: String, age: Int)
 DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
 ```
 
-```json
+```javascript
 {"schema":
 "{
    \"namespace\": \"com.datawizards.dmg.examples\",
@@ -114,5 +114,27 @@ DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
       {\"name\": \"age\", \"type\": \"int\"}
    ]
 }"
+}
+```
+
+## Elasticsearch
+
+### Elasticsearch mapping
+
+```scala
+
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Elasticsearch)
+```
+
+```javascript
+{
+   "mappings": {
+      "Person": {
+         "name": {"type": "string"},
+         "age": {"type": "integer"}
+      }
+   }
 }
 ```

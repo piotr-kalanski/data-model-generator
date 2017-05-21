@@ -5,4 +5,5 @@ package object dialects {
   val Hive: DatabaseDialect = HiveDialect
   val AvroSchema: Dialect = AvroSchemaDialect
   val AvroSchemaRegistry: Dialect = AvroSchemaRegistryDialect
+  val Elasticsearch: Dialect = ElasticsearchDialect
 }
