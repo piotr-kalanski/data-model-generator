@@ -37,10 +37,10 @@ or
 # Examples
 
 ## H2
-
 ```scala
 import com.datawizards.dmg.{DataModelGenerator, dialects}
-import com.datawizards.dmg.examples.TestModel.Person
+
+case class Person(name: String, age: Int)
 
 object H2Example extends App {
   println(DataModelGenerator.generate[Person](dialects.H2))
@@ -50,6 +50,24 @@ object H2Example extends App {
 ```sql
 CREATE TABLE Person(
    name VARCHAR,
+   age INT
+);
+```
+
+## Hive
+```scala
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
+case class Person(name: String, age: Int)
+
+object HiveExample extends App {
+  println(DataModelGenerator.generate[Person](dialects.Hive))
+}
+```
+
+```sql
+CREATE TABLE Person(
+   name STRING,
    age INT
 );
 ```
