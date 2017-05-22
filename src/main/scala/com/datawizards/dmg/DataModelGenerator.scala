@@ -1,8 +1,10 @@
 package com.datawizards.dmg
 
 import com.datawizards.dmg.dialects.Dialect
+import com.datawizards.dmg.metadata.{CaseClassMetaDataExtractor, ClassFieldMetaData}
 import com.datawizards.dmg.model.{ClassMetaData, FieldMetaData}
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+import org.apache.spark.sql.types.StructField
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
@@ -27,9 +29,22 @@ object DataModelGenerator {
 
   private def getFieldsMetadata[T: ClassTag: TypeTag](dialect: Dialect): Array[FieldMetaData] = {
     val schema = ExpressionEncoder[T].schema
-    schema
-      .fields
-      .map(f => FieldMetaData(f.name, dialect.mapDataType(f.dataType)))
+    val classMetaData = CaseClassMetaDataExtractor.extractCaseClassMetaData[T]()
+    (schema.fields zip classMetaData.fields)
+      .map{case (schemaField, classField) =>
+        FieldMetaData(
+          getFieldName(schemaField, classField),
+          dialect.mapDataType(schemaField.dataType)
+        )
+      }
+  }
+
+  private def getFieldName(schemaField: StructField, classFieldMetaData: ClassFieldMetaData): String = {
+    val columnAnnotation = classFieldMetaData.annotations.find(_.name == "com.datawizards.dmg.annotations.column")
+    if(columnAnnotation.isDefined)
+      columnAnnotation.get.attributes.head.value
+    else
+      schemaField.name
   }
 
 }
