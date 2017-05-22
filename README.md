@@ -11,6 +11,7 @@ Data model generator based on Scala case classes.
 - [Goals](#goals)
 - [Getting started](#getting-started)
 - [Examples](#examples)
+- [Customizations](#customizations)
 
 # Goals
 
@@ -163,4 +164,27 @@ DataModelGenerator.generate[Person](dialects.Elasticsearch)
       }
    }
 }
+```
+
+# Customizations
+
+## Custom column name
+
+```scala
+import com.datawizards.dmg.annotations._
+
+case class Person(
+  @column(name="personName")
+  name: String,
+  age: Int
+)
+
+DataModelGenerator.generate[Person](H2Dialect)
+```
+
+```sql
+CREATE TABLE Person(
+   personName VARCHAR,
+   age INT
+);
 ```

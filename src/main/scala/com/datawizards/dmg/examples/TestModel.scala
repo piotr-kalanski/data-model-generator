@@ -1,6 +1,7 @@
 package com.datawizards.dmg.examples
 
 import java.sql.{Date, Timestamp}
+import com.datawizards.dmg.annotations._
 
 object TestModel {
   case class Person(name: String, age: Int)
@@ -16,5 +17,10 @@ object TestModel {
     byteVal: Byte,
     dateVal: Date,
     timestampVal: Timestamp
+  )
+  case class PersonWithCustomName(
+    @column(name="personName") name: String,
+    @column(name="personAge") age: Int,
+    gender: String
   )
 }

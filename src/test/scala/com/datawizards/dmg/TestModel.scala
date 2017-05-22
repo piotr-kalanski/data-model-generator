@@ -3,6 +3,8 @@ package com.datawizards.dmg
 import java.sql.Timestamp
 import java.sql.Date
 
+import com.datawizards.dmg.annotations.column
+
 object TestModel {
   case class Person(name: String, age: Int)
   case class Book(title: String, year: Int, personName: String)
@@ -17,5 +19,9 @@ object TestModel {
     byteVal: Byte,
     dateVal: Date,
     timestampVal: Timestamp
+  )
+  case class PersonWithCustomName(
+    @column("personName") name: String,
+    age: Int
   )
 }
