@@ -1,5 +1,7 @@
 package com.datawizards.dmg.dialects
 
+import com.datawizards.dmg.model.ClassMetaData
+
 object HiveDialect extends DatabaseDialect {
   override def intType: String = "INT"
 
@@ -20,4 +22,13 @@ object HiveDialect extends DatabaseDialect {
   override def dateType: String = "DATE"
 
   override def timestampType: String = "TIMESTAMP"
+
+
+  override protected def additionalTableProperties(classMetaData: ClassMetaData): String =
+    if(classMetaData.comment.isDefined)
+      s"""
+         |COMMENT '${classMetaData.comment.get}'""".stripMargin
+    else ""
+
+  override protected def additionalTableExpressions(classMetaData: ClassMetaData): String = ""
 }

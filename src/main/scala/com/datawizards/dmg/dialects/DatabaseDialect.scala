@@ -9,10 +9,14 @@ trait DatabaseDialect extends Dialect {
 
     s"CREATE TABLE ${classMetaData.className}(\n" +
       s"   $columnsExpression" +
-      s"\n);"
+      s"\n)${additionalTableProperties(classMetaData)};${additionalTableExpressions(classMetaData)}"
   }
 
   private def generateColumnsExpression(classMetaData: ClassMetaData): String =
-    classMetaData.fields.map(f => f.name + " " + f.targetType).mkString(",\n   ")
+    classMetaData.fields.map(f => f.name + " " + f.targetType + (if(f.comment.isEmpty) "" else s" COMMENT '${f.comment.get}'")).mkString(",\n   ")
+
+  protected def additionalTableProperties(classMetaData: ClassMetaData): String
+
+  protected def additionalTableExpressions(classMetaData: ClassMetaData): String
 
 }

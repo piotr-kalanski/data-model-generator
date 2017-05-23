@@ -1,13 +1,12 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.DataModelGenerator
+import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
 import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class GenerateAvroSchemaRegistryTest extends FunSuite {
+class GenerateAvroSchemaRegistryTest extends DataModelGeneratorBaseTest {
 
   test("Simple model") {
     val expected =
@@ -23,7 +22,7 @@ class GenerateAvroSchemaRegistryTest extends FunSuite {
         |}"
         |}""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[Person](AvroSchemaRegistryDialect)
     }
   }
@@ -50,7 +49,7 @@ class GenerateAvroSchemaRegistryTest extends FunSuite {
         |}"
         |}""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithAllSimpleTypes](AvroSchemaRegistryDialect)
     }
   }

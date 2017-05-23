@@ -25,12 +25,16 @@ object AvroSchemaDialect extends Dialect {
   override def timestampType: String = "long"
 
   override def generateDataModel(classMetaData: ClassMetaData): String = {
-    val fieldsExpression = generateFieldsExpression(classMetaData  )
+    val fieldsExpression = generateFieldsExpression(classMetaData)
+    val tableDoc =
+      if(classMetaData.comment.isEmpty) ""
+      else s"""
+         |   "doc": "${classMetaData.comment.get}",""".stripMargin
 
     s"""{
        |   "namespace": "${classMetaData.packageName}",
        |   "type": "record",
-       |   "name": "${classMetaData.className}",
+       |   "name": "${classMetaData.className}",$tableDoc
        |   "fields": [
        |      $fieldsExpression
        |   ]
@@ -38,5 +42,5 @@ object AvroSchemaDialect extends Dialect {
   }
 
   private def generateFieldsExpression(classMetaData: ClassMetaData): String =
-    classMetaData.fields.map(f => s"""{"name": "${f.name}", "type": "${f.targetType}"}""").mkString(",\n      ")
+    classMetaData.fields.map(f => s"""{"name": "${f.name}", "type": "${f.targetType}"${if(f.comment.isEmpty) "" else s""", "doc": "${f.comment.get}""""}}""").mkString(",\n      ")
 }

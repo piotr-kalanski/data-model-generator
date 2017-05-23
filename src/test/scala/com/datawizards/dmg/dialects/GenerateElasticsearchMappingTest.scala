@@ -1,13 +1,12 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.DataModelGenerator
+import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
 import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class GenerateElasticsearchMappingTest extends FunSuite {
+class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
 
   test("Simple model") {
     val expected =
@@ -20,7 +19,7 @@ class GenerateElasticsearchMappingTest extends FunSuite {
         |   }
         |}""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[Person](ElasticsearchDialect)
     }
   }
@@ -44,7 +43,7 @@ class GenerateElasticsearchMappingTest extends FunSuite {
         |   }
         |}""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithAllSimpleTypes](ElasticsearchDialect)
     }
   }
