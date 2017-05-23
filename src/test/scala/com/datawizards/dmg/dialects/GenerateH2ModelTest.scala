@@ -1,7 +1,7 @@
 package com.datawizards.dmg.dialects
 
 import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
-import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person, PersonWithComments, PersonWithCustomName}
+import com.datawizards.dmg.TestModel._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -62,6 +62,18 @@ class GenerateH2ModelTest extends DataModelGeneratorBaseTest {
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonWithComments](H2Dialect)
+    }
+  }
+
+  test("Column length") {
+    val expected =
+      """CREATE TABLE PersonWithCustomLength(
+        |   name VARCHAR(1000),
+        |   age INT
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithCustomLength](H2Dialect)
     }
   }
 

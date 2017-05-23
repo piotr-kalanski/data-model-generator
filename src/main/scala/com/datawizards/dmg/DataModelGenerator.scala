@@ -43,15 +43,19 @@ object DataModelGenerator {
         FieldMetaData(
           getFieldName(schemaField, classField),
           dialect.mapDataType(schemaField.dataType),
+          length = getAnnotationValue(classField.annotations, "com.datawizards.dmg.annotations.length"),
           comment = getComment(classField.annotations)
         )
       }
   }
 
-  private def getComment(annotations: Iterable[AnnotationMetaData]): Option[String] = {
-    val commentAnnotation = annotations.find(_.name == "com.datawizards.dmg.annotations.comment")
-    if(commentAnnotation.isDefined)
-      Some(commentAnnotation.get.attributes.head.value)
+  private def getComment(annotations: Iterable[AnnotationMetaData]): Option[String] =
+    getAnnotationValue(annotations, "com.datawizards.dmg.annotations.comment")
+
+  private def getAnnotationValue(annotations: Iterable[AnnotationMetaData], annotationName: String): Option[String] = {
+    val annotation = annotations.find(_.name == annotationName)
+    if(annotation.isDefined)
+      Some(annotation.get.attributes.head.value)
     else
       None
   }

@@ -13,7 +13,13 @@ trait DatabaseDialect extends Dialect {
   }
 
   private def generateColumnsExpression(classMetaData: ClassMetaData): String =
-    classMetaData.fields.map(f => f.name + " " + f.targetType + (if(f.comment.isEmpty) "" else s" COMMENT '${f.comment.get}'")).mkString(",\n   ")
+    classMetaData
+      .fields
+      .map(f =>
+        f.name + " " + f.targetType +
+        (if(f.length.isEmpty) "" else s"(${f.length.get})") +
+        (if(f.comment.isEmpty) "" else s" COMMENT '${f.comment.get}'")
+      ).mkString(",\n   ")
 
   protected def additionalTableProperties(classMetaData: ClassMetaData): String
 

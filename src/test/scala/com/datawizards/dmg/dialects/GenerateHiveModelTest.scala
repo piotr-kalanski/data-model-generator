@@ -1,7 +1,7 @@
 package com.datawizards.dmg.dialects
 
 import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
-import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person, PersonWithComments}
+import com.datawizards.dmg.TestModel._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -50,6 +50,18 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonWithComments](HiveDialect)
+    }
+  }
+
+  test("Column length") {
+    val expected =
+      """CREATE TABLE PersonWithCustomLength(
+        |   name STRING(1000),
+        |   age INT
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithCustomLength](HiveDialect)
     }
   }
 

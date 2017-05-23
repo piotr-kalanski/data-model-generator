@@ -33,4 +33,9 @@ object TestModel {
     age: Int
   )
 
+  case class PersonWithCustomLength(
+    @length(1000) name: String,
+    age: Int
+  )
+
 }
