@@ -1,13 +1,12 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.DataModelGenerator
-import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person}
+import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
+import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person, PersonWithComments}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class GenerateAvroSchemaTest extends FunSuite {
+class GenerateAvroSchemaTest extends DataModelGeneratorBaseTest {
 
   test("Simple model") {
     val expected =
@@ -21,7 +20,7 @@ class GenerateAvroSchemaTest extends FunSuite {
         |   ]
         |}""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[Person](AvroSchemaDialect)
     }
   }
@@ -46,8 +45,26 @@ class GenerateAvroSchemaTest extends FunSuite {
         |   ]
         |}""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithAllSimpleTypes](AvroSchemaDialect)
+    }
+  }
+
+  test("Table and column comment") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "PersonWithComments",
+        |   "doc": "People data",
+        |   "fields": [
+        |      {"name": "name", "type": "string", "doc": "Person name"},
+        |      {"name": "age", "type": "int"}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithComments](AvroSchemaDialect)
     }
   }
 

@@ -10,8 +10,15 @@ Data model generator based on Scala case classes.
 
 - [Goals](#goals)
 - [Getting started](#getting-started)
-- [Examples](#examples)
+- [Dialects](#dialects)
+ - [H2 dialect](#h2-dialect)
+ - [Hive dialect](#hive-dialect)
+ - [Avro schema dialect](#avro-schema-dialect)
+ - [Elasticsearch dialect](#elasticsearch-dialect)
 - [Customizations](#customizations)
+ - [Custom column name](#custom-column-name)
+ - [Custom table name](#custom-table-name)
+ - [Documentation comments](#documentation-comments)
 
 # Goals
 
@@ -35,9 +42,10 @@ or
 </dependency>
 ```
 
-# Examples
+# Dialects
 
-## H2
+## H2 dialect
+
 ```scala
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 
@@ -55,7 +63,8 @@ CREATE TABLE Person(
 );
 ```
 
-## Hive
+## Hive dialect
+
 ```scala
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 
@@ -73,9 +82,10 @@ CREATE TABLE Person(
 );
 ```
 
-## Avro
+## Avro schema dialect
 
 ### Avro schema
+
 ```scala
 
 case class Person(name: String, age: Int)
@@ -118,7 +128,7 @@ DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
 }
 ```
 
-## Registering Avro schema to Avro schema registry
+### Registering Avro schema to Avro schema registry
 
 ```scala
 import com.datawizards.dmg.service.AvroSchemaRegistryServiceImpl
@@ -144,7 +154,7 @@ object RegisterAvroSchema extends App {
 {"type":"record","name":"Person","namespace":"com.datawizards.dmg.examples","fields":[{"name":"name","type":"string"},{"name":"age","type":"int"}]}
 ```
 
-## Elasticsearch
+## Elasticsearch dialect
 
 ### Elasticsearch mapping
 
@@ -179,7 +189,7 @@ case class Person(
   age: Int
 )
 
-DataModelGenerator.generate[Person](H2Dialect)
+DataModelGenerator.generate[Person](dialects.H2)
 ```
 
 ```sql
@@ -187,4 +197,82 @@ CREATE TABLE Person(
    personName VARCHAR,
    age INT
 );
+```
+
+## Custom table name
+
+```scala
+import com.datawizards.dmg.annotations._
+
+@table("PEOPLE")
+case class Person(
+  name: String,
+  age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.H2)
+```
+
+```sql
+CREATE TABLE PEOPLE(
+   name VARCHAR,
+   age INT
+);
+```
+
+## Documentation comments
+
+```scala
+@comment("People data")
+case class PersonWithComments(
+    @comment("Person name") name: String,
+    age: Int
+)
+```
+
+### H2
+
+```scala
+DataModelGenerator.generate[PersonWithComments](dialects.H2)
+```
+
+```sql
+CREATE TABLE PersonWithComments(
+   name VARCHAR COMMENT 'Person name',
+   age INT
+);
+COMMENT ON TABLE PersonWithComments IS 'People data';
+```
+
+### Hive
+
+```scala
+DataModelGenerator.generate[PersonWithComments](dialects.Hive)
+```
+
+```sql
+CREATE TABLE PersonWithComments(
+   name STRING COMMENT 'Person name',
+   age INT
+)
+COMMENT 'People data';
+```
+
+### Avro schema
+
+```scala
+DataModelGenerator.generate[PersonWithComments](dialects.AvroSchema)
+```
+
+```json
+{
+   "namespace": "com.datawizards.dmg.examples",
+   "type": "record",
+   "name": "PersonWithComments",
+   "doc": "People data",
+   "fields": [
+      {"name": "name", "type": "string", "doc": "Person name"},
+      {"name": "age", "type": "int"}
+   ]
+}
 ```

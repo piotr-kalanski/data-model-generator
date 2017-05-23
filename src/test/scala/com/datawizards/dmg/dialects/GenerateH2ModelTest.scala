@@ -1,13 +1,12 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.DataModelGenerator
-import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person, PersonWithCustomName}
+import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
+import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person, PersonWithComments, PersonWithCustomName}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class GenerateH2ModelTest extends FunSuite {
+class GenerateH2ModelTest extends DataModelGeneratorBaseTest {
 
   test("Simple model") {
     val expected =
@@ -16,7 +15,7 @@ class GenerateH2ModelTest extends FunSuite {
         |   age INT
         |);""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[Person](H2Dialect)
     }
   }
@@ -36,20 +35,33 @@ class GenerateH2ModelTest extends FunSuite {
         |   timestampVal TIMESTAMP
         |);""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithAllSimpleTypes](H2Dialect)
     }
   }
 
-  test("Custom name") {
+  test("Custom column and table name") {
     val expected =
-      """CREATE TABLE PersonWithCustomName(
+      """CREATE TABLE PEOPLE(
         |   personName VARCHAR,
         |   age INT
         |);""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonWithCustomName](H2Dialect)
+    }
+  }
+
+  test("Table and column comment") {
+    val expected =
+      """CREATE TABLE PersonWithComments(
+        |   name VARCHAR COMMENT 'Person name',
+        |   age INT
+        |);
+        |COMMENT ON TABLE PersonWithComments IS 'People data';""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithComments](H2Dialect)
     }
   }
 

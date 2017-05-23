@@ -23,4 +23,9 @@ object TestModel {
     @column(name="personAge") age: Int,
     gender: String
   )
+  @comment("People data")
+  case class PersonWithComments(
+    @comment("Person name") name: String,
+    age: Int
+  )
 }
