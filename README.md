@@ -11,14 +11,15 @@ Data model generator based on Scala case classes.
 - [Goals](#goals)
 - [Getting started](#getting-started)
 - [Dialects](#dialects)
- - [H2 dialect](#h2-dialect)
- - [Hive dialect](#hive-dialect)
- - [Avro schema dialect](#avro-schema-dialect)
- - [Elasticsearch dialect](#elasticsearch-dialect)
+  * [H2 dialect](#h2-dialect)
+  * [Hive dialect](#hive-dialect)
+  * [Avro schema dialect](#avro-schema-dialect)
+  * [Elasticsearch dialect](#elasticsearch-dialect)
 - [Customizations](#customizations)
- - [Custom column name](#custom-column-name)
- - [Custom table name](#custom-table-name)
- - [Documentation comments](#documentation-comments)
+  * [Custom column name](#custom-column-name)
+  * [Custom table name](#custom-table-name)
+  * [Documentation comments](#documentation-comments)
+  * [Column length](#column-length)
 
 # Goals
 
@@ -275,4 +276,24 @@ DataModelGenerator.generate[PersonWithComments](dialects.AvroSchema)
       {"name": "age", "type": "int"}
    ]
 }
+```
+
+## Column length
+
+```scala
+import com.datawizards.dmg.annotations._
+
+case class Person(
+  @length(1000) name: String,
+  age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.H2)
+```
+
+```sql
+CREATE TABLE PEOPLE(
+   name VARCHAR(1000),
+   age INT
+);
 ```
