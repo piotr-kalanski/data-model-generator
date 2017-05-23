@@ -1,6 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model.ClassMetaData
+import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldType, PrimitiveFieldType}
 
 object ElasticsearchDialect extends Dialect {
 
@@ -24,6 +24,8 @@ object ElasticsearchDialect extends Dialect {
 
   override def timestampType: String = "date"
 
+  override def arrayType: String = "N/A"
+
   override def generateDataModel(classMetaData: ClassMetaData): String = {
     val fieldsExpression = generateFieldsExpression(classMetaData  )
 
@@ -37,5 +39,15 @@ object ElasticsearchDialect extends Dialect {
   }
 
   private def generateFieldsExpression(classMetaData: ClassMetaData): String =
-    classMetaData.fields.map(f => s""""${f.name}": {"type": "${f.targetType}"}""").mkString(",\n         ")
+    classMetaData
+      .fields
+      .map(f => s""""${f.name}": {"type": "${getFieldType(f.targetType)}"}""")
+      .mkString(",\n         ")
+
+  private def getFieldType(fieldType: FieldType): String = fieldType match {
+    case p:PrimitiveFieldType => p.name
+    case a:ArrayFieldType => getFieldType(a.elementType)
+  }
+
+  override def toString: String = "ElasticsearchDialect"
 }

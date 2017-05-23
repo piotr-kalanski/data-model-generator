@@ -28,4 +28,5 @@ object TestModel {
     @comment("Person name") name: String,
     age: Int
   )
+  case class CV(skills: Seq[String])
 }

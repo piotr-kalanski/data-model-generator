@@ -77,4 +77,28 @@ class GenerateH2ModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Array type") {
+    val expected =
+      """CREATE TABLE CV(
+        |   skills ARRAY,
+        |   grades ARRAY
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[CV](H2Dialect)
+    }
+  }
+
+  test("Nested array type") {
+    val expected =
+      """CREATE TABLE NestedArray(
+        |   nested ARRAY,
+        |   nested3 ARRAY
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[NestedArray](H2Dialect)
+    }
+  }
+
 }

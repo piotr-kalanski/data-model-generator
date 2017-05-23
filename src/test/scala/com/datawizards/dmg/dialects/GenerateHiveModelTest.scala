@@ -65,4 +65,28 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Array type") {
+    val expected =
+      """CREATE TABLE CV(
+        |   skills ARRAY<STRING>,
+        |   grades ARRAY<INT>
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[CV](HiveDialect)
+    }
+  }
+
+  test("Nested array type") {
+    val expected =
+      """CREATE TABLE NestedArray(
+        |   nested ARRAY<ARRAY<STRING>>,
+        |   nested3 ARRAY<ARRAY<ARRAY<INT>>>
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[NestedArray](HiveDialect)
+    }
+  }
+
 }

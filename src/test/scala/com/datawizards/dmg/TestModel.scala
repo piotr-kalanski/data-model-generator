@@ -7,7 +7,6 @@ import com.datawizards.dmg.annotations._
 
 object TestModel {
   case class Person(name: String, age: Int)
-  case class Book(title: String, year: Int, personName: String)
   case class ClassWithAllSimpleTypes(
     strVal: String,
     intVal: Int,
@@ -38,4 +37,7 @@ object TestModel {
     age: Int
   )
 
+  case class CV(skills: Seq[String], grades: Seq[Int])
+  case class NestedArray(nested: Seq[Seq[String]], nested3: Seq[Seq[Seq[Int]]])
+  case class Book(title: String, year: Int, authors:Seq[Person])
 }

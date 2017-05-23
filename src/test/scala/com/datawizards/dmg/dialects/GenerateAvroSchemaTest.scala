@@ -1,7 +1,7 @@
 package com.datawizards.dmg.dialects
 
 import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
-import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person, PersonWithComments}
+import com.datawizards.dmg.TestModel._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -65,6 +65,40 @@ class GenerateAvroSchemaTest extends DataModelGeneratorBaseTest {
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonWithComments](AvroSchemaDialect)
+    }
+  }
+
+  test("Array type") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "CV",
+        |   "fields": [
+        |      {"name": "skills", "type": "array", "items": "string"},
+        |      {"name": "grades", "type": "array", "items": "int"}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[CV](AvroSchemaDialect)
+    }
+  }
+
+  test("Nested array type") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "NestedArray",
+        |   "fields": [
+        |      {"name": "nested", "type": "array", "items": {"type": "array", "items": "string"}},
+        |      {"name": "nested3", "type": "array", "items": {"type": "array", "items": {"type": "array", "items": "int"}}}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[NestedArray](AvroSchemaDialect)
     }
   }
 

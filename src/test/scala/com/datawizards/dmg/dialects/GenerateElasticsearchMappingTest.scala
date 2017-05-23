@@ -1,7 +1,7 @@
 package com.datawizards.dmg.dialects
 
 import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
-import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person}
+import com.datawizards.dmg.TestModel._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -45,6 +45,38 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithAllSimpleTypes](ElasticsearchDialect)
+    }
+  }
+
+  test("Array type") {
+    val expected =
+      """{
+        |   "mappings": {
+        |      "CV": {
+        |         "skills": {"type": "string"},
+        |         "grades": {"type": "integer"}
+        |      }
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[CV](ElasticsearchDialect)
+    }
+  }
+
+  test("Nested array type") {
+    val expected =
+      """{
+        |   "mappings": {
+        |      "NestedArray": {
+        |         "nested": {"type": "string"},
+        |         "nested3": {"type": "integer"}
+        |      }
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[NestedArray](ElasticsearchDialect)
     }
   }
 

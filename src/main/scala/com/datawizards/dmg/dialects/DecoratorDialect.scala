@@ -24,8 +24,11 @@ abstract class DecoratorDialect(dialect: Dialect) extends Dialect {
 
   override def timestampType: String = dialect.timestampType
 
+  override def arrayType: String = dialect.arrayType
+
   override def generateDataModel(classMetaData: ClassMetaData): String =
     decorate(dialect.generateDataModel(classMetaData))
 
   protected def decorate(dataModel: String): String
+
 }
