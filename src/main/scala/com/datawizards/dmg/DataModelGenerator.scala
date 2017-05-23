@@ -3,6 +3,7 @@ package com.datawizards.dmg
 import com.datawizards.dmg.dialects.Dialect
 import com.datawizards.dmg.metadata.{AnnotationMetaData, CaseClassMetaData, CaseClassMetaDataExtractor, ClassFieldMetaData}
 import com.datawizards.dmg.model.{ClassMetaData, FieldMetaData}
+import org.apache.log4j.Logger
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.types.StructField
 
@@ -11,8 +12,13 @@ import scala.reflect.runtime.universe.TypeTag
 
 object DataModelGenerator {
 
-  def generate[T: ClassTag: TypeTag](dialect: Dialect): String =
+  private val log = Logger.getLogger(getClass.getName)
+
+  def generate[T: ClassTag: TypeTag](dialect: Dialect): String = {
+    val ct = implicitly[ClassTag[T]].runtimeClass
+    log.info(s"Generating model for class: [${ct.getName}], dialect: [$dialect]")
     dialect.generateDataModel(getClassMetaData[T](dialect))
+  }
 
   private def getClassMetaData[T: ClassTag: TypeTag](dialect: Dialect): ClassMetaData = {
     val classMetaData = CaseClassMetaDataExtractor.extractCaseClassMetaData[T]()

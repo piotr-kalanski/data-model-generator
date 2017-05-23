@@ -1,6 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model.ClassMetaData
+import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldType, PrimitiveFieldType}
 
 object AvroSchemaDialect extends Dialect {
 
@@ -24,6 +24,8 @@ object AvroSchemaDialect extends Dialect {
 
   override def timestampType: String = "long"
 
+  override def arrayType: String = "array"
+
   override def generateDataModel(classMetaData: ClassMetaData): String = {
     val fieldsExpression = generateFieldsExpression(classMetaData)
     val tableDoc =
@@ -42,5 +44,24 @@ object AvroSchemaDialect extends Dialect {
   }
 
   private def generateFieldsExpression(classMetaData: ClassMetaData): String =
-    classMetaData.fields.map(f => s"""{"name": "${f.name}", "type": "${f.targetType}"${if(f.comment.isEmpty) "" else s""", "doc": "${f.comment.get}""""}}""").mkString(",\n      ")
+    classMetaData
+      .fields
+      .map(f =>
+        s"""{"name": "${f.name}", """ +
+        s""""type": "${f.targetType.name}"""" +
+          (f.targetType match {
+              case a:ArrayFieldType => s""", "items": ${getArrayItemsType(a.elementType)}"""
+              case _ => ""
+          }) +
+        s"""${if(f.comment.isEmpty) "" else s""", "doc": "${f.comment.get}""""}}""".stripMargin
+      )
+      .mkString(",\n      ")
+
+  private def getArrayItemsType(fieldType: FieldType): String = fieldType match {
+    case p:PrimitiveFieldType => s""""${p.name}""""
+    case a:ArrayFieldType => s"""{"type": "array", "items": ${getArrayItemsType(a.elementType)}}"""
+  }
+
+  override def toString: String = "AvroSchemaDialect"
+
 }

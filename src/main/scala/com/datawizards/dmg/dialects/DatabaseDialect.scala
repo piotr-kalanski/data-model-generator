@@ -1,6 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model.ClassMetaData
+import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldType, PrimitiveFieldType}
 
 trait DatabaseDialect extends Dialect {
 
@@ -16,7 +16,7 @@ trait DatabaseDialect extends Dialect {
     classMetaData
       .fields
       .map(f =>
-        f.name + " " + f.targetType +
+        f.name + " " + getFieldType(f.targetType) +
         (if(f.length.isEmpty) "" else s"(${f.length.get})") +
         (if(f.comment.isEmpty) "" else s" COMMENT '${f.comment.get}'")
       ).mkString(",\n   ")
@@ -24,5 +24,12 @@ trait DatabaseDialect extends Dialect {
   protected def additionalTableProperties(classMetaData: ClassMetaData): String
 
   protected def additionalTableExpressions(classMetaData: ClassMetaData): String
+
+  protected def getFieldType(fieldType: FieldType): String = fieldType match {
+    case p:PrimitiveFieldType => p.name
+    case a:ArrayFieldType => getArrayType(a)
+  }
+
+  protected def getArrayType(a: ArrayFieldType): String
 
 }

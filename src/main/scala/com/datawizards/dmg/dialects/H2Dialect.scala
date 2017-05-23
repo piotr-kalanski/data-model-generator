@@ -1,5 +1,5 @@
 package com.datawizards.dmg.dialects
-import com.datawizards.dmg.model.ClassMetaData
+import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData}
 
 object H2Dialect extends DatabaseDialect {
   override def intType: String = "INT"
@@ -22,6 +22,8 @@ object H2Dialect extends DatabaseDialect {
 
   override def timestampType: String = "TIMESTAMP"
 
+  override def arrayType: String = "ARRAY"
+
   override protected def additionalTableProperties(classMetaData: ClassMetaData): String = ""
 
   override protected def additionalTableExpressions(classMetaData: ClassMetaData): String =
@@ -29,4 +31,8 @@ object H2Dialect extends DatabaseDialect {
       s"""
          |COMMENT ON TABLE ${classMetaData.className} IS '${classMetaData.comment.get}';""".stripMargin
     else ""
+
+  override protected def getArrayType(a: ArrayFieldType): String = a.name
+
+  override def toString: String = "H2Dialect"
 }

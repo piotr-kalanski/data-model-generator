@@ -1,6 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model.ClassMetaData
+import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData}
 
 object HiveDialect extends DatabaseDialect {
   override def intType: String = "INT"
@@ -23,6 +23,7 @@ object HiveDialect extends DatabaseDialect {
 
   override def timestampType: String = "TIMESTAMP"
 
+  override def arrayType: String = "ARRAY"
 
   override protected def additionalTableProperties(classMetaData: ClassMetaData): String =
     if(classMetaData.comment.isDefined)
@@ -31,4 +32,9 @@ object HiveDialect extends DatabaseDialect {
     else ""
 
   override protected def additionalTableExpressions(classMetaData: ClassMetaData): String = ""
+
+  override protected def getArrayType(a: ArrayFieldType): String =
+    s"${a.name}<${getFieldType(a.elementType)}>"
+
+  override def toString: String = "HiveDialect"
 }

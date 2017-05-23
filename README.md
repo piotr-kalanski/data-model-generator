@@ -50,7 +50,7 @@ or
 ```scala
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 
-case class Person(name: String, age: Int)
+case class Person(name: String, age: Int, skills: Seq[String])
 
 object H2Example extends App {
   println(DataModelGenerator.generate[Person](dialects.H2))
@@ -60,7 +60,8 @@ object H2Example extends App {
 ```sql
 CREATE TABLE Person(
    name VARCHAR,
-   age INT
+   age INT,
+   skills ARRAY
 );
 ```
 
@@ -69,7 +70,7 @@ CREATE TABLE Person(
 ```scala
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 
-case class Person(name: String, age: Int)
+case class Person(name: String, age: Int, skills: Seq[String])
 
 object HiveExample extends App {
   println(DataModelGenerator.generate[Person](dialects.Hive))
@@ -79,7 +80,8 @@ object HiveExample extends App {
 ```sql
 CREATE TABLE Person(
    name STRING,
-   age INT
+   age INT,
+   skills ARRAY<STRING>
 );
 ```
 
@@ -101,7 +103,8 @@ DataModelGenerator.generate[Person](dialects.AvroSchema)
    "name": "Person",
    "fields": [
       {"name": "name", "type": "string"},
-      {"name": "age", "type": "int"}
+      {"name": "age", "type": "int"},
+      {"name": "skills", "type": "array", "items": "string"}
    ]
 }
 ```
@@ -110,7 +113,7 @@ DataModelGenerator.generate[Person](dialects.AvroSchema)
 
 ```scala
 
-case class Person(name: String, age: Int)
+case class Person(name: String, age: Int, skills: Seq[String])
 
 DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
 ```
@@ -123,7 +126,8 @@ DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
    \"name\": \"Person\",
    \"fields\": [
       {\"name\": \"name\", \"type\": \"string\"},
-      {\"name\": \"age\", \"type\": \"int\"}
+      {\"name\": \"age\", \"type\": \"int\"},
+      {\"name\": \"skills\", \"type\": \"array\", \"items\": \"string\"}
    ]
 }"
 }
@@ -161,7 +165,7 @@ object RegisterAvroSchema extends App {
 
 ```scala
 
-case class Person(name: String, age: Int)
+case class Person(name: String, age: Int, skills: Seq[String])
 
 DataModelGenerator.generate[Person](dialects.Elasticsearch)
 ```
@@ -171,7 +175,8 @@ DataModelGenerator.generate[Person](dialects.Elasticsearch)
    "mappings": {
       "Person": {
          "name": {"type": "string"},
-         "age": {"type": "integer"}
+         "age": {"type": "integer"},
+         "skills": {"type": "string"}
       }
    }
 }
