@@ -37,6 +37,19 @@ object TestModel {
     age: Int
   )
 
+  @table("people")
+  @table("PEOPLE", dialects.H2)
+  @table("person", dialects.Elasticsearch)
+  case class PersonWithMultipleCustomNames(
+    @column("NAME", dialects.H2)
+    @column("personNameEs", dialects.Elasticsearch)
+    name: String,
+    @column("personAge")
+    @column("AGE", dialects.H2)
+    @column("personAgeEs", dialects.Elasticsearch)
+    age: Int
+  )
+
   case class CV(skills: Seq[String], grades: Seq[Int])
   case class NestedArray(nested: Seq[Seq[String]], nested3: Seq[Seq[Seq[Int]]])
   case class Book(title: String, year: Int, authors:Seq[Person])
