@@ -13,6 +13,7 @@ Data model generator based on Scala case classes.
 - [Dialects](#dialects)
   * [H2 dialect](#h2-dialect)
   * [Hive dialect](#hive-dialect)
+  * [Redshift dialect](#redshift-dialect)
   * [Avro schema dialect](#avro-schema-dialect)
   * [Elasticsearch dialect](#elasticsearch-dialect)
 - [Customizations](#customizations)
@@ -82,6 +83,26 @@ CREATE TABLE Person(
    name STRING,
    age INT,
    skills ARRAY<STRING>
+);
+```
+
+## Redshift dialect
+
+```scala
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
+case class Person(name: String, age: Int, skills: Seq[String])
+
+object RedshiftExample extends App {
+  println(DataModelGenerator.generate[Person](dialects.Redshift))
+}
+```
+
+```sql
+CREATE TABLE Person(
+   name VARCHAR,
+   age INT,
+   skills VARCHAR
 );
 ```
 
@@ -262,6 +283,21 @@ CREATE TABLE PersonWithComments(
    age INT
 )
 COMMENT 'People data';
+```
+
+### Hive
+
+```scala
+DataModelGenerator.generate[PersonWithComments](dialects.Redshift)
+```
+
+```sql
+CREATE TABLE PersonWithComments(
+   name VARCHAR,
+   age INTEGER
+);
+COMMENT ON TABLE PersonWithComments IS 'People data';
+COMMENT ON COLUMN PersonWithComments.name IS 'Person name';
 ```
 
 ### Avro schema
