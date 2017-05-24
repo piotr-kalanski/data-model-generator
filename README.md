@@ -226,6 +226,42 @@ CREATE TABLE Person(
 );
 ```
 
+### Custom column name specific for dialect
+
+```scala
+import com.datawizards.dmg.annotations._
+
+case class Person(
+  @column(name="NAME")
+  @column(name="personName", dialects.Elasticsearch)
+  name: String,
+  @column(name="AGE")
+  @column(name="personAge", dialects.Elasticsearch)
+  age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.H2)
+DataModelGenerator.generate[Person](dialects.Elasticsearch)
+```
+
+```sql
+CREATE TABLE PEOPLE(
+   NAME VARCHAR,
+   AGE INT
+);
+```
+
+```json
+{
+   "mappings": {
+      "person": {
+         "personName": {"type": "string"},
+         "personAge": {"type": "integer"}
+      }
+   }
+}
+```
+
 ## Custom table name
 
 ```scala
@@ -245,6 +281,40 @@ CREATE TABLE PEOPLE(
    name VARCHAR,
    age INT
 );
+```
+
+### Custom table name specific for dialect
+
+```scala
+import com.datawizards.dmg.annotations._
+
+@table("PEOPLE")
+@table("person", dialects.Elasticsearch)
+case class Person(
+  name: String,
+  age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.H2)
+DataModelGenerator.generate[Person](dialects.Elasticsearch)
+```
+
+```sql
+CREATE TABLE PEOPLE(
+   name VARCHAR,
+   age INT
+);
+```
+
+```json
+{
+   "mappings": {
+      "person": {
+         "name": {"type": "string"},
+         "age": {"type": "integer"}
+      }
+   }
+}
 ```
 
 ## Documentation comments
@@ -285,7 +355,7 @@ CREATE TABLE PersonWithComments(
 COMMENT 'People data';
 ```
 
-### Hive
+### Redshift
 
 ```scala
 DataModelGenerator.generate[PersonWithComments](dialects.Redshift)

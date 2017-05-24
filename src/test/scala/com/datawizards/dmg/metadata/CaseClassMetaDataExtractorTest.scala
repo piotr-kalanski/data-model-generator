@@ -33,8 +33,8 @@ class CaseClassMetaDataExtractorTest extends FunSuite {
                   , value = "personName_es"
                 ),
                 AnnotationAttributeMetaData(
-                  name = "context"
-                  , value = "es"
+                  name = "dialect"
+                  , value = "com.datawizards.dmg.dialects.ElasticsearchDialect"
                 )
               )
             ),
@@ -69,8 +69,8 @@ class CaseClassMetaDataExtractorTest extends FunSuite {
                   , value = "age_es"
                 ),
                 AnnotationAttributeMetaData(
-                  name = "context"
-                  , value = "es"
+                  name = "dialect"
+                  , value = "com.datawizards.dmg.dialects.ElasticsearchDialect"
                 )
               )
             )
