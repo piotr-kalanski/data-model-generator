@@ -1,9 +1,11 @@
 package com.datawizards.dmg.dialects
 
 import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldType, PrimitiveFieldType}
+import org.apache.log4j.Logger
 import org.apache.spark.sql.types._
 
 trait Dialect {
+  protected val log:Logger = Logger.getLogger(getClass.getName)
 
   def generateDataModel(classMetaData: ClassMetaData): String
 
