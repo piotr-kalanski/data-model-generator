@@ -1,13 +1,12 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.DataModelGenerator
-import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person}
+import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
+import com.datawizards.dmg.TestModel._
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class GenerateHiveModelTest extends FunSuite {
+class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
 
   test("Simple model") {
     val expected =
@@ -16,7 +15,7 @@ class GenerateHiveModelTest extends FunSuite {
         |   age INT
         |);""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[Person](HiveDialect)
     }
   }
@@ -36,8 +35,71 @@ class GenerateHiveModelTest extends FunSuite {
         |   timestampVal TIMESTAMP
         |);""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithAllSimpleTypes](HiveDialect)
+    }
+  }
+
+  test("Table and column comment") {
+    val expected =
+      """CREATE TABLE PersonWithComments(
+        |   name STRING COMMENT 'Person name',
+        |   age INT
+        |)
+        |COMMENT 'People data';""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithComments](HiveDialect)
+    }
+  }
+
+  test("Column length") {
+    val expected =
+      """CREATE TABLE PersonWithCustomLength(
+        |   name STRING(1000),
+        |   age INT
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithCustomLength](HiveDialect)
+    }
+  }
+
+  test("Array type") {
+    val expected =
+      """CREATE TABLE CV(
+        |   skills ARRAY<STRING>,
+        |   grades ARRAY<INT>
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[CV](HiveDialect)
+    }
+  }
+
+  test("Nested array type") {
+    val expected =
+      """CREATE TABLE NestedArray(
+        |   nested ARRAY<ARRAY<STRING>>,
+        |   nested3 ARRAY<ARRAY<ARRAY<INT>>>
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[NestedArray](HiveDialect)
+    }
+  }
+
+  test("Struct types") {
+    val expected =
+      """CREATE TABLE Book(
+        |   title STRING,
+        |   year INT,
+        |   owner STRUCT<name : STRING, age : INT>,
+        |   authors ARRAY<STRUCT<name : STRING, age : INT>>
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[Book](HiveDialect)
     }
   }
 

@@ -1,13 +1,12 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.DataModelGenerator
-import com.datawizards.dmg.TestModel.{ClassWithAllSimpleTypes, Person}
+import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
+import com.datawizards.dmg.TestModel._
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class GenerateAvroSchemaTest extends FunSuite {
+class GenerateAvroSchemaTest extends DataModelGeneratorBaseTest {
 
   test("Simple model") {
     val expected =
@@ -21,7 +20,7 @@ class GenerateAvroSchemaTest extends FunSuite {
         |   ]
         |}""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[Person](AvroSchemaDialect)
     }
   }
@@ -46,8 +45,79 @@ class GenerateAvroSchemaTest extends FunSuite {
         |   ]
         |}""".stripMargin
 
-    assertResult(expected) {
+    assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithAllSimpleTypes](AvroSchemaDialect)
+    }
+  }
+
+  test("Table and column comment") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "PersonWithComments",
+        |   "doc": "People data",
+        |   "fields": [
+        |      {"name": "name", "type": "string", "doc": "Person name"},
+        |      {"name": "age", "type": "int"}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithComments](AvroSchemaDialect)
+    }
+  }
+
+  test("Array type") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "CV",
+        |   "fields": [
+        |      {"name": "skills", "type": "array", "items": "string"},
+        |      {"name": "grades", "type": "array", "items": "int"}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[CV](AvroSchemaDialect)
+    }
+  }
+
+  test("Nested array type") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "NestedArray",
+        |   "fields": [
+        |      {"name": "nested", "type": "array", "items": {"type": "array", "items": "string"}},
+        |      {"name": "nested3", "type": "array", "items": {"type": "array", "items": {"type": "array", "items": "int"}}}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[NestedArray](AvroSchemaDialect)
+    }
+  }
+
+  test("Struct types") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "Book",
+        |   "fields": [
+        |      {"name": "title", "type": "string"},
+        |      {"name": "year", "type": "int"},
+        |      {"name": "owner", "type": "record", "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}]},
+        |      {"name": "authors", "type": "array", "items": {"type": "record", "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}]}}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[Book](AvroSchemaDialect)
     }
   }
 

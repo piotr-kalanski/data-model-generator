@@ -1,6 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model.ClassMetaData
+import com.datawizards.dmg.model._
 
 object AvroSchemaDialect extends Dialect {
 
@@ -24,13 +24,21 @@ object AvroSchemaDialect extends Dialect {
 
   override def timestampType: String = "long"
 
+  override def arrayType: String = "array"
+
+  override def structType: String = "record"
+
   override def generateDataModel(classMetaData: ClassMetaData): String = {
-    val fieldsExpression = generateFieldsExpression(classMetaData  )
+    val fieldsExpression = generateFieldsExpression(classMetaData)
+    val tableDoc =
+      if(classMetaData.comment.isEmpty) ""
+      else s"""
+         |   "doc": "${classMetaData.comment.get}",""".stripMargin
 
     s"""{
        |   "namespace": "${classMetaData.packageName}",
        |   "type": "record",
-       |   "name": "${classMetaData.className}",
+       |   "name": "${classMetaData.className}",$tableDoc
        |   "fields": [
        |      $fieldsExpression
        |   ]
@@ -38,5 +46,26 @@ object AvroSchemaDialect extends Dialect {
   }
 
   private def generateFieldsExpression(classMetaData: ClassMetaData): String =
-    classMetaData.fields.map(f => s"""{"name": "${f.name}", "type": "${f.targetType}"}""").mkString(",\n      ")
+    classMetaData
+      .fields
+      .map(f =>
+        s"""{"name": "${f.name}", """ +
+        s""""type": "${f.targetType.name}"""" +
+          (f.targetType match {
+              case a:ArrayFieldType => s""", "items": ${getArrayItemsType(a.elementType)}"""
+              case s:StructFieldType => s""", "fields": [${s.fields.map{case (k,v) => s"""{"name": "$k", "type": "${v.name}"}"""}.mkString(", ")}]"""
+              case _ => ""
+          }) +
+        s"""${if(f.comment.isEmpty) "" else s""", "doc": "${f.comment.get}""""}}""".stripMargin
+      )
+      .mkString(",\n      ")
+
+  private def getArrayItemsType(fieldType: FieldType): String = fieldType match {
+    case p:PrimitiveFieldType => s""""${p.name}""""
+    case a:ArrayFieldType => s"""{"type": "array", "items": ${getArrayItemsType(a.elementType)}}"""
+    case s:StructFieldType => s"""{"type": "record", "fields": [${s.fields.map{case (k,v) => s"""{"name": "$k", "type": "${v.name}"}"""}.mkString(", ")}]}"""
+  }
+
+  override def toString: String = "AvroSchemaDialect"
+
 }

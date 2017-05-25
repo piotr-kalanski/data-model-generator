@@ -1,6 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model.ClassMetaData
+import com.datawizards.dmg.model._
 
 object ElasticsearchDialect extends Dialect {
 
@@ -24,18 +24,39 @@ object ElasticsearchDialect extends Dialect {
 
   override def timestampType: String = "date"
 
-  override def generateDataModel(classMetaData: ClassMetaData): String = {
-    val fieldsExpression = generateFieldsExpression(classMetaData  )
+  override def arrayType: String = "N/A"
 
+  override def structType: String = "N/A"
+
+  override def generateDataModel(classMetaData: ClassMetaData): String = {
     s"""{
        |   "mappings": {
        |      "${classMetaData.className}": {
-       |         $fieldsExpression
+       |         "properties": {
+       |            ${generateFieldsExpression(classMetaData)}
+       |         }
        |      }
        |   }
        |}""".stripMargin
   }
 
   private def generateFieldsExpression(classMetaData: ClassMetaData): String =
-    classMetaData.fields.map(f => s""""${f.name}": {"type": "${f.targetType}"}""").mkString(",\n         ")
+    classMetaData
+      .fields
+      .map(f => s"""${generateFieldExpression(f.name, f.targetType)}""")
+      .mkString(",\n            ")
+
+  private def generateFieldExpression(fieldName: String, fieldType: FieldType, level:Int=1): String = fieldType match {
+    case p:PrimitiveFieldType => s""""$fieldName": {"type": "${p.name}"}"""
+    case a:ArrayFieldType => generateFieldExpression(fieldName, a.elementType)
+    case s:StructFieldType =>
+      s""""$fieldName": {
+         |         ${"   "*level}   "properties": {
+         |            ${"   "*level}   ${s.fields.map{case (k,v) => s"""${generateFieldExpression(k, v, level+1)}"""}.mkString(",\n               "+("   "*level))}
+         |            ${"   "*level}}
+         |         ${"   "*level}}""".stripMargin
+  }
+
+  override def toString: String = "ElasticsearchDialect"
+
 }
