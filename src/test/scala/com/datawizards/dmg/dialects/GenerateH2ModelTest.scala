@@ -101,4 +101,18 @@ class GenerateH2ModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Struct types") {
+    val expected =
+      """CREATE TABLE Book(
+        |   title VARCHAR,
+        |   year INT,
+        |   owner OTHER,
+        |   authors ARRAY
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[Book](H2Dialect)
+    }
+  }
+
 }

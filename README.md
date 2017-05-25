@@ -51,18 +51,20 @@ or
 ```scala
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 
-case class Person(name: String, age: Int, skills: Seq[String])
+case class Person(name: String, age: Int)
+case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
 object H2Example extends App {
-  println(DataModelGenerator.generate[Person](dialects.H2))
+  println(DataModelGenerator.generate[Book](dialects.H2))
 }
 ```
 
 ```sql
-CREATE TABLE Person(
-   name VARCHAR,
-   age INT,
-   skills ARRAY
+CREATE TABLE Book(
+   title VARCHAR,
+   year INT,
+   owner OTHER,
+   authors ARRAY
 );
 ```
 
@@ -71,18 +73,20 @@ CREATE TABLE Person(
 ```scala
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 
-case class Person(name: String, age: Int, skills: Seq[String])
+case class Person(name: String, age: Int)
+case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
 object HiveExample extends App {
-  println(DataModelGenerator.generate[Person](dialects.Hive))
+  println(DataModelGenerator.generate[Book](dialects.Hive))
 }
 ```
 
 ```sql
-CREATE TABLE Person(
-   name STRING,
-   age INT,
-   skills ARRAY<STRING>
+CREATE TABLE Book(
+   title STRING,
+   year INT,
+   owner STRUCT<name : STRING, age : INT>,
+   authors ARRAY<STRUCT<name : STRING, age : INT>>
 );
 ```
 
@@ -91,18 +95,20 @@ CREATE TABLE Person(
 ```scala
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 
-case class Person(name: String, age: Int, skills: Seq[String])
+case class Person(name: String, age: Int)
+case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
 object RedshiftExample extends App {
-  println(DataModelGenerator.generate[Person](dialects.Redshift))
+  println(DataModelGenerator.generate[Book](dialects.Redshift))
 }
 ```
 
 ```sql
-CREATE TABLE Person(
-   name VARCHAR,
-   age INT,
-   skills VARCHAR
+CREATE TABLE Book(
+   title VARCHAR,
+   year INTEGER,
+   owner VARCHAR,
+   authors VARCHAR
 );
 ```
 
@@ -113,19 +119,21 @@ CREATE TABLE Person(
 ```scala
 
 case class Person(name: String, age: Int)
+case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
-DataModelGenerator.generate[Person](dialects.AvroSchema)
+DataModelGenerator.generate[Book](dialects.AvroSchema)
 ```
 
 ```json
 {
    "namespace": "com.datawizards.dmg.examples",
    "type": "record",
-   "name": "Person",
+   "name": "Book",
    "fields": [
-      {"name": "name", "type": "string"},
-      {"name": "age", "type": "int"},
-      {"name": "skills", "type": "array", "items": "string"}
+      {"name": "title", "type": "string"},
+      {"name": "year", "type": "int"},
+      {"name": "owner", "type": "record", "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}]},
+      {"name": "authors", "type": "array", "items": {"type": "record", "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}]}}
    ]
 }
 ```
@@ -186,18 +194,32 @@ object RegisterAvroSchema extends App {
 
 ```scala
 
-case class Person(name: String, age: Int, skills: Seq[String])
+case class Person(name: String, age: Int)
+case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
-DataModelGenerator.generate[Person](dialects.Elasticsearch)
+DataModelGenerator.generate[Book](dialects.Elasticsearch)
 ```
 
 ```json
 {
    "mappings": {
-      "Person": {
-         "name": {"type": "string"},
-         "age": {"type": "integer"},
-         "skills": {"type": "string"}
+      "Book": {
+         "properties": {
+            "title": {"type": "string"},
+            "year": {"type": "integer"},
+            "owner": {
+               "properties": {
+                  "name": {"type": "string"},
+                  "age": {"type": "integer"}
+               }
+            },
+            "authors": {
+               "properties": {
+                  "name": {"type": "string"},
+                  "age": {"type": "integer"}
+               }
+            }
+         }
       }
    }
 }

@@ -1,6 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldType, PrimitiveFieldType}
+import com.datawizards.dmg.model._
 import org.apache.log4j.Logger
 import org.apache.spark.sql.types._
 
@@ -21,6 +21,7 @@ trait Dialect {
     case DateType => PrimitiveFieldType(dateType)
     case TimestampType => PrimitiveFieldType(timestampType)
     case a:ArrayType => ArrayFieldType(arrayType, mapDataType(a.elementType))
+    case s:StructType => StructFieldType(structType, s.fields.map(x => x.name -> mapDataType(x.dataType)).toMap)
     case _ => throw new Exception("Not supported type: " + dataType)
   }
 
@@ -35,6 +36,7 @@ trait Dialect {
   def dateType: String
   def timestampType: String
   def arrayType: String
+  def structType: String
 }
 
 

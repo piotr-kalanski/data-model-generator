@@ -1,6 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldMetaData}
+import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldMetaData, StructFieldType}
 
 object RedshiftDialect extends DatabaseDialect {
   override def intType: String = "INTEGER"
@@ -25,6 +25,8 @@ object RedshiftDialect extends DatabaseDialect {
 
   override def arrayType: String = "VARCHAR"
 
+  override def structType: String = "VARCHAR"
+
   override protected def fieldAdditionalExpressions(f: FieldMetaData): String = ""
 
   override protected def additionalTableProperties(classMetaData: ClassMetaData): String = ""
@@ -46,5 +48,11 @@ object RedshiftDialect extends DatabaseDialect {
     "VARCHAR"
   }
 
+  override protected def getStructType(s: StructFieldType): String = {
+    log.warn("Redshift doesn't support Struct type. Column converted to VARCHAR.")
+    "VARCHAR"
+  }
+
   override def toString: String = "RedshiftDialect"
+
 }

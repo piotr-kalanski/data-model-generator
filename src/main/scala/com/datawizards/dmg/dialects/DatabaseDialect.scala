@@ -30,8 +30,11 @@ trait DatabaseDialect extends Dialect {
   protected def getFieldType(fieldType: FieldType): String = fieldType match {
     case p:PrimitiveFieldType => p.name
     case a:ArrayFieldType => getArrayType(a)
+    case s:StructFieldType => getStructType(s)
   }
 
   protected def getArrayType(a: ArrayFieldType): String
+
+  protected def getStructType(s: StructFieldType): String
 
 }

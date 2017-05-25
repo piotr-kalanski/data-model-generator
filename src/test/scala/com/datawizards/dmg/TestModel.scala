@@ -52,5 +52,5 @@ object TestModel {
 
   case class CV(skills: Seq[String], grades: Seq[Int])
   case class NestedArray(nested: Seq[Seq[String]], nested3: Seq[Seq[Seq[Int]]])
-  case class Book(title: String, year: Int, authors:Seq[Person])
+  case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 }

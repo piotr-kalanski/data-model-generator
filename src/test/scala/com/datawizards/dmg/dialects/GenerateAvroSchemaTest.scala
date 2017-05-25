@@ -102,4 +102,23 @@ class GenerateAvroSchemaTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Struct types") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "Book",
+        |   "fields": [
+        |      {"name": "title", "type": "string"},
+        |      {"name": "year", "type": "int"},
+        |      {"name": "owner", "type": "record", "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}]},
+        |      {"name": "authors", "type": "array", "items": {"type": "record", "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}]}}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[Book](AvroSchemaDialect)
+    }
+  }
+
 }

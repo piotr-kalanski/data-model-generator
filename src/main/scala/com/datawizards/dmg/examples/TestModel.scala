@@ -7,7 +7,6 @@ import com.datawizards.dmg.dialects
 
 object TestModel {
   case class Person(name: String, age: Int)
-  case class Book(title: String, year: Int, personName: String)
   case class ClassWithAllSimpleTypes(
     strVal: String,
     intVal: Int,
@@ -43,4 +42,5 @@ object TestModel {
     age: Int
   )
   case class CV(skills: Seq[String])
+  case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 }
