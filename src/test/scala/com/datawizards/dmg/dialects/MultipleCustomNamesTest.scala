@@ -66,8 +66,10 @@ class MultipleCustomNamesTest extends DataModelGeneratorBaseTest {
       """{
         |   "mappings": {
         |      "person": {
-        |         "personNameEs": {"type": "string"},
-        |         "personAgeEs": {"type": "integer"}
+        |         "properties": {
+        |            "personNameEs": {"type": "string"},
+        |            "personAgeEs": {"type": "integer"}
+        |         }
         |      }
         |   }
         |}""".stripMargin

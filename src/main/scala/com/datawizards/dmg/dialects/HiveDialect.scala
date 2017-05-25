@@ -1,6 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldMetaData}
+import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldMetaData, StructFieldType}
 
 object HiveDialect extends DatabaseDialect {
   override def intType: String = "INT"
@@ -25,6 +25,8 @@ object HiveDialect extends DatabaseDialect {
 
   override def arrayType: String = "ARRAY"
 
+  override def structType: String = "STRUCT"
+
   override protected def fieldAdditionalExpressions(f: FieldMetaData): String =
     if(f.comment.isEmpty) "" else s" COMMENT '${f.comment.get}'"
 
@@ -38,6 +40,9 @@ object HiveDialect extends DatabaseDialect {
 
   override protected def getArrayType(a: ArrayFieldType): String =
     s"${a.name}<${getFieldType(a.elementType)}>"
+
+  override protected def getStructType(s: StructFieldType): String =
+    s"${s.name}<${s.fields.map{case (k,v) => s"$k : ${v.name}"}.mkString(", ")}>"
 
   override def toString: String = "HiveDialect"
 }

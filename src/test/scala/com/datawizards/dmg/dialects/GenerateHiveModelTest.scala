@@ -89,4 +89,18 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Struct types") {
+    val expected =
+      """CREATE TABLE Book(
+        |   title STRING,
+        |   year INT,
+        |   owner STRUCT<name : STRING, age : INT>,
+        |   authors ARRAY<STRUCT<name : STRING, age : INT>>
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[Book](HiveDialect)
+    }
+  }
+
 }

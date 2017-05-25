@@ -90,4 +90,18 @@ class GenerateRedshiftModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Struct types") {
+    val expected =
+      """CREATE TABLE Book(
+        |   title VARCHAR,
+        |   year INTEGER,
+        |   owner VARCHAR,
+        |   authors VARCHAR
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[Book](RedshiftDialect)
+    }
+  }
+
 }

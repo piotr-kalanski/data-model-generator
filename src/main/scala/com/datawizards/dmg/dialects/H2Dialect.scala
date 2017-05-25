@@ -1,5 +1,5 @@
 package com.datawizards.dmg.dialects
-import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldMetaData}
+import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldMetaData, StructFieldType}
 
 object H2Dialect extends DatabaseDialect {
   override def intType: String = "INT"
@@ -24,6 +24,8 @@ object H2Dialect extends DatabaseDialect {
 
   override def arrayType: String = "ARRAY"
 
+  override def structType: String = "OTHER"
+
   override protected def fieldAdditionalExpressions(f: FieldMetaData): String =
     if(f.comment.isEmpty) "" else s" COMMENT '${f.comment.get}'"
 
@@ -36,6 +38,8 @@ object H2Dialect extends DatabaseDialect {
     else ""
 
   override protected def getArrayType(a: ArrayFieldType): String = a.name
+
+  override protected def getStructType(s: StructFieldType): String = s.name
 
   override def toString: String = "H2Dialect"
 }
