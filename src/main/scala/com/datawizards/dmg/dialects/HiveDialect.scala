@@ -1,6 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.metadata.{AnnotationMetaData, CaseClassMetaDataExtractor}
+import com.datawizards.dmg.metadata.CaseClassMetaDataExtractor
 import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldMetaData, StructFieldType}
 
 object HiveDialect extends DatabaseDialect {
@@ -32,19 +32,9 @@ object HiveDialect extends DatabaseDialect {
     if(f.comment.isEmpty) "" else s" COMMENT '${f.comment.get}'"
 
   override protected def additionalTableProperties(classMetaData: ClassMetaData): String =
-  (
-    if(classMetaData.comment.isDefined)
-      s"""
-         |COMMENT '${classMetaData.comment.get}'""".stripMargin
-    else ""
-  ) +
-  {
-    val externalTableLocation = hiveExternalTableLocation(classMetaData)
-    if(externalTableLocation.isDefined)
-      s"""
-         |LOCATION '${externalTableLocation.get}'""".stripMargin
-    else ""
-  }
+    commentExpression(classMetaData) +
+    storedAsExpression(classMetaData) +
+    locationExpression(classMetaData)
 
   override protected def additionalTableExpressions(classMetaData: ClassMetaData): String = ""
 
@@ -58,6 +48,30 @@ object HiveDialect extends DatabaseDialect {
     s"CREATE ${if(hiveExternalTableLocation(classMetaData).isDefined) "EXTERNAL " else ""}TABLE ${classMetaData.className}"
 
   override def toString: String = "HiveDialect"
+
+  private def commentExpression(classMetaData: ClassMetaData): String =
+    if(classMetaData.comment.isDefined)
+      s"""
+         |COMMENT '${classMetaData.comment.get}'""".stripMargin
+    else ""
+
+  private def storedAsExpression(classMetaData: ClassMetaData): String =
+  {
+    val storedAs = CaseClassMetaDataExtractor.getAnnotationValue(classMetaData.annotations, "com.datawizards.dmg.annotations.hive.hiveStoredAs")
+    if(storedAs.isDefined)
+      s"""
+         |STORED AS ${storedAs.get.replace("\\'","'")}""".stripMargin
+    else ""
+  }
+
+  private def locationExpression(classMetaData: ClassMetaData): String =
+  {
+    val externalTableLocation = hiveExternalTableLocation(classMetaData)
+    if(externalTableLocation.isDefined)
+      s"""
+         |LOCATION '${externalTableLocation.get}'""".stripMargin
+    else ""
+  }
 
   private def hiveExternalTableLocation(classMetaData: ClassMetaData): Option[String] =
     CaseClassMetaDataExtractor.getAnnotationValue(classMetaData.annotations, "com.datawizards.dmg.annotations.hive.hiveExternalTable")

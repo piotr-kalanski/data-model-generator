@@ -10,4 +10,11 @@ package object hive {
     * @param location location of data
     */
   final class hiveExternalTable(val location: String) extends StaticAnnotation
+
+  /**
+    * STORED AS X clause
+    *
+    * @param format format of data e.g. PARQUET
+    */
+  final class hiveStoredAs(val format: String) extends StaticAnnotation
 }
