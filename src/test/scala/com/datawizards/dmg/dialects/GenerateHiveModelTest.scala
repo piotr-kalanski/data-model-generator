@@ -103,4 +103,17 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("External table") {
+    val expected =
+      """CREATE EXTERNAL TABLE PersonExternalTable(
+        |   name STRING,
+        |   age INT
+        |)
+        |LOCATION 'hdfs:///data/people';""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonExternalTable](HiveDialect)
+    }
+  }
+
 }

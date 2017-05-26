@@ -7,10 +7,13 @@ trait DatabaseDialect extends Dialect {
   override def generateDataModel(classMetaData: ClassMetaData): String = {
     val columnsExpression = generateColumnsExpression(classMetaData)
 
-    s"CREATE TABLE ${classMetaData.className}(\n" +
+    s"${createTableExpression(classMetaData)}(\n" +
       s"   $columnsExpression" +
       s"\n)${additionalTableProperties(classMetaData)};${additionalTableExpressions(classMetaData)}"
   }
+
+  protected def createTableExpression(classMetaData: ClassMetaData): String =
+    s"CREATE TABLE ${classMetaData.className}"
 
   private def generateColumnsExpression(classMetaData: ClassMetaData): String =
     classMetaData

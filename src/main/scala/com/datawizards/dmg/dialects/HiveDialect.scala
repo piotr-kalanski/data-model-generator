@@ -1,5 +1,6 @@
 package com.datawizards.dmg.dialects
 
+import com.datawizards.dmg.metadata.{AnnotationMetaData, CaseClassMetaDataExtractor}
 import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldMetaData, StructFieldType}
 
 object HiveDialect extends DatabaseDialect {
@@ -31,10 +32,19 @@ object HiveDialect extends DatabaseDialect {
     if(f.comment.isEmpty) "" else s" COMMENT '${f.comment.get}'"
 
   override protected def additionalTableProperties(classMetaData: ClassMetaData): String =
+  (
     if(classMetaData.comment.isDefined)
       s"""
          |COMMENT '${classMetaData.comment.get}'""".stripMargin
     else ""
+  ) +
+  {
+    val externalTableLocation = hiveExternalTableLocation(classMetaData)
+    if(externalTableLocation.isDefined)
+      s"""
+         |LOCATION '${externalTableLocation.get}'""".stripMargin
+    else ""
+  }
 
   override protected def additionalTableExpressions(classMetaData: ClassMetaData): String = ""
 
@@ -44,5 +54,12 @@ object HiveDialect extends DatabaseDialect {
   override protected def getStructType(s: StructFieldType): String =
     s"${s.name}<${s.fields.map{case (k,v) => s"$k : ${v.name}"}.mkString(", ")}>"
 
+  override protected def createTableExpression(classMetaData: ClassMetaData): String =
+    s"CREATE ${if(hiveExternalTableLocation(classMetaData).isDefined) "EXTERNAL " else ""}TABLE ${classMetaData.className}"
+
   override def toString: String = "HiveDialect"
+
+  private def hiveExternalTableLocation(classMetaData: ClassMetaData): Option[String] =
+    CaseClassMetaDataExtractor.getAnnotationValue(classMetaData.annotations, "com.datawizards.dmg.annotations.hive.hiveExternalTable")
+
 }

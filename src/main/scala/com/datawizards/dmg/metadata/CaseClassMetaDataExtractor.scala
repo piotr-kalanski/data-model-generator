@@ -29,6 +29,14 @@ object CaseClassMetaDataExtractor {
     )
   }
 
+  def getAnnotationValue(annotations: Iterable[AnnotationMetaData], annotationName: String): Option[String] = {
+    val annotation = annotations.find(_.name == annotationName)
+    if(annotation.isDefined)
+      Some(annotation.get.attributes.head.value)
+    else
+      None
+  }
+
   private def extractAnnotations(symbol: Symbol): Seq[AnnotationMetaData] =
     symbol
       .annotations
