@@ -116,4 +116,30 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("STORED AS PARQUET") {
+    val expected =
+      """CREATE TABLE PersonStoredAsParquet(
+        |   name STRING,
+        |   age INT
+        |)
+        |STORED AS PARQUET;""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonStoredAsParquet](HiveDialect)
+    }
+  }
+
+  test("STORED AS avro") {
+    val expected =
+      """CREATE TABLE PersonStoredAsAvro(
+        |   name STRING,
+        |   age INT
+        |)
+        |STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat';""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonStoredAsAvro](HiveDialect)
+    }
+  }
+
 }

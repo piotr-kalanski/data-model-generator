@@ -58,4 +58,9 @@ object TestModel {
   @hiveExternalTable(location="hdfs:///data/people")
   case class PersonExternalTable(name: String, age: Int)
 
+  @hiveStoredAs(format="PARQUET")
+  case class PersonStoredAsParquet(name: String, age: Int)
+
+  @hiveStoredAs(format="""INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'""")
+  case class PersonStoredAsAvro(name: String, age: Int)
 }

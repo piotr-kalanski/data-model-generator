@@ -93,15 +93,36 @@ CREATE TABLE Book(
 ### Hive external table
 
 ```scala
-DataModelGenerator.generate[PersonExternalTable](dialects.Hive)
+
+@hiveExternalTable(location="hdfs:///data/people")
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Hive)
 ```
 
 ```sql
-CREATE EXTERNAL TABLE PersonExternalTable(
+CREATE EXTERNAL TABLE Person(
    name STRING,
    age INT
 )
 LOCATION 'hdfs:///data/people';
+```
+
+### Hive STORED AS
+
+```scala
+@hiveStoredAs(format="PARQUET")
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Hive)
+```
+
+```sql
+CREATE TABLE Person(
+   name STRING,
+   age INT
+)
+STORED AS PARQUET;
 ```
 
 ## Redshift dialect
