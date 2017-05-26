@@ -33,7 +33,8 @@ object DataModelGenerator {
       packageName = getPackageName[T],
       className = getClassName[T](dialect, classMetaData),
       comment = getComment(classMetaData.annotations),
-      fields = getFieldsMetadata[T](classMetaData, dialect)
+      fields = getFieldsMetadata[T](classMetaData, dialect),
+      annotations = classMetaData.annotations
     )
   }
 
@@ -65,22 +66,14 @@ object DataModelGenerator {
         FieldMetaData(
           getFieldName(dialect, schemaField, classField),
           dialect.mapDataType(schemaField.dataType),
-          length = getAnnotationValue(classField.annotations, "com.datawizards.dmg.annotations.length"),
+          length = CaseClassMetaDataExtractor.getAnnotationValue(classField.annotations, "com.datawizards.dmg.annotations.length"),
           comment = getComment(classField.annotations)
         )
       }
   }
 
   private def getComment(annotations: Iterable[AnnotationMetaData]): Option[String] =
-    getAnnotationValue(annotations, "com.datawizards.dmg.annotations.comment")
-
-  private def getAnnotationValue(annotations: Iterable[AnnotationMetaData], annotationName: String): Option[String] = {
-    val annotation = annotations.find(_.name == annotationName)
-    if(annotation.isDefined)
-      Some(annotation.get.attributes.head.value)
-    else
-      None
-  }
+    CaseClassMetaDataExtractor.getAnnotationValue(annotations, "com.datawizards.dmg.annotations.comment")
 
   private def getFieldName(dialect: Dialect, schemaField: StructField, classFieldMetaData: ClassFieldMetaData): String = {
     val columnAnnotations = classFieldMetaData.annotations.filter(_.name == "com.datawizards.dmg.annotations.column")

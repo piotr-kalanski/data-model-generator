@@ -4,6 +4,7 @@ import java.sql.Timestamp
 import java.sql.Date
 
 import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.hive._
 
 object TestModel {
   case class Person(name: String, age: Int)
@@ -53,4 +54,8 @@ object TestModel {
   case class CV(skills: Seq[String], grades: Seq[Int])
   case class NestedArray(nested: Seq[Seq[String]], nested3: Seq[Seq[Seq[Int]]])
   case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
+
+  @hiveExternalTable(location="hdfs:///data/people")
+  case class PersonExternalTable(name: String, age: Int)
+
 }

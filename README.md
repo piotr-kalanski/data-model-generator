@@ -90,6 +90,20 @@ CREATE TABLE Book(
 );
 ```
 
+### Hive external table
+
+```scala
+DataModelGenerator.generate[PersonExternalTable](dialects.Hive)
+```
+
+```sql
+CREATE EXTERNAL TABLE PersonExternalTable(
+   name STRING,
+   age INT
+)
+LOCATION 'hdfs:///data/people';
+```
+
 ## Redshift dialect
 
 ```scala
