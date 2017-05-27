@@ -96,18 +96,8 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
         |         "properties": {
         |            "title": {"type": "string"},
         |            "year": {"type": "integer"},
-        |            "owner": {
-        |               "properties": {
-        |                  "name": {"type": "string"},
-        |                  "age": {"type": "integer"}
-        |               }
-        |            },
-        |            "authors": {
-        |               "properties": {
-        |                  "name": {"type": "string"},
-        |                  "age": {"type": "integer"}
-        |               }
-        |            }
+        |            "owner": {"properties": {"name": {"type": "string"}, "age": {"type": "integer"}}},
+        |            "authors": {"properties": {"name": {"type": "string"}, "age": {"type": "integer"}}}
         |         }
         |      }
         |   }

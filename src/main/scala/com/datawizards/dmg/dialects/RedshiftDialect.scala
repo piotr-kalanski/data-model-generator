@@ -1,6 +1,7 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldMetaData, StructFieldType}
+import com.datawizards.dmg.metadata.ClassTypeMetaData
+import com.datawizards.dmg.model.{ClassMetaData, FieldMetaData}
 
 object RedshiftDialect extends DatabaseDialect {
   override def intType: String = "INTEGER"
@@ -23,9 +24,17 @@ object RedshiftDialect extends DatabaseDialect {
 
   override def timestampType: String = "TIMESTAMP"
 
-  override def arrayType: String = "VARCHAR"
+  override def generateArrayTypeExpression(elementTypeExpression: String): String = {
+    log.warn("Redshift doesn't support ARRAY type. Column converted to VARCHAR.")
+    "VARCHAR"
+  }
 
-  override def structType: String = "VARCHAR"
+  override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String = {
+    log.warn("Redshift doesn't support Struct type. Column converted to VARCHAR.")
+    "VARCHAR"
+  }
+
+  override def toString: String = "RedshiftDialect"
 
   override protected def fieldAdditionalExpressions(f: FieldMetaData): String = ""
 
@@ -41,18 +50,5 @@ object RedshiftDialect extends DatabaseDialect {
         s"\nCOMMENT ON COLUMN ${classMetaData.className}.${f.name} IS '${f.comment.get}';"
       else ""
     ).mkString("")
-
-
-  override protected def getArrayType(a: ArrayFieldType): String = {
-    log.warn("Redshift doesn't support ARRAY type. Column converted to VARCHAR.")
-    "VARCHAR"
-  }
-
-  override protected def getStructType(s: StructFieldType): String = {
-    log.warn("Redshift doesn't support Struct type. Column converted to VARCHAR.")
-    "VARCHAR"
-  }
-
-  override def toString: String = "RedshiftDialect"
 
 }

@@ -19,7 +19,7 @@ trait DatabaseDialect extends Dialect {
       .fields
       .withFilter(f => generateColumn(f))
       .map(f =>
-        f.name + " " + getFieldType(f.targetType) +
+        f.name + " " + generateTypeExpression(f) +
         (if(f.length.isEmpty) "" else s"(${f.length.get})") +
         fieldAdditionalExpressions(f)
       ).mkString(",\n   ") +
@@ -32,15 +32,5 @@ trait DatabaseDialect extends Dialect {
   protected def additionalTableProperties(classMetaData: ClassMetaData): String
 
   protected def additionalTableExpressions(classMetaData: ClassMetaData): String
-
-  protected def getFieldType(fieldType: FieldType): String = fieldType match {
-    case p:PrimitiveFieldType => p.name
-    case a:ArrayFieldType => getArrayType(a)
-    case s:StructFieldType => getStructType(s)
-  }
-
-  protected def getArrayType(a: ArrayFieldType): String
-
-  protected def getStructType(s: StructFieldType): String
 
 }

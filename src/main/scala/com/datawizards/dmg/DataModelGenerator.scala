@@ -1,11 +1,9 @@
 package com.datawizards.dmg
 
 import com.datawizards.dmg.dialects.Dialect
-import com.datawizards.dmg.metadata.{AnnotationMetaData, CaseClassMetaData, CaseClassMetaDataExtractor, ClassFieldMetaData}
+import com.datawizards.dmg.metadata._
 import com.datawizards.dmg.model.{ClassMetaData, FieldMetaData}
 import org.apache.log4j.Logger
-import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
-import org.apache.spark.sql.types.StructField
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
@@ -27,26 +25,19 @@ object DataModelGenerator {
   }
 
   private def getClassMetaData[T: ClassTag: TypeTag](dialect: Dialect): ClassMetaData = {
-    val classMetaData = CaseClassMetaDataExtractor.extractCaseClassMetaData[T]()
+    val classMetaData = MetaDataExtractor.extractClassMetaData[T]()
 
-    ClassMetaData(
-      packageName = getPackageName[T],
+    new ClassMetaData(
       className = getClassName[T](dialect, classMetaData),
-      comment = getComment(classMetaData.annotations),
-      fields = getFieldsMetadata[T](classMetaData, dialect),
-      annotations = classMetaData.annotations
+      fields = getFieldsMetadata(dialect, classMetaData),
+      metaData = classMetaData
     )
   }
 
-  private def getPackageName[T: ClassTag]: String =
-    implicitly[ClassTag[T]].runtimeClass.getPackage.getName
-
   private val Table = "com.datawizards.dmg.annotations.table"
-  private val Length = "com.datawizards.dmg.annotations.length"
-  private val Comment = "com.datawizards.dmg.annotations.comment"
   private val Column = "com.datawizards.dmg.annotations.column"
 
-  private def getClassName[T: ClassTag](dialect: Dialect, classMetaData: CaseClassMetaData): String = {
+  private def getClassName[T: ClassTag](dialect: Dialect, classMetaData: ClassTypeMetaData): String = {
     val tableAnnotations = classMetaData.annotations.filter(_.name == Table)
     if(tableAnnotations.nonEmpty) {
       val dialectSpecificTableAnnotation = tableAnnotations.find(_.attributes.exists(aa => aa.name == "dialect" && aa.value.contains(dialect.toString.replace("Dialect",""))))
@@ -64,24 +55,15 @@ object DataModelGenerator {
       implicitly[ClassTag[T]].runtimeClass.getSimpleName
   }
 
-  private def getFieldsMetadata[T: ClassTag: TypeTag](classMetaData: CaseClassMetaData, dialect: Dialect): Array[FieldMetaData] = {
-    val schema = ExpressionEncoder[T].schema
-    (schema.fields zip classMetaData.fields)
-      .map{case (schemaField, classField) =>
-        FieldMetaData(
-          getFieldName(dialect, schemaField, classField),
-          dialect.mapDataType(classField.typeName, schemaField.dataType),
-          length = CaseClassMetaDataExtractor.getAnnotationValue(classField.annotations, Length),
-          comment = getComment(classField.annotations),
-          annotations = classField.annotations
-        )
-      }
-  }
+  private def getFieldsMetadata(dialect: Dialect, classMetaData: ClassTypeMetaData): Iterable[FieldMetaData] =
+    classMetaData
+      .fields
+      .map(f => new FieldMetaData(
+        name = getFieldName(dialect, f),
+        fieldMetaData = f
+      ))
 
-  private def getComment(annotations: Iterable[AnnotationMetaData]): Option[String] =
-    CaseClassMetaDataExtractor.getAnnotationValue(annotations, Comment)
-
-  private def getFieldName(dialect: Dialect, schemaField: StructField, classFieldMetaData: ClassFieldMetaData): String = {
+  private def getFieldName(dialect: Dialect, classFieldMetaData: ClassFieldMetaData): String = {
     val columnAnnotations = classFieldMetaData.annotations.filter(_.name == Column)
     if(columnAnnotations.nonEmpty) {
       val dialectSpecificColumnAnnotation = columnAnnotations.find(_.attributes.exists(aa => aa.name == "dialect" && aa.value.contains(dialect.toString.replace("Dialect",""))))
@@ -92,11 +74,11 @@ object DataModelGenerator {
         if(defaultColumnAnnotation.isDefined)
           defaultColumnAnnotation.get.attributes.filter(_.name == "name").head.value
         else
-          schemaField.name
+          classFieldMetaData.fieldName
       }
     }
     else
-      schemaField.name
+      classFieldMetaData.fieldName
   }
 
 }
