@@ -17,12 +17,15 @@ trait DatabaseDialect extends Dialect {
     "(\n   " +
     classMetaData
       .fields
+      .withFilter(f => generateColumn(f))
       .map(f =>
         f.name + " " + getFieldType(f.targetType) +
         (if(f.length.isEmpty) "" else s"(${f.length.get})") +
         fieldAdditionalExpressions(f)
       ).mkString(",\n   ") +
     "\n)"
+
+  protected def generateColumn(field: FieldMetaData): Boolean = true
 
   protected def fieldAdditionalExpressions(f: FieldMetaData): String
 

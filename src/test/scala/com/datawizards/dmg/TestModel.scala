@@ -74,4 +74,76 @@ object TestModel {
 
   @hiveTableProperty("avro.schema.url", "hdfs:///metadata/person.avro")
   case class PersonAvroSchemaURL(name: String, age: Int)
+
+  case class ClicksPartitioned(
+    time: Timestamp,
+    event: String,
+    user: String,
+    @hivePartitionColumn
+    year: Int,
+    @hivePartitionColumn
+    month: Int,
+    @hivePartitionColumn
+    day: Int
+  )
+
+  case class ClicksPartitionedWithOrder(
+    time: Timestamp,
+    event: String,
+    user: String,
+    @hivePartitionColumn(order=3)
+    day: Int,
+    @hivePartitionColumn(order=1)
+    year: Int,
+    @hivePartitionColumn(order=2)
+    month: Int
+  )
+
+  @table("CUSTOM_TABLE_NAME")
+  @comment("Table comment")
+  @hiveStoredAs(format="PARQUET")
+  @hiveExternalTable(location="hdfs:///data/table")
+  @hiveTableProperty("key1", "value1")
+  @hiveTableProperty("key2", "value2")
+  @hiveTableProperty("key3", "value3")
+  case class ParquetTableWithManyAnnotations(
+    @column("eventTime")
+    @comment("Event time")
+    time: Timestamp,
+    @comment("Event name")
+    event: String,
+    @comment("User id")
+    user: String,
+    @hivePartitionColumn(order=3)
+    day: Int,
+    @hivePartitionColumn(order=1)
+    year: Int,
+    @hivePartitionColumn(order=2)
+    month: Int
+  )
+
+  @table("CUSTOM_TABLE_NAME")
+  @comment("Table comment")
+  @hiveRowFormatSerde(format="org.apache.hadoop.hive.serde2.avro.AvroSerDe")
+  @hiveStoredAs("INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'")
+  @hiveExternalTable(location="hdfs:///data/table")
+  @hiveTableProperty("avro.schema.url", "hdfs:///metadata/table.avro")
+  @hiveTableProperty("key1", "value1")
+  @hiveTableProperty("key2", "value2")
+  @hiveTableProperty("key3", "value3")
+  case class AvroTableWithManyAnnotations(
+    @column("eventTime")
+    @comment("Event time")
+    time: Timestamp,
+    @comment("Event name")
+    event: String,
+    @comment("User id")
+    user: String,
+    @hivePartitionColumn(order=3)
+    day: Int,
+    @hivePartitionColumn(order=1)
+    year: Int,
+    @hivePartitionColumn(order=2)
+    month: Int
+  )
 }

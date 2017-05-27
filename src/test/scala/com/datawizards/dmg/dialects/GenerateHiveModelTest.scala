@@ -184,4 +184,77 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Paritioned by") {
+    val expected =
+      """CREATE TABLE ClicksPartitioned(
+        |   time TIMESTAMP,
+        |   event STRING,
+        |   user STRING
+        |)
+        |PARTITIONED BY(year INT, month INT, day INT);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClicksPartitioned](HiveDialect)
+    }
+  }
+
+  test("Paritioned by - order") {
+    val expected =
+      """CREATE TABLE ClicksPartitionedWithOrder(
+        |   time TIMESTAMP,
+        |   event STRING,
+        |   user STRING
+        |)
+        |PARTITIONED BY(year INT, month INT, day INT);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClicksPartitionedWithOrder](HiveDialect)
+    }
+  }
+
+  test("ParquetTableWithManyAnnotations") {
+    val expected =
+      """CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME(
+        |   eventTime TIMESTAMP COMMENT 'Event time',
+        |   event STRING COMMENT 'Event name',
+        |   user STRING COMMENT 'User id'
+        |)
+        |COMMENT 'Table comment'
+        |PARTITIONED BY(year INT, month INT, day INT)
+        |STORED AS PARQUET
+        |LOCATION 'hdfs:///data/table'
+        |TBLPROPERTIES(
+        |   'key1' = 'value1',
+        |   'key2' = 'value2',
+        |   'key3' = 'value3'
+        |);""".stripMargin
+
+    println(expected)
+    println(DataModelGenerator.generate[ParquetTableWithManyAnnotations](HiveDialect))
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ParquetTableWithManyAnnotations](HiveDialect)
+    }
+  }
+
+  test("AvroTableWithManyAnnotations") {
+    val expected =
+      """CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME
+        |COMMENT 'Table comment'
+        |PARTITIONED BY(year INT, month INT, day INT)
+        |ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+        |STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+        |LOCATION 'hdfs:///data/table'
+        |TBLPROPERTIES(
+        |   'avro.schema.url' = 'hdfs:///metadata/table.avro',
+        |   'key1' = 'value1',
+        |   'key2' = 'value2',
+        |   'key3' = 'value3'
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[AvroTableWithManyAnnotations](HiveDialect)
+    }
+  }
+
 }

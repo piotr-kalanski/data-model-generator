@@ -149,6 +149,8 @@ STORED AS PARQUET;
 @hiveTableProperty("key2", "value2")
 @hiveTableProperty("key3", "value3")
 case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Hive)
 ```
 
 ```sql
@@ -168,6 +170,8 @@ TBLPROPERTIES(
 ```scala
 @hiveTableProperty("avro.schema.url", "hdfs:///metadata/person.avro")
 case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Hive)
 ```
 
 If "avro.schema.url" table property is provided then generated data model doesn't have any columns definitions, because they are taken by Hive from avro schema.
@@ -176,6 +180,152 @@ If "avro.schema.url" table property is provided then generated data model doesn'
 CREATE TABLE Person
 TBLPROPERTIES(
    'avro.schema.url' = 'hdfs:///metadata/person.avro'
+);
+```
+
+### Hive partition columns
+
+```scala
+case class ClicksPartitioned(
+    time: Timestamp,
+    event: String,
+    user: String,
+    @hivePartitionColumn
+    year: Int,
+    @hivePartitionColumn
+    month: Int,
+    @hivePartitionColumn
+    day: Int
+)
+
+DataModelGenerator.generate[ClicksPartitioned](dialects.Hive)
+```
+
+```sql
+CREATE TABLE ClicksPartitioned(
+   time TIMESTAMP,
+   event STRING,
+   user STRING
+)
+PARTITIONED BY(year INT, month INT, day INT);
+```
+
+### Hive partition columns - order
+
+```scala
+case class ClicksPartitioned(
+    time: Timestamp,
+    event: String,
+    user: String,
+    @hivePartitionColumn(order=3)
+    day: Int,
+    @hivePartitionColumn(order=1)
+    year: Int,
+    @hivePartitionColumn(order=2)
+    month: Int
+)
+
+DataModelGenerator.generate[ClicksPartitionedWithOrder](dialects.Hive)
+```
+
+```sql
+CREATE TABLE ClicksPartitionedWithOrder(
+   time TIMESTAMP,
+   event STRING,
+   user STRING
+)
+PARTITIONED BY(year INT, month INT, day INT);
+```
+
+### Hive Parquet table with many annotations
+
+```scala
+@table("CUSTOM_TABLE_NAME")
+@comment("Table comment")
+@hiveStoredAs(format="PARQUET")
+@hiveExternalTable(location="hdfs:///data/table")
+@hiveTableProperty("key1", "value1")
+@hiveTableProperty("key2", "value2")
+@hiveTableProperty("key3", "value3")
+case class ParquetTableWithManyAnnotations(
+    @column("eventTime")
+    @comment("Event time")
+    time: Timestamp,
+    @comment("Event name")
+    event: String,
+    @comment("User id")
+    user: String,
+    @hivePartitionColumn(order=3)
+    day: Int,
+    @hivePartitionColumn(order=1)
+    year: Int,
+    @hivePartitionColumn(order=2)
+    month: Int
+)
+
+DataModelGenerator.generate[ParquetTableWithManyAnnotations](dialects.Hive)
+```
+
+```sql
+CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME(
+   eventTime TIMESTAMP COMMENT 'Event time',
+   event STRING COMMENT 'Event name',
+   user STRING COMMENT 'User id'
+)
+COMMENT 'Table comment'
+PARTITIONED BY(year INT, month INT, day INT)
+STORED AS PARQUET
+LOCATION 'hdfs:///data/table'
+TBLPROPERTIES(
+   'key1' = 'value1',
+   'key2' = 'value2',
+   'key3' = 'value3'
+);
+```
+
+### Hive Avro table with many annotations
+
+```scala
+@table("CUSTOM_TABLE_NAME")
+@comment("Table comment")
+@hiveRowFormatSerde(format="org.apache.hadoop.hive.serde2.avro.AvroSerDe")
+@hiveStoredAs("INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'")
+@hiveExternalTable(location="hdfs:///data/table")
+@hiveTableProperty("avro.schema.url", "hdfs:///metadata/table.avro")
+@hiveTableProperty("key1", "value1")
+@hiveTableProperty("key2", "value2")
+@hiveTableProperty("key3", "value3")
+case class AvroTableWithManyAnnotations(
+    @column("eventTime")
+    @comment("Event time")
+    time: Timestamp,
+    @comment("Event name")
+    event: String,
+    @comment("User id")
+    user: String,
+    @hivePartitionColumn(order=3)
+    day: Int,
+    @hivePartitionColumn(order=1)
+    year: Int,
+    @hivePartitionColumn(order=2)
+    month: Int
+)
+
+DataModelGenerator.generate[AvroTableWithManyAnnotations](dialects.Hive)
+```
+
+```sql
+CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME
+COMMENT 'Table comment'
+PARTITIONED BY(year INT, month INT, day INT)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+LOCATION 'hdfs:///data/table'
+TBLPROPERTIES(
+   'avro.schema.url' = 'hdfs:///metadata/table.avro',
+   'key1' = 'value1',
+   'key2' = 'value2',
+   'key3' = 'value3'
 );
 ```
 
