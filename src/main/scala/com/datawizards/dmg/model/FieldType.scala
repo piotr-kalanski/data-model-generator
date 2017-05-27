@@ -5,4 +5,4 @@ sealed trait FieldType {
 }
 case class PrimitiveFieldType(name: String) extends FieldType
 case class ArrayFieldType(name: String, elementType: FieldType) extends FieldType
-case class StructFieldType(name: String, fields: Map[String,FieldType]) extends FieldType
+case class StructFieldType(name: String, typeName: String, fields: Map[String,FieldType]) extends FieldType

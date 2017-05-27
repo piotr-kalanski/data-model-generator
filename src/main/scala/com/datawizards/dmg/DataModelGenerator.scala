@@ -70,7 +70,7 @@ object DataModelGenerator {
       .map{case (schemaField, classField) =>
         FieldMetaData(
           getFieldName(dialect, schemaField, classField),
-          dialect.mapDataType(schemaField.dataType),
+          dialect.mapDataType(classField.typeName, schemaField.dataType),
           length = CaseClassMetaDataExtractor.getAnnotationValue(classField.annotations, Length),
           comment = getComment(classField.annotations),
           annotations = classField.annotations

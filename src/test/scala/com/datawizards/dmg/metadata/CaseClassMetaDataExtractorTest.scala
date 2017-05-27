@@ -24,6 +24,7 @@ class CaseClassMetaDataExtractorTest extends FunSuite {
       , fields = Seq(
         ClassFieldMetaData(
           name = "name"
+          , typeName = "String"
           , annotations = Seq(
             AnnotationMetaData(
               name = "com.datawizards.dmg.annotations.column"
@@ -60,6 +61,7 @@ class CaseClassMetaDataExtractorTest extends FunSuite {
         ),
         ClassFieldMetaData(
           name = "age"
+          , typeName = "Int"
           , annotations = Seq(
             AnnotationMetaData(
               name = "com.datawizards.dmg.annotations.column"
@@ -78,6 +80,7 @@ class CaseClassMetaDataExtractorTest extends FunSuite {
         ),
         ClassFieldMetaData(
           name = "title"
+          , typeName = "String"
           , annotations = Seq()
         )
       )
