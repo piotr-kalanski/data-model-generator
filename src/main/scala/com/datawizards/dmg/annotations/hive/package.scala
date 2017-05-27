@@ -24,4 +24,12 @@ package object hive {
     * @param format row format of data e.g. org.apache.hadoop.hive.serde2.avro.AvroSerDe, org.apache.hive.hcatalog.data.JsonSerDe
     */
   final class hiveRowFormatSerde(val format: String) extends StaticAnnotation
+
+  /**
+    * Hive TBLPROPERTIES section
+    *
+    * @param key key of table property
+    * @param value value of table property
+    */
+  final class hiveTableProperty(val key: String, val value: String) extends StaticAnnotation
 }

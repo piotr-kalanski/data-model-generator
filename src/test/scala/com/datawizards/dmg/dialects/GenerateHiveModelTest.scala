@@ -155,4 +155,33 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Multiple table properties") {
+    val expected =
+      """CREATE TABLE PersonMultipleTableProperties(
+        |   name STRING,
+        |   age INT
+        |)
+        |TBLPROPERTIES(
+        |   'key1' = 'value1',
+        |   'key2' = 'value2',
+        |   'key3' = 'value3'
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonMultipleTableProperties](HiveDialect)
+    }
+  }
+
+  test("Table properties - avro schema url") {
+    val expected =
+      """CREATE TABLE PersonAvroSchemaURL
+        |TBLPROPERTIES(
+        |   'avro.schema.url' = 'hdfs:///metadata/person.avro'
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonAvroSchemaURL](HiveDialect)
+    }
+  }
+
 }

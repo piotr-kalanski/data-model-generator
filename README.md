@@ -142,6 +142,43 @@ CREATE TABLE Person(
 STORED AS PARQUET;
 ```
 
+### Hive TABLE PROPERTIES
+
+```scala
+@hiveTableProperty("key1", "value1")
+@hiveTableProperty("key2", "value2")
+@hiveTableProperty("key3", "value3")
+case class Person(name: String, age: Int)
+```
+
+```sql
+CREATE TABLE Person(
+   name STRING,
+   age INT
+)
+TBLPROPERTIES(
+   'key1' = 'value1',
+   'key2' = 'value2',
+   'key3' = 'value3'
+);
+```
+
+### Hive avro schema url property
+
+```scala
+@hiveTableProperty("avro.schema.url", "hdfs:///metadata/person.avro")
+case class Person(name: String, age: Int)
+```
+
+If "avro.schema.url" table property is provided then generated data model doesn't have any columns definitions, because they are taken by Hive from avro schema.
+
+```sql
+CREATE TABLE Person
+TBLPROPERTIES(
+   'avro.schema.url' = 'hdfs:///metadata/person.avro'
+);
+```
+
 ## Redshift dialect
 
 ```scala

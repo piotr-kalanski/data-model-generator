@@ -4,25 +4,25 @@ import com.datawizards.dmg.model._
 
 trait DatabaseDialect extends Dialect {
 
-  override def generateDataModel(classMetaData: ClassMetaData): String = {
-    val columnsExpression = generateColumnsExpression(classMetaData)
-
-    s"${createTableExpression(classMetaData)}(\n" +
-      s"   $columnsExpression" +
-      s"\n)${additionalTableProperties(classMetaData)};${additionalTableExpressions(classMetaData)}"
-  }
+  override def generateDataModel(classMetaData: ClassMetaData): String =
+    createTableExpression(classMetaData) +
+    generateColumnsExpression(classMetaData) +
+    additionalTableProperties(classMetaData) + ";" +
+    additionalTableExpressions(classMetaData)
 
   protected def createTableExpression(classMetaData: ClassMetaData): String =
     s"CREATE TABLE ${classMetaData.className}"
 
-  private def generateColumnsExpression(classMetaData: ClassMetaData): String =
+  protected def generateColumnsExpression(classMetaData: ClassMetaData): String =
+    "(\n   " +
     classMetaData
       .fields
       .map(f =>
         f.name + " " + getFieldType(f.targetType) +
         (if(f.length.isEmpty) "" else s"(${f.length.get})") +
         fieldAdditionalExpressions(f)
-      ).mkString(",\n   ")
+      ).mkString(",\n   ") +
+    "\n)"
 
   protected def fieldAdditionalExpressions(f: FieldMetaData): String
 
