@@ -1,7 +1,7 @@
 package com.datawizards.dmg.model
 
 import com.datawizards.dmg.metadata.AnnotationMetaData
-
+@deprecated
 case class ClassMetaData(
   packageName: String,
   className: String,

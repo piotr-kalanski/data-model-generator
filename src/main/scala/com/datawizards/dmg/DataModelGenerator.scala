@@ -1,7 +1,7 @@
 package com.datawizards.dmg
 
 import com.datawizards.dmg.dialects.Dialect
-import com.datawizards.dmg.metadata.{AnnotationMetaData, CaseClassMetaData, CaseClassMetaDataExtractor, ClassFieldMetaData}
+import com.datawizards.dmg.metadata.{AnnotationMetaData, CaseClassMetaData, CaseClassMetaDataExtractor, CaseClassFieldMetaData}
 import com.datawizards.dmg.model.{ClassMetaData, FieldMetaData}
 import org.apache.log4j.Logger
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
@@ -81,7 +81,7 @@ object DataModelGenerator {
   private def getComment(annotations: Iterable[AnnotationMetaData]): Option[String] =
     CaseClassMetaDataExtractor.getAnnotationValue(annotations, Comment)
 
-  private def getFieldName(dialect: Dialect, schemaField: StructField, classFieldMetaData: ClassFieldMetaData): String = {
+  private def getFieldName(dialect: Dialect, schemaField: StructField, classFieldMetaData: CaseClassFieldMetaData): String = {
     val columnAnnotations = classFieldMetaData.annotations.filter(_.name == Column)
     if(columnAnnotations.nonEmpty) {
       val dialectSpecificColumnAnnotation = columnAnnotations.find(_.attributes.exists(aa => aa.name == "dialect" && aa.value.contains(dialect.toString.replace("Dialect",""))))

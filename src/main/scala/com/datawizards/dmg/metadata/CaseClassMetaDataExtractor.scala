@@ -7,6 +7,7 @@ import scala.reflect.runtime.universe._
   * Class responsible for extracting using reflections metadata about case class: fields, annotations with attributes.
   * It is used to simplify getting such information, because current Scala API is very hard to use.
   */
+@deprecated
 object CaseClassMetaDataExtractor {
   def extractCaseClassMetaData[T : ClassTag : TypeTag](): CaseClassMetaData = {
     val ct = implicitly[ClassTag[T]]
@@ -22,7 +23,7 @@ object CaseClassMetaDataExtractor {
         .typeSignature
         .paramLists
         .head
-        .map(f => ClassFieldMetaData(
+        .map(f => CaseClassFieldMetaData(
           name = f.name.toString,
           typeName = f.typeSignature.toString.stripPrefix("scala."),
           annotations = extractAnnotations(f)

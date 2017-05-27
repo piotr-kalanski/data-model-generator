@@ -1,8 +1,9 @@
 package com.datawizards.dmg.metadata
 
+@deprecated
 case class CaseClassMetaData(
-  packageName: String,
-  className: String,
-  fields: Seq[ClassFieldMetaData],
-  annotations: Seq[AnnotationMetaData]
+                              packageName: String,
+                              className: String,
+                              fields: Seq[CaseClassFieldMetaData],
+                              annotations: Seq[AnnotationMetaData]
 )

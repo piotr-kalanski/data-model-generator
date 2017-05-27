@@ -228,7 +228,7 @@ class GenerateJavaClassTest extends DataModelGeneratorBaseTest {
     }
   }
 
-  //not yet supported!
+  //TODO - add support:
 
   /*test("Struct types") {
     val expected =

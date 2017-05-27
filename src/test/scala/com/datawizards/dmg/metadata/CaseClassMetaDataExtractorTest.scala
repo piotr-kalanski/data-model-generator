@@ -4,6 +4,7 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+//TODO - remove this
 @RunWith(classOf[JUnitRunner])
 class CaseClassMetaDataExtractorTest extends FunSuite {
   test("Extract Person MetaData") {
@@ -22,7 +23,7 @@ class CaseClassMetaDataExtractorTest extends FunSuite {
         )
       )
       , fields = Seq(
-        ClassFieldMetaData(
+        CaseClassFieldMetaData(
           name = "name"
           , typeName = "String"
           , annotations = Seq(
@@ -59,7 +60,7 @@ class CaseClassMetaDataExtractorTest extends FunSuite {
             )
           )
         ),
-        ClassFieldMetaData(
+        CaseClassFieldMetaData(
           name = "age"
           , typeName = "Int"
           , annotations = Seq(
@@ -78,7 +79,7 @@ class CaseClassMetaDataExtractorTest extends FunSuite {
             )
           )
         ),
-        ClassFieldMetaData(
+        CaseClassFieldMetaData(
           name = "title"
           , typeName = "String"
           , annotations = Seq()
