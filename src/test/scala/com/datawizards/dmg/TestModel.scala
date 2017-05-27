@@ -61,6 +61,9 @@ object TestModel {
   @hiveStoredAs(format="PARQUET")
   case class PersonStoredAsParquet(name: String, age: Int)
 
-  @hiveStoredAs(format="""INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'""")
+  @hiveStoredAs(format="INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'")
   case class PersonStoredAsAvro(name: String, age: Int)
+
+  @hiveRowFormatSerde(format="org.apache.hadoop.hive.serde2.avro.AvroSerDe")
+  case class PersonRowFormatSerde(name: String, age: Int)
 }

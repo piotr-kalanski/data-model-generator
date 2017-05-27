@@ -108,6 +108,23 @@ CREATE EXTERNAL TABLE Person(
 LOCATION 'hdfs:///data/people';
 ```
 
+### Hive ROW FORMAT SERDE
+
+```scala
+@hiveRowFormatSerde(format="org.apache.hadoop.hive.serde2.avro.AvroSerDe")
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Hive)
+```
+
+```sql
+CREATE TABLE Person(
+   name STRING,
+   age INT
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe';
+```
+
 ### Hive STORED AS
 
 ```scala
