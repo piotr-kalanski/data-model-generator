@@ -1,5 +1,6 @@
 package com.datawizards.dmg.dialects
 
+import com.datawizards.dmg.metadata.ClassTypeMetaData
 import com.datawizards.dmg.model._
 
 object ElasticsearchDialect extends Dialect {
@@ -24,9 +25,7 @@ object ElasticsearchDialect extends Dialect {
 
   override def timestampType: String = "date"
 
-  override def arrayType: String = "N/A"
-
-  override def structType: String = "N/A"
+  override def toString: String = "ElasticsearchDialect"
 
   override def generateDataModel(classMetaData: ClassMetaData): String = {
     s"""{
@@ -43,20 +42,15 @@ object ElasticsearchDialect extends Dialect {
   private def generateFieldsExpression(classMetaData: ClassMetaData): String =
     classMetaData
       .fields
-      .map(f => s"""${generateFieldExpression(f.name, f.targetType)}""")
+      .map(f => s""""${f.name}": ${generateTypeExpression(f)}""")
       .mkString(",\n            ")
 
-  private def generateFieldExpression(fieldName: String, fieldType: FieldType, level:Int=1): String = fieldType match {
-    case p:PrimitiveFieldType => s""""$fieldName": {"type": "${p.name}"}"""
-    case a:ArrayFieldType => generateFieldExpression(fieldName, a.elementType)
-    case s:StructFieldType =>
-      s""""$fieldName": {
-         |         ${"   "*level}   "properties": {
-         |            ${"   "*level}   ${s.fields.map{case (k,v) => s"""${generateFieldExpression(k, v, level+1)}"""}.mkString(",\n               "+("   "*level))}
-         |            ${"   "*level}}
-         |         ${"   "*level}}""".stripMargin
-  }
+  override def generatePrimitiveTypeExpression(typeExpression: String): String =
+    s"""{"type": "$typeExpression"}"""
 
-  override def toString: String = "ElasticsearchDialect"
+  override def generateArrayTypeExpression(elementTypeExpression: String): String =
+    elementTypeExpression
 
+  override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String =
+    s"""{"properties": {${fieldNamesWithExpressions.map{case (k,v) => s""""$k": $v"""}.mkString(", ")}}}"""
 }

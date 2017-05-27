@@ -11,6 +11,15 @@ object MetaDataExtractor {
   private def mirror =
     runtimeMirror(Thread.currentThread().getContextClassLoader)
 
+  def extractClassMetaData[T: TypeTag](): ClassTypeMetaData = {
+    val tpe = localTypeOf[T]
+    tpe match {
+      case t if definedByConstructorParams(t) => extractClassMetaData(t)
+      case other =>
+        throw new UnsupportedOperationException(s"MetaData for type $other is not supported")
+    }
+  }
+
   def extractTypeMetaData[T : TypeTag](): TypeMetaData =
     extractTypeMetaData(localTypeOf[T])
 
@@ -53,16 +62,19 @@ object MetaDataExtractor {
     case t if t <:< definitions.ShortTpe => ShortType
     case t if t <:< definitions.ByteTpe => ByteType
     case t if t <:< definitions.BooleanTpe => BooleanType
-    case t if definedByConstructorParams(t) =>
-      val cls = mirror.runtimeClass(tpe)
-      ClassTypeMetaData(
-        packageName = cls.getPackage.getName,
-        typeName = cls.getSimpleName,
-        annotations = extractAnnotations(t.typeSymbol),
-        fields = extractClassFields(t)
-      )
+    case t if definedByConstructorParams(t) => extractClassMetaData(t)
     case other =>
       throw new UnsupportedOperationException(s"MetaData for type $other is not supported")
+  }
+
+  private def extractClassMetaData(tpe: `Type`): ClassTypeMetaData = {
+    val cls = mirror.runtimeClass(tpe)
+    ClassTypeMetaData(
+      packageName = cls.getPackage.getName,
+      typeName = cls.getSimpleName,
+      annotations = extractAnnotations(tpe.typeSymbol),
+      fields = extractClassFields(tpe)
+    )
   }
 
   private def localTypeOf[T: TypeTag]: Type = MetaDataExtractor.synchronized {

@@ -228,19 +228,17 @@ class GenerateJavaClassTest extends DataModelGeneratorBaseTest {
     }
   }
 
-  //TODO - add support:
-
-  /*test("Struct types") {
+  test("Struct types") {
     val expected =
       """public class Book {
         |   private String title;
         |   private Integer year;
-        |   private com.datawizards.dmg.TestModel.Person owner;
-        |   private java.util.List<Person> authors;
+        |   private com.datawizards.dmg.Person owner;
+        |   private java.util.List<com.datawizards.dmg.Person> authors;
         |
         |   public Book() {}
         |
-        |   public Book(String title, Integer year, com.datawizards.dmg.TestModel.Person owner, java.util.List<com.datawizards.dmg.TestModel.Person> authors) {
+        |   public Book(String title, Integer year, com.datawizards.dmg.Person owner, java.util.List<com.datawizards.dmg.Person> authors) {
         |      this.title = title;
         |      this.year = year;
         |      this.owner = owner;
@@ -263,19 +261,19 @@ class GenerateJavaClassTest extends DataModelGeneratorBaseTest {
         |      this.year = year;
         |   }
         |
-        |   public com.datawizards.dmg.TestModel.Person getOwner() {
+        |   public com.datawizards.dmg.Person getOwner() {
         |      return owner;
         |   }
         |
-        |   public void setOwner(com.datawizards.dmg.TestModel.Person owner) {
+        |   public void setOwner(com.datawizards.dmg.Person owner) {
         |      this.owner = owner;
         |   }
         |
-        |   public java.util.List<com.datawizards.dmg.TestModel.Person> getAuthors() {
+        |   public java.util.List<com.datawizards.dmg.Person> getAuthors() {
         |      return authors;
         |   }
         |
-        |   public void setAuthors(java.util.List<com.datawizards.dmg.TestModel.Person> authors) {
+        |   public void setAuthors(java.util.List<com.datawizards.dmg.Person> authors) {
         |      this.authors = authors;
         |   }
         |}""".stripMargin
@@ -283,6 +281,6 @@ class GenerateJavaClassTest extends DataModelGeneratorBaseTest {
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[Book](JavaDialect)
     }
-  }*/
+  }
 
 }
