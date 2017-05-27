@@ -142,4 +142,17 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("ROW FORMAT SERDE") {
+    val expected =
+      """CREATE TABLE PersonRowFormatSerde(
+        |   name STRING,
+        |   age INT
+        |)
+        |ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe';""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonRowFormatSerde](HiveDialect)
+    }
+  }
+
 }

@@ -28,11 +28,14 @@ object HiveDialect extends DatabaseDialect {
 
   override def structType: String = "STRUCT"
 
+  override def toString: String = "HiveDialect"
+
   override protected def fieldAdditionalExpressions(f: FieldMetaData): String =
     if(f.comment.isEmpty) "" else s" COMMENT '${f.comment.get}'"
 
   override protected def additionalTableProperties(classMetaData: ClassMetaData): String =
     commentExpression(classMetaData) +
+    rowFormatSerdeExpression(classMetaData) +
     storedAsExpression(classMetaData) +
     locationExpression(classMetaData)
 
@@ -47,13 +50,20 @@ object HiveDialect extends DatabaseDialect {
   override protected def createTableExpression(classMetaData: ClassMetaData): String =
     s"CREATE ${if(hiveExternalTableLocation(classMetaData).isDefined) "EXTERNAL " else ""}TABLE ${classMetaData.className}"
 
-  override def toString: String = "HiveDialect"
-
   private def commentExpression(classMetaData: ClassMetaData): String =
     if(classMetaData.comment.isDefined)
       s"""
          |COMMENT '${classMetaData.comment.get}'""".stripMargin
     else ""
+
+  private def rowFormatSerdeExpression(classMetaData: ClassMetaData): String =
+  {
+    val rowFormatSerde = CaseClassMetaDataExtractor.getAnnotationValue(classMetaData.annotations, "com.datawizards.dmg.annotations.hive.hiveRowFormatSerde")
+    if(rowFormatSerde.isDefined)
+      s"""
+         |ROW FORMAT SERDE '${rowFormatSerde.get}'""".stripMargin
+    else ""
+  }
 
   private def storedAsExpression(classMetaData: ClassMetaData): String =
   {
