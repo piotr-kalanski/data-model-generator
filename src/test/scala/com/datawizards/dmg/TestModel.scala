@@ -66,4 +66,12 @@ object TestModel {
 
   @hiveRowFormatSerde(format="org.apache.hadoop.hive.serde2.avro.AvroSerDe")
   case class PersonRowFormatSerde(name: String, age: Int)
+
+  @hiveTableProperty("key1", "value1")
+  @hiveTableProperty("key2", "value2")
+  @hiveTableProperty("key3", "value3")
+  case class PersonMultipleTableProperties(name: String, age: Int)
+
+  @hiveTableProperty("avro.schema.url", "hdfs:///metadata/person.avro")
+  case class PersonAvroSchemaURL(name: String, age: Int)
 }

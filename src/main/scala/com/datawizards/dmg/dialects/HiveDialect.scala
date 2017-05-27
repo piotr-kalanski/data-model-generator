@@ -30,6 +30,10 @@ object HiveDialect extends DatabaseDialect {
 
   override def toString: String = "HiveDialect"
 
+  override protected def generateColumnsExpression(classMetaData: ClassMetaData): String =
+   if(isAvroSchemaURLProvided(classMetaData)) ""
+   else super.generateColumnsExpression(classMetaData)
+
   override protected def fieldAdditionalExpressions(f: FieldMetaData): String =
     if(f.comment.isEmpty) "" else s" COMMENT '${f.comment.get}'"
 
@@ -37,7 +41,8 @@ object HiveDialect extends DatabaseDialect {
     commentExpression(classMetaData) +
     rowFormatSerdeExpression(classMetaData) +
     storedAsExpression(classMetaData) +
-    locationExpression(classMetaData)
+    locationExpression(classMetaData) +
+    tablePropertiesExpression(classMetaData)
 
   override protected def additionalTableExpressions(classMetaData: ClassMetaData): String = ""
 
@@ -49,6 +54,12 @@ object HiveDialect extends DatabaseDialect {
 
   override protected def createTableExpression(classMetaData: ClassMetaData): String =
     s"CREATE ${if(hiveExternalTableLocation(classMetaData).isDefined) "EXTERNAL " else ""}TABLE ${classMetaData.className}"
+
+  private def isAvroSchemaURLProvided(classMetaData: ClassMetaData): Boolean =
+    classMetaData
+      .annotations
+      .filter(_.name == "com.datawizards.dmg.annotations.hive.hiveTableProperty")
+      .exists(_.attributes.exists(_.value == "avro.schema.url"))
 
   private def commentExpression(classMetaData: ClassMetaData): String =
     if(classMetaData.comment.isDefined)
@@ -81,6 +92,23 @@ object HiveDialect extends DatabaseDialect {
       s"""
          |LOCATION '${externalTableLocation.get}'""".stripMargin
     else ""
+  }
+
+  private def tablePropertiesExpression(classMetaData: ClassMetaData): String =
+  {
+    val tableProperties = classMetaData.annotations.filter(_.name == "com.datawizards.dmg.annotations.hive.hiveTableProperty")
+    if(tableProperties.isEmpty)
+      ""
+    else
+      "TBLPROPERTIES(\n   " +
+      tableProperties
+        .map(a => {
+          val key = a.attributes.find(_.name == "key").get.value
+          val value = a.attributes.find(_.name == "value").get.value
+          s"'$key' = '$value'"
+        })
+      .mkString(",\n   ") +
+      "\n)"
   }
 
   private def hiveExternalTableLocation(classMetaData: ClassMetaData): Option[String] =
