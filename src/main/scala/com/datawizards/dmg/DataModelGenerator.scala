@@ -41,8 +41,13 @@ object DataModelGenerator {
   private def getPackageName[T: ClassTag]: String =
     implicitly[ClassTag[T]].runtimeClass.getPackage.getName
 
+  private val Table = "com.datawizards.dmg.annotations.table"
+  private val Length = "com.datawizards.dmg.annotations.length"
+  private val Comment = "com.datawizards.dmg.annotations.comment"
+  private val Column = "com.datawizards.dmg.annotations.column"
+
   private def getClassName[T: ClassTag](dialect: Dialect, classMetaData: CaseClassMetaData): String = {
-    val tableAnnotations = classMetaData.annotations.filter(_.name == "com.datawizards.dmg.annotations.table")
+    val tableAnnotations = classMetaData.annotations.filter(_.name == Table)
     if(tableAnnotations.nonEmpty) {
       val dialectSpecificTableAnnotation = tableAnnotations.find(_.attributes.exists(aa => aa.name == "dialect" && aa.value.contains(dialect.toString.replace("Dialect",""))))
       if(dialectSpecificTableAnnotation.isDefined)
@@ -66,17 +71,18 @@ object DataModelGenerator {
         FieldMetaData(
           getFieldName(dialect, schemaField, classField),
           dialect.mapDataType(schemaField.dataType),
-          length = CaseClassMetaDataExtractor.getAnnotationValue(classField.annotations, "com.datawizards.dmg.annotations.length"),
-          comment = getComment(classField.annotations)
+          length = CaseClassMetaDataExtractor.getAnnotationValue(classField.annotations, Length),
+          comment = getComment(classField.annotations),
+          annotations = classField.annotations
         )
       }
   }
 
   private def getComment(annotations: Iterable[AnnotationMetaData]): Option[String] =
-    CaseClassMetaDataExtractor.getAnnotationValue(annotations, "com.datawizards.dmg.annotations.comment")
+    CaseClassMetaDataExtractor.getAnnotationValue(annotations, Comment)
 
   private def getFieldName(dialect: Dialect, schemaField: StructField, classFieldMetaData: ClassFieldMetaData): String = {
-    val columnAnnotations = classFieldMetaData.annotations.filter(_.name == "com.datawizards.dmg.annotations.column")
+    val columnAnnotations = classFieldMetaData.annotations.filter(_.name == Column)
     if(columnAnnotations.nonEmpty) {
       val dialectSpecificColumnAnnotation = columnAnnotations.find(_.attributes.exists(aa => aa.name == "dialect" && aa.value.contains(dialect.toString.replace("Dialect",""))))
       if(dialectSpecificColumnAnnotation.isDefined)

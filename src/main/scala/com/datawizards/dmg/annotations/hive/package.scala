@@ -32,4 +32,11 @@ package object hive {
     * @param value value of table property
     */
   final class hiveTableProperty(val key: String, val value: String) extends StaticAnnotation
+
+  /**
+    * Marking column as Hive partition
+    *
+    * @param order order of partitioning, without providing order value partitioning order is the same as order of class fields
+    */
+  final class hivePartitionColumn(val order: Int=0) extends StaticAnnotation
 }
