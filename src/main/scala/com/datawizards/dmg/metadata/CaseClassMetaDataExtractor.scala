@@ -24,7 +24,7 @@ object CaseClassMetaDataExtractor {
         .head
         .map(f => ClassFieldMetaData(
           name = f.name.toString,
-          typeName = f.typeSignature.toString,
+          typeName = f.typeSignature.toString.stripPrefix("scala."),
           annotations = extractAnnotations(f)
         ))
     )
