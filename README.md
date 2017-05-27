@@ -16,6 +16,7 @@ Data model generator based on Scala case classes.
   * [Redshift dialect](#redshift-dialect)
   * [Avro schema dialect](#avro-schema-dialect)
   * [Elasticsearch dialect](#elasticsearch-dialect)
+  * [Java dialect](#java-dialect)
 - [Customizations](#customizations)
   * [Custom column name](#custom-column-name)
   * [Custom table name](#custom-table-name)
@@ -460,6 +461,44 @@ DataModelGenerator.generate[Book](dialects.Elasticsearch)
             }
          }
       }
+   }
+}
+```
+
+## Java dialect
+
+```scala
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Java)
+```
+
+```java
+public class Person {
+   private String name;
+   private Integer age;
+
+   public Person() {}
+
+   public Person(String name, Integer age) {
+      this.name = name;
+      this.age = age;
+   }
+
+   public String getName() {
+      return name;
+   }
+
+   public void setName(String name) {
+      this.name = name;
+   }
+
+   public Integer getAge() {
+      return age;
+   }
+
+   public void setAge(Integer age) {
+      this.age = age;
    }
 }
 ```

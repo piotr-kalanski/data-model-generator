@@ -7,4 +7,5 @@ package object dialects {
   val AvroSchema: Dialect = AvroSchemaDialect
   val AvroSchemaRegistry: Dialect = AvroSchemaRegistryDialect
   val Elasticsearch: Dialect = ElasticsearchDialect
+  val Java: Dialect = JavaDialect
 }

@@ -9,7 +9,7 @@ trait Dialect {
 
   def generateDataModel(classMetaData: ClassMetaData): String
 
-  def mapDataType(dataType: DataType): FieldType = dataType match {
+  def mapDataType(typeName: String, dataType: DataType): FieldType = dataType match {
     case IntegerType => PrimitiveFieldType(intType)
     case StringType => PrimitiveFieldType(stringType)
     case LongType => PrimitiveFieldType(longType)
@@ -20,8 +20,8 @@ trait Dialect {
     case ByteType => PrimitiveFieldType(byteType)
     case DateType => PrimitiveFieldType(dateType)
     case TimestampType => PrimitiveFieldType(timestampType)
-    case a:ArrayType => ArrayFieldType(arrayType, mapDataType(a.elementType))
-    case s:StructType => StructFieldType(structType, s.fields.map(x => x.name -> mapDataType(x.dataType)).toMap)
+    case a:ArrayType => ArrayFieldType(arrayType, mapDataType(null /* not supported*/, a.elementType))
+    case s:StructType => StructFieldType(structType, typeName, s.fields.map(x => x.name -> mapDataType(null /* not supported*/, x.dataType)).toMap)
     case _ => throw new Exception("Not supported type: " + dataType)
   }
 
