@@ -1,7 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.metadata.{ClassTypeMetaData, CollectionTypeMetaData, PrimitiveTypeMetaData, TypeMetaData}
-import com.datawizards.dmg.model._
+import com.datawizards.dmg.metadata._
 
 object AvroSchemaDialect extends Dialect {
 
@@ -25,8 +24,8 @@ object AvroSchemaDialect extends Dialect {
 
   override def timestampType: String = "long"
 
-  override def generatePrimitiveTypeExpression(typeExpression: String): String =
-    s""""$typeExpression""""
+  override def generatePrimitiveTypeExpression(p: PrimitiveTypeMetaData): String =
+    s""""${mapPrimitiveDataType(p)}""""
 
   override def generateArrayTypeExpression(elementTypeExpression: String): String =
     s""""array", "items": $elementTypeExpression"""
@@ -36,37 +35,33 @@ object AvroSchemaDialect extends Dialect {
 
   override def toString: String = "AvroSchemaDialect"
 
-  override def generateDataModel(classMetaData: ClassMetaData): String = {
-    val fieldsExpression = generateFieldsExpression(classMetaData)
+  override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String = {
+    val fieldsExpression = fieldsExpressions.mkString(",\n      ")
     val tableDoc =
-      if(classMetaData.comment.isEmpty) ""
-      else s"""
-         |   "doc": "${classMetaData.comment.get}",""".stripMargin
+      if (comment(classTypeMetaData).isEmpty) ""
+      else
+        s"""
+           |   "doc": "${comment(classTypeMetaData).get}",""".stripMargin
 
     s"""{
-       |   "namespace": "${classMetaData.packageName}",
+       |   "namespace": "${classTypeMetaData.packageName}",
        |   "type": "record",
-       |   "name": "${classMetaData.className}",$tableDoc
+       |   "name": "${classTypeMetaData.typeName}",$tableDoc
        |   "fields": [
        |      $fieldsExpression
        |   ]
        |}""".stripMargin
   }
 
-  private def generateFieldsExpression(classMetaData: ClassMetaData): String =
-    classMetaData
-      .fields
-      .map(f =>
-        s"""{"name": "${f.name}", """ +
-        s""""type": "${getAvroTypeName(f.fieldType)}"""" +
-          (f.fieldType match {
-              case a:CollectionTypeMetaData => s""", "items": ${getArrayItemsType(a.elementType)}"""
-              case s:ClassTypeMetaData => s""", "fields": [${s.fields.map(f => s"""{"name": "${f.fieldName}", "type": ${generateTypeExpression(f.fieldType)}}""").mkString(", ")}]"""
-              case _ => ""
-          }) +
-        s"""${if(f.comment.isEmpty) "" else s""", "doc": "${f.comment.get}""""}}""".stripMargin
-      )
-      .mkString(",\n      ")
+  override def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String, level: Int): String =
+    s"""{"name": "${f.fieldName}", """ +
+      s""""type": "${getAvroTypeName(f.fieldType)}"""" +
+      (f.fieldType match {
+        case a:CollectionTypeMetaData => s""", "items": ${getArrayItemsType(a.elementType)}"""
+        case s:ClassTypeMetaData => s""", "fields": [${s.fields.map(f => s"""{"name": "${f.fieldName}", "type": ${generateTypeExpression(f.fieldType)}}""").mkString(", ")}]"""
+        case _ => ""
+      }) +
+      s"""${if(comment(f).isEmpty) "" else s""", "doc": "${comment(f).get}""""}}"""
 
   private def getArrayItemsType(typeMetaData: TypeMetaData): String = typeMetaData match {
     case p:PrimitiveTypeMetaData => s"""${generateTypeExpression(p)}"""
@@ -81,4 +76,5 @@ object AvroSchemaDialect extends Dialect {
     case c:ClassTypeMetaData => "record"
     case _ => throw new Exception("Not supported type: " + typeMetaData)
   }
+
 }

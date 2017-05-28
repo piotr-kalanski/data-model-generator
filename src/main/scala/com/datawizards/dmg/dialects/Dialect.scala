@@ -1,13 +1,15 @@
 package com.datawizards.dmg.dialects
 
 import com.datawizards.dmg.metadata._
-import com.datawizards.dmg.model._
 import org.apache.log4j.Logger
 
 trait Dialect {
   protected val log:Logger = Logger.getLogger(getClass.getName)
 
-  def generateDataModel(classMetaData: ClassMetaData): String
+  private val Length = "com.datawizards.dmg.annotations.length"
+  private val Comment = "com.datawizards.dmg.annotations.comment"
+
+  def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String
 
   def mapPrimitiveDataType(primitiveType: PrimitiveTypeMetaData): String = primitiveType match {
     case IntegerType => intType
@@ -34,23 +36,44 @@ trait Dialect {
   def dateType: String
   def timestampType: String
 
-  def generateTypeExpression(fieldMetaData: FieldMetaData): String = generateTypeExpression(fieldMetaData.fieldType)
+  def fieldLength(f: ClassFieldMetaData): Option[String] = f.getAnnotationValue(Length)
 
-  def generateTypeExpression(typeMetaData: TypeMetaData): String = typeMetaData match {
-    case p:PrimitiveTypeMetaData => generatePrimitiveTypeExpression(mapPrimitiveDataType(p))
-    case c:CollectionTypeMetaData => generateArrayTypeExpression(generateTypeExpression(c.elementType))
-    //case m:MapTypeMetaData => generateMapTypeExpression(generateTypeExpression(m.keyType), generateTypeExpression(m.valueType))
-    case c:ClassTypeMetaData => generateClassTypeExpression(c, c.fields.map(f => (f.fieldName, generateTypeExpression(f.fieldType))))
-    case _ => throw new Exception("Not supported")
+  def comment(a: HasAnnotations): Option[String] = a.getAnnotationValue(Comment)
+
+  def generateClassFieldExpression(f: ClassFieldMetaData): String =
+    generateClassFieldExpression(f, 0)
+
+  def generateClassFieldExpression(f: ClassFieldMetaData, level: Int): String = {
+    val typeExpression = generateTypeExpression(f.fieldType, level)
+    generateClassFieldExpression(f, typeExpression, level)
   }
 
-  def generatePrimitiveTypeExpression(typeExpression: String): String = typeExpression
+  def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String): String =
+    generateClassFieldExpression(f, typeExpression, 0)
+
+  def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String, level: Int): String
+
+  def generateTypeExpression(typeMetaData: TypeMetaData): String =
+    generateTypeExpression(typeMetaData, 0)
+
+  def generateTypeExpression(typeMetaData: TypeMetaData, level: Int): String = typeMetaData match {
+    case p:PrimitiveTypeMetaData => generatePrimitiveTypeExpression(p)
+    case c:CollectionTypeMetaData => generateArrayTypeExpression(generateTypeExpression(c.elementType, level))
+    case m:MapTypeMetaData => generateMapTypeExpression(generateTypeExpression(m.keyType, level), generateTypeExpression(m.valueType, level))
+    case c:ClassTypeMetaData => generateClassTypeExpression(c, c.fields.map(f => (f.fieldName, generateClassFieldExpression(f, level+1))))
+  }
+
+  def generatePrimitiveTypeExpression(p:PrimitiveTypeMetaData): String =
+    mapPrimitiveDataType(p)
 
   def generateArrayTypeExpression(elementTypeExpression: String): String
 
-  //protected def generateMapTypeExpression(keyTypeExpression: String, valueTypeExpression: String): String
+  def generateMapTypeExpression(keyExpression: String, valueExpression: String): String =
+    throw new Exception("Map type not supported")
 
   def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String
+
+  def generateColumn(f: ClassFieldMetaData): Boolean = true
 }
 
 

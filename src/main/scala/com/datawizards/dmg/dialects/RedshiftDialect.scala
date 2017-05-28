@@ -1,7 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.metadata.ClassTypeMetaData
-import com.datawizards.dmg.model.{ClassMetaData, FieldMetaData}
+import com.datawizards.dmg.metadata._
 
 object RedshiftDialect extends DatabaseDialect {
   override def intType: String = "INTEGER"
@@ -36,18 +35,18 @@ object RedshiftDialect extends DatabaseDialect {
 
   override def toString: String = "RedshiftDialect"
 
-  override protected def fieldAdditionalExpressions(f: FieldMetaData): String = ""
+  override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String = ""
 
-  override protected def additionalTableProperties(classMetaData: ClassMetaData): String = ""
+  override protected def additionalTableProperties(classTypeMetaData: ClassTypeMetaData): String = ""
 
-  override protected def additionalTableExpressions(classMetaData: ClassMetaData): String =
+  override protected def additionalTableExpressions(classTypeMetaData: ClassTypeMetaData): String =
     (
-      if(classMetaData.comment.isDefined)
-        s"\nCOMMENT ON TABLE ${classMetaData.className} IS '${classMetaData.comment.get}';"
+      if(comment(classTypeMetaData).isDefined)
+        s"\nCOMMENT ON TABLE ${classTypeMetaData.typeName} IS '${comment(classTypeMetaData).get}';"
       else ""
-    ) + classMetaData.fields.map(f =>
-      if(f.comment.isDefined)
-        s"\nCOMMENT ON COLUMN ${classMetaData.className}.${f.name} IS '${f.comment.get}';"
+    ) + classTypeMetaData.fields.map(f =>
+      if(comment(f).isDefined)
+        s"\nCOMMENT ON COLUMN ${classTypeMetaData.typeName}.${f.fieldName} IS '${comment(f).get}';"
       else ""
     ).mkString("")
 

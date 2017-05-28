@@ -5,6 +5,7 @@ import java.sql.Date
 
 import com.datawizards.dmg.annotations._
 import com.datawizards.dmg.annotations.hive._
+import com.datawizards.dmg.annotations.es._
 
 object TestModel {
   case class Person(name: String, age: Int)
@@ -146,4 +147,10 @@ object TestModel {
     @hivePartitionColumn(order=2)
     month: Int
   )
+
+  case class PersonEsIndexSettings(
+    @esIndex("not_analyzed") name: String,
+    age: Int
+  )
+
 }

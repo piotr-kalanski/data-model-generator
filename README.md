@@ -465,6 +465,32 @@ DataModelGenerator.generate[Book](dialects.Elasticsearch)
 }
 ```
 
+### index parameter
+
+Index parameter: https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-index.html
+
+```scala
+case class Person(
+    @esIndex("not_analyzed") name: String,
+    age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.Elasticsearch)
+```
+
+```json
+{
+   "mappings": {
+      "PersonEsIndexSettings": {
+         "properties": {
+            "name": {"type": "string", "index": "not_analyzed"},
+            "age": {"type": "integer"}
+         }
+      }
+   }
+}
+```
+
 ## Java dialect
 
 ```scala

@@ -1,7 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.metadata.ClassTypeMetaData
-import com.datawizards.dmg.model.{ClassMetaData, FieldMetaData}
+import com.datawizards.dmg.metadata._
 
 import scala.util.Try
 
@@ -30,32 +29,32 @@ object HiveDialect extends DatabaseDialect {
     s"ARRAY<$elementTypeExpression>"
 
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String =
-    s"STRUCT<${fieldNamesWithExpressions.map{case (k,v) => s"$k : $v"}.mkString(", ")}>"
+    s"STRUCT<${classTypeMetaData.fields.map(f => s"${f.fieldName} : ${generateTypeExpression(f.fieldType)}").mkString(", ")}>"
 
   override def toString: String = "HiveDialect"
 
-  override protected def generateColumnsExpression(classMetaData: ClassMetaData): String =
-   if(isAvroSchemaURLProvided(classMetaData)) ""
-   else super.generateColumnsExpression(classMetaData)
+  override protected def generateColumnsExpression(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
+   if(isAvroSchemaURLProvided(classTypeMetaData)) ""
+   else super.generateColumnsExpression(classTypeMetaData, fieldsExpressions)
 
-  override protected def fieldAdditionalExpressions(f: FieldMetaData): String =
-    if(f.comment.isEmpty) "" else s" COMMENT '${f.comment.get}'"
+  override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String =
+    if(comment(f).isEmpty) "" else s" COMMENT '${comment(f).get}'"
 
-  override protected def additionalTableProperties(classMetaData: ClassMetaData): String =
-    commentExpression(classMetaData) +
-    partitionedByExpression(classMetaData) +
-    rowFormatSerdeExpression(classMetaData) +
-    storedAsExpression(classMetaData) +
-    locationExpression(classMetaData) +
-    tablePropertiesExpression(classMetaData)
+  override protected def additionalTableProperties(classTypeMetaData: ClassTypeMetaData): String =
+    commentExpression(classTypeMetaData) +
+    partitionedByExpression(classTypeMetaData) +
+    rowFormatSerdeExpression(classTypeMetaData) +
+    storedAsExpression(classTypeMetaData) +
+    locationExpression(classTypeMetaData) +
+    tablePropertiesExpression(classTypeMetaData)
 
-  override protected def additionalTableExpressions(classMetaData: ClassMetaData): String = ""
+  override protected def additionalTableExpressions(classTypeMetaData: ClassTypeMetaData): String = ""
 
-  override protected def createTableExpression(classMetaData: ClassMetaData): String =
-    s"CREATE ${if(hiveExternalTableLocation(classMetaData).isDefined) "EXTERNAL " else ""}TABLE ${classMetaData.className}"
+  override protected def createTableExpression(classTypeMetaData: ClassTypeMetaData): String =
+    s"CREATE ${if(hiveExternalTableLocation(classTypeMetaData).isDefined) "EXTERNAL " else ""}TABLE ${classTypeMetaData.typeName}"
 
-  override protected def generateColumn(field: FieldMetaData): Boolean =
-    !isPartitionField(field)
+  override def generateColumn(f: ClassFieldMetaData): Boolean =
+    !isPartitionField(f)
 
   private val HivePartitionColumn: String = "com.datawizards.dmg.annotations.hive.hivePartitionColumn"
   private val HiveRowFormatSerde: String = "com.datawizards.dmg.annotations.hive.hiveRowFormatSerde"
@@ -63,26 +62,26 @@ object HiveDialect extends DatabaseDialect {
   private val HiveStoredAs: String = "com.datawizards.dmg.annotations.hive.hiveStoredAs"
   private val HiveExternalTable: String = "com.datawizards.dmg.annotations.hive.hiveExternalTable"
 
-  private def isPartitionField(field: FieldMetaData): Boolean =
+  private def isPartitionField(field: ClassFieldMetaData): Boolean =
     field
       .annotations
       .exists(_.name == HivePartitionColumn)
 
-  private def isAvroSchemaURLProvided(classMetaData: ClassMetaData): Boolean =
-    classMetaData
+  private def isAvroSchemaURLProvided(classTypeMetaData: ClassTypeMetaData): Boolean =
+    classTypeMetaData
       .annotations
       .filter(_.name == HieTableProperty)
       .exists(_.attributes.exists(_.value == "avro.schema.url"))
 
-  private def commentExpression(classMetaData: ClassMetaData): String =
-    if(classMetaData.comment.isDefined)
+  private def commentExpression(classTypeMetaData: ClassTypeMetaData): String =
+    if(comment(classTypeMetaData).isDefined)
       s"""
-         |COMMENT '${classMetaData.comment.get}'""".stripMargin
+         |COMMENT '${comment(classTypeMetaData).get}'""".stripMargin
     else ""
 
-  private def partitionedByExpression(classMetaData: ClassMetaData): String =
+  private def partitionedByExpression(classTypeMetaData: ClassTypeMetaData): String =
   {
-    val partitionFields = classMetaData.fields.filter(_.annotations.exists(_.name == HivePartitionColumn))
+    val partitionFields = classTypeMetaData.fields.filter(_.annotations.exists(_.name == HivePartitionColumn))
     if(partitionFields.isEmpty)
       ""
     else {
@@ -98,42 +97,42 @@ object HiveDialect extends DatabaseDialect {
           .toSeq
           .sortWith{case (e1,e2) => e1._2 < e2._2 || (e1._2 == e2._2 && e1._3 < e2._3)}
           .map(_._1)
-          .map(f => s"${f.name} ${generateTypeExpression(f)}")
+          .map(f => s"${f.fieldName} ${generateTypeExpression(f.fieldType)}")
           .mkString(", ") +
         ")"
     }
   }
 
-  private def rowFormatSerdeExpression(classMetaData: ClassMetaData): String =
+  private def rowFormatSerdeExpression(classTypeMetaData: ClassTypeMetaData): String =
   {
-    val rowFormatSerde = classMetaData.getAnnotationValue(HiveRowFormatSerde)
+    val rowFormatSerde = classTypeMetaData.getAnnotationValue(HiveRowFormatSerde)
     if(rowFormatSerde.isDefined)
       s"""
          |ROW FORMAT SERDE '${rowFormatSerde.get}'""".stripMargin
     else ""
   }
 
-  private def storedAsExpression(classMetaData: ClassMetaData): String =
+  private def storedAsExpression(classTypeMetaData: ClassTypeMetaData): String =
   {
-    val storedAs = classMetaData.getAnnotationValue(HiveStoredAs)
+    val storedAs = classTypeMetaData.getAnnotationValue(HiveStoredAs)
     if(storedAs.isDefined)
       s"""
          |STORED AS ${storedAs.get.replace("\\'","'")}""".stripMargin
     else ""
   }
 
-  private def locationExpression(classMetaData: ClassMetaData): String =
+  private def locationExpression(classTypeMetaData: ClassTypeMetaData): String =
   {
-    val externalTableLocation = hiveExternalTableLocation(classMetaData)
+    val externalTableLocation = hiveExternalTableLocation(classTypeMetaData)
     if(externalTableLocation.isDefined)
       s"""
          |LOCATION '${externalTableLocation.get}'""".stripMargin
     else ""
   }
 
-  private def tablePropertiesExpression(classMetaData: ClassMetaData): String =
+  private def tablePropertiesExpression(classTypeMetaData: ClassTypeMetaData): String =
   {
-    val tableProperties = classMetaData.annotations.filter(_.name == HieTableProperty)
+    val tableProperties = classTypeMetaData.annotations.filter(_.name == HieTableProperty)
     if(tableProperties.isEmpty)
       ""
     else
@@ -148,7 +147,7 @@ object HiveDialect extends DatabaseDialect {
       "\n)"
   }
 
-  private def hiveExternalTableLocation(classMetaData: ClassMetaData): Option[String] =
-    classMetaData.getAnnotationValue(HiveExternalTable)
+  private def hiveExternalTableLocation(classTypeMetaData: ClassTypeMetaData): Option[String] =
+    classTypeMetaData.getAnnotationValue(HiveExternalTable)
 
 }
