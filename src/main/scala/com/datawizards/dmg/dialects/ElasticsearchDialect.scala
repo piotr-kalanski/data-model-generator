@@ -44,7 +44,7 @@ object ElasticsearchDialect extends Dialect {
       case _:ClassTypeMetaData => typeExpression
       case _ => s"""{"type": $typeExpression}"""
     }
-    case _ => s"""{"type": $typeExpression${indexAttribute(f)}}"""
+    case _ => s"""{"type": $typeExpression${fieldParametersExpressions(f)}}"""
   })
 
   override def generatePrimitiveTypeExpression(p: PrimitiveTypeMetaData): String =
@@ -56,9 +56,19 @@ object ElasticsearchDialect extends Dialect {
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String =
     s"""{"properties": {${fieldNamesWithExpressions.map{case (k,v) => v}.mkString(", ")}}}"""
 
-  private def indexAttribute(f: ClassFieldMetaData): String = {
-    val indexAnnotation = f.getAnnotationValue("com.datawizards.dmg.annotations.es.esIndex")
-    if(indexAnnotation.isDefined) s""", "index": "${indexAnnotation.get}""""
+  private def fieldParametersExpressions(f: ClassFieldMetaData): String =
+    indexParameterExpression(f) +
+    formatParameterExpression(f)
+
+  private def indexParameterExpression(f: ClassFieldMetaData): String =
+    generateFieldParameterExpression(f, "com.datawizards.dmg.annotations.es.esIndex", "index")
+
+  private def formatParameterExpression(f: ClassFieldMetaData): String =
+    generateFieldParameterExpression(f, "com.datawizards.dmg.annotations.es.esFormat", "format")
+
+  private def generateFieldParameterExpression(f: ClassFieldMetaData, annotationName: String, parameterName: String): String = {
+    val annotation = f.getAnnotationValue(annotationName)
+    if(annotation.isDefined) s""", "$parameterName": "${annotation.get}""""
     else ""
   }
 }

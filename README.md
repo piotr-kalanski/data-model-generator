@@ -491,6 +491,32 @@ DataModelGenerator.generate[Person](dialects.Elasticsearch)
 }
 ```
 
+### format parameter
+
+Date format parameter: https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html
+
+```scala
+case class Person(
+    name: String,
+    @esFormat("yyyy-MM-dd") birthday: Date
+)
+
+DataModelGenerator.generate[Person](dialects.Elasticsearch)
+```
+
+```json
+{
+   "mappings": {
+      "Person": {
+         "properties": {
+            "name": {"type": "string"},
+            "birthday": {"type": "date", "format": "yyyy-MM-dd"}
+         }
+      }
+   }
+}
+```
+
 ## Java dialect
 
 ```scala
