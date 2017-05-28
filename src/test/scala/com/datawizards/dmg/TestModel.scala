@@ -153,4 +153,9 @@ object TestModel {
     age: Int
   )
 
+  case class PersonWithDateFormat(
+    name: String,
+    @esFormat("yyyy-MM-dd") birthday: Date
+  )
+
 }

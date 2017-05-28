@@ -13,4 +13,12 @@ package object es {
     *
     */
   final class esIndex(value: String) extends StaticAnnotation
+
+  /**
+    * Date format
+    * [[https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html]]
+    *
+    */
+  final class esFormat(value: String) extends StaticAnnotation
+
 }

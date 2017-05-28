@@ -126,4 +126,22 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("format option") {
+    val expected =
+      """{
+        |   "mappings": {
+        |      "PersonWithDateFormat": {
+        |         "properties": {
+        |            "name": {"type": "string"},
+        |            "birthday": {"type": "date", "format": "yyyy-MM-dd"}
+        |         }
+        |      }
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithDateFormat](ElasticsearchDialect)
+    }
+  }
+
 }
