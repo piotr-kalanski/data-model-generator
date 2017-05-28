@@ -108,4 +108,22 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("index option") {
+    val expected =
+      """{
+        |   "mappings": {
+        |      "PersonEsIndexSettings": {
+        |         "properties": {
+        |            "name": {"type": "string", "index": "not_analyzed"},
+        |            "age": {"type": "integer"}
+        |         }
+        |      }
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonEsIndexSettings](ElasticsearchDialect)
+    }
+  }
+
 }

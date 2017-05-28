@@ -1,6 +1,5 @@
 package com.datawizards.dmg.dialects
-import com.datawizards.dmg.metadata.ClassTypeMetaData
-import com.datawizards.dmg.model.{ClassMetaData, FieldMetaData}
+import com.datawizards.dmg.metadata._
 
 object H2Dialect extends DatabaseDialect {
   override def intType: String = "INT"
@@ -29,15 +28,15 @@ object H2Dialect extends DatabaseDialect {
 
   override def toString: String = "H2Dialect"
 
-  override protected def fieldAdditionalExpressions(f: FieldMetaData): String =
-    if(f.comment.isEmpty) "" else s" COMMENT '${f.comment.get}'"
+  override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String =
+    if(comment(f).isEmpty) "" else s" COMMENT '${comment(f).get}'"
 
-  override protected def additionalTableProperties(classMetaData: ClassMetaData): String = ""
+  override protected def additionalTableProperties(classTypeMetaData: ClassTypeMetaData): String = ""
 
-  override protected def additionalTableExpressions(classMetaData: ClassMetaData): String =
-    if(classMetaData.comment.isDefined)
+  override protected def additionalTableExpressions(classTypeMetaData: ClassTypeMetaData): String =
+    if(comment(classTypeMetaData).isDefined)
       s"""
-         |COMMENT ON TABLE ${classMetaData.className} IS '${classMetaData.comment.get}';""".stripMargin
+         |COMMENT ON TABLE ${classTypeMetaData.typeName} IS '${comment(classTypeMetaData).get}';""".stripMargin
     else ""
 
 }

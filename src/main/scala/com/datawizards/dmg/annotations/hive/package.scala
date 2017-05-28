@@ -2,6 +2,9 @@ package com.datawizards.dmg.annotations
 
 import scala.annotation.StaticAnnotation
 
+/**
+  * HIVE DDL dedicated annotations
+  */
 package object hive {
 
   /**

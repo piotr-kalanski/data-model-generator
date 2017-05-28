@@ -1,7 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.metadata.ClassTypeMetaData
-import com.datawizards.dmg.model._
+import com.datawizards.dmg.metadata._
 
 object JavaDialect extends Dialect {
 
@@ -33,41 +32,40 @@ object JavaDialect extends Dialect {
 
   override def toString: String = "JavaDialect"
 
-  override def generateDataModel(classMetaData: ClassMetaData): String = {
-    s"""public class ${classMetaData.className} {
-       |${generatePrivateFieldsExpression(classMetaData)}
-       |${generateDefaultConstructor(classMetaData)}
-       |${generateConstructor(classMetaData)}
-       |${generateGettersAndSetters(classMetaData)}
+  override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
+    s"""public class ${classTypeMetaData.typeName} {
+       |${generatePrivateFieldsExpression(fieldsExpressions)}
+       |${generateDefaultConstructor(classTypeMetaData)}
+       |${generateConstructor(classTypeMetaData)}
+       |${generateGettersAndSetters(classTypeMetaData)}
        |}""".stripMargin
-  }
 
-  private def generatePrivateFieldsExpression(classMetaData: ClassMetaData): String =
-    classMetaData
-      .fields
-      .map(f => s"   private ${generateTypeExpression(f)} ${f.name};").mkString("\n")
+  override def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String, level: Int): String =
+    s"   private $typeExpression ${f.fieldName};"
 
-  private def generateDefaultConstructor(classMetaData: ClassMetaData): String =
-    s"\n   public ${classMetaData.className}() {}"
+  private def generatePrivateFieldsExpression(fieldsExpressions: Iterable[String]): String =
+    fieldsExpressions.mkString("\n")
 
-  private def generateConstructor(classMetaData: ClassMetaData): String =
+  private def generateDefaultConstructor(classTypeMetaData: ClassTypeMetaData): String =
+    s"\n   public ${classTypeMetaData.typeName}() {}"
+
+  private def generateConstructor(classTypeMetaData: ClassTypeMetaData): String =
     s"""
-       |   public ${classMetaData.className}(${classMetaData.fields.map(f => s"${generateTypeExpression(f)} ${f.name}").mkString(", ")}) {
-       |      ${classMetaData.fields.map(f => s"this.${f.name} = ${f.name};").mkString("\n      ")}
+       |   public ${classTypeMetaData.typeName}(${classTypeMetaData.fields.map(f => s"${generateTypeExpression(f.fieldType)} ${f.fieldName}").mkString(", ")}) {
+       |      ${classTypeMetaData.fields.map(f => s"this.${f.fieldName} = ${f.fieldName};").mkString("\n      ")}
        |   }""".stripMargin
 
-  private def generateGettersAndSetters(classMetaData: ClassMetaData): String =
-    classMetaData
+  private def generateGettersAndSetters(classTypeMetaData: ClassTypeMetaData): String =
+    classTypeMetaData
       .fields
       .map(f =>
         s"""
-           |   public ${generateTypeExpression(f)} get${f.name.capitalize}() {
-           |      return ${f.name};
+           |   public ${generateTypeExpression(f.fieldType)} get${f.fieldName.capitalize}() {
+           |      return ${f.fieldName};
            |   }
            |
-           |   public void set${f.name.capitalize}(${generateTypeExpression(f)} ${f.name}) {
-           |      this.${f.name} = ${f.name};
+           |   public void set${f.fieldName.capitalize}(${generateTypeExpression(f.fieldType)} ${f.fieldName}) {
+           |      this.${f.fieldName} = ${f.fieldName};
            |   }""".stripMargin)
       .mkString("\n")
-
 }

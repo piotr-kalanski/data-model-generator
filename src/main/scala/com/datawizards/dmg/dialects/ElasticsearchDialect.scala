@@ -1,7 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.metadata.ClassTypeMetaData
-import com.datawizards.dmg.model._
+import com.datawizards.dmg.metadata._
 
 object ElasticsearchDialect extends Dialect {
 
@@ -27,30 +26,39 @@ object ElasticsearchDialect extends Dialect {
 
   override def toString: String = "ElasticsearchDialect"
 
-  override def generateDataModel(classMetaData: ClassMetaData): String = {
+  override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
     s"""{
        |   "mappings": {
-       |      "${classMetaData.className}": {
+       |      "${classTypeMetaData.typeName}": {
        |         "properties": {
-       |            ${generateFieldsExpression(classMetaData)}
+       |            ${fieldsExpressions.mkString(",\n            ")}
        |         }
        |      }
        |   }
        |}""".stripMargin
-  }
 
-  private def generateFieldsExpression(classMetaData: ClassMetaData): String =
-    classMetaData
-      .fields
-      .map(f => s""""${f.name}": ${generateTypeExpression(f)}""")
-      .mkString(",\n            ")
+  override def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String, level: Int): String =
+    s""""${f.fieldName}": """ + (f.fieldType match {
+    case _:ClassTypeMetaData => typeExpression
+    case c:CollectionTypeMetaData => c.elementType match {
+      case _:ClassTypeMetaData => typeExpression
+      case _ => s"""{"type": $typeExpression}"""
+    }
+    case _ => s"""{"type": $typeExpression${indexAttribute(f)}}"""
+  })
 
-  override def generatePrimitiveTypeExpression(typeExpression: String): String =
-    s"""{"type": "$typeExpression"}"""
+  override def generatePrimitiveTypeExpression(p: PrimitiveTypeMetaData): String =
+    s""""${mapPrimitiveDataType(p)}""""
 
   override def generateArrayTypeExpression(elementTypeExpression: String): String =
     elementTypeExpression
 
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String =
-    s"""{"properties": {${fieldNamesWithExpressions.map{case (k,v) => s""""$k": $v"""}.mkString(", ")}}}"""
+    s"""{"properties": {${fieldNamesWithExpressions.map{case (k,v) => v}.mkString(", ")}}}"""
+
+  private def indexAttribute(f: ClassFieldMetaData): String = {
+    val indexAnnotation = f.getAnnotationValue("com.datawizards.dmg.annotations.es.esIndex")
+    if(indexAnnotation.isDefined) s""", "index": "${indexAnnotation.get}""""
+    else ""
+  }
 }

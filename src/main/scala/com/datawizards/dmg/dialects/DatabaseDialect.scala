@@ -1,36 +1,30 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model._
+import com.datawizards.dmg.metadata._
 
 trait DatabaseDialect extends Dialect {
 
-  override def generateDataModel(classMetaData: ClassMetaData): String =
-    createTableExpression(classMetaData) +
-    generateColumnsExpression(classMetaData) +
-    additionalTableProperties(classMetaData) + ";" +
-    additionalTableExpressions(classMetaData)
+  override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
+    createTableExpression(classTypeMetaData) +
+    generateColumnsExpression(classTypeMetaData, fieldsExpressions) +
+    additionalTableProperties(classTypeMetaData) + ";" +
+    additionalTableExpressions(classTypeMetaData)
 
-  protected def createTableExpression(classMetaData: ClassMetaData): String =
-    s"CREATE TABLE ${classMetaData.className}"
+  protected def createTableExpression(classTypeMetaData: ClassTypeMetaData): String =
+    s"CREATE TABLE ${classTypeMetaData.typeName}"
 
-  protected def generateColumnsExpression(classMetaData: ClassMetaData): String =
-    "(\n   " +
-    classMetaData
-      .fields
-      .withFilter(f => generateColumn(f))
-      .map(f =>
-        f.name + " " + generateTypeExpression(f) +
-        (if(f.length.isEmpty) "" else s"(${f.length.get})") +
-        fieldAdditionalExpressions(f)
-      ).mkString(",\n   ") +
-    "\n)"
+  protected def generateColumnsExpression(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
+    "(\n   " + fieldsExpressions.mkString(",\n   ") + "\n)"
 
-  protected def generateColumn(field: FieldMetaData): Boolean = true
+  override def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String, level: Int): String =
+    f.fieldName + " " + typeExpression +
+      (if(fieldLength(f).isEmpty) "" else s"(${fieldLength(f).get})") +
+      fieldAdditionalExpressions(f)
 
-  protected def fieldAdditionalExpressions(f: FieldMetaData): String
+  protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String
 
-  protected def additionalTableProperties(classMetaData: ClassMetaData): String
+  protected def additionalTableProperties(classTypeMetaData: ClassTypeMetaData): String
 
-  protected def additionalTableExpressions(classMetaData: ClassMetaData): String
+  protected def additionalTableExpressions(classTypeMetaData: ClassTypeMetaData): String
 
 }

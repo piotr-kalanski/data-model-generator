@@ -1,7 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.metadata.ClassTypeMetaData
-import com.datawizards.dmg.model.ClassMetaData
+import com.datawizards.dmg.metadata._
 
 abstract class DecoratorDialect(dialect: Dialect) extends Dialect {
 
@@ -25,8 +24,11 @@ abstract class DecoratorDialect(dialect: Dialect) extends Dialect {
 
   override def timestampType: String = dialect.timestampType
 
-  override def generateDataModel(classMetaData: ClassMetaData): String =
-    decorate(dialect.generateDataModel(classMetaData))
+  override def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String, level: Int): String =
+    dialect.generateClassFieldExpression(f, typeExpression, level)
+
+  override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
+    decorate(dialect.generateDataModel(classTypeMetaData, fieldsExpressions))
 
   protected def decorate(dataModel: String): String
 
