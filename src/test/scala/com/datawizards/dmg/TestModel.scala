@@ -158,4 +158,9 @@ object TestModel {
     @esFormat("yyyy-MM-dd") birthday: Date
   )
 
+  @esSetting("number_of_shards", 1)
+  @esSetting("number_of_replicas", 3)
+  @esSetting("blocks.read_only", true)
+  @esSetting("codec", "best_compression")
+  case class PersonWithIndexSettings(name: String, age: Int)
 }

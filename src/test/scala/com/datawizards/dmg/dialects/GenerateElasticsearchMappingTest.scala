@@ -11,11 +11,11 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
   test("Simple model") {
     val expected =
       """{
-        |   "mappings": {
-        |      "Person": {
-        |         "properties": {
-        |            "name": {"type": "string"},
-        |            "age": {"type": "integer"}
+        |   "mappings" : {
+        |      "Person" : {
+        |         "properties" : {
+        |            "name" : {"type" : "string"},
+        |            "age" : {"type" : "integer"}
         |         }
         |      }
         |   }
@@ -29,19 +29,19 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
   test("ClassWithAllSimpleTypes") {
     val expected =
       """{
-        |   "mappings": {
-        |      "ClassWithAllSimpleTypes": {
-        |         "properties": {
-        |            "strVal": {"type": "string"},
-        |            "intVal": {"type": "integer"},
-        |            "longVal": {"type": "long"},
-        |            "doubleVal": {"type": "double"},
-        |            "floatVal": {"type": "float"},
-        |            "shortVal": {"type": "short"},
-        |            "booleanVal": {"type": "boolean"},
-        |            "byteVal": {"type": "byte"},
-        |            "dateVal": {"type": "date"},
-        |            "timestampVal": {"type": "date"}
+        |   "mappings" : {
+        |      "ClassWithAllSimpleTypes" : {
+        |         "properties" : {
+        |            "strVal" : {"type" : "string"},
+        |            "intVal" : {"type" : "integer"},
+        |            "longVal" : {"type" : "long"},
+        |            "doubleVal" : {"type" : "double"},
+        |            "floatVal" : {"type" : "float"},
+        |            "shortVal" : {"type" : "short"},
+        |            "booleanVal" : {"type" : "boolean"},
+        |            "byteVal" : {"type" : "byte"},
+        |            "dateVal" : {"type" : "date"},
+        |            "timestampVal" : {"type" : "date"}
         |         }
         |      }
         |   }
@@ -55,11 +55,11 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
   test("Array type") {
     val expected =
       """{
-        |   "mappings": {
-        |      "CV": {
-        |         "properties": {
-        |            "skills": {"type": "string"},
-        |            "grades": {"type": "integer"}
+        |   "mappings" : {
+        |      "CV" : {
+        |         "properties" : {
+        |            "skills" : {"type" : "string"},
+        |            "grades" : {"type" : "integer"}
         |         }
         |      }
         |   }
@@ -73,11 +73,11 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
   test("Nested array type") {
     val expected =
       """{
-        |   "mappings": {
-        |      "NestedArray": {
-        |         "properties": {
-        |            "nested": {"type": "string"},
-        |            "nested3": {"type": "integer"}
+        |   "mappings" : {
+        |      "NestedArray" : {
+        |         "properties" : {
+        |            "nested" : {"type" : "string"},
+        |            "nested3" : {"type" : "integer"}
         |         }
         |      }
         |   }
@@ -91,13 +91,13 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
   test("Struct types") {
     val expected =
       """{
-        |   "mappings": {
-        |      "Book": {
-        |         "properties": {
-        |            "title": {"type": "string"},
-        |            "year": {"type": "integer"},
-        |            "owner": {"properties": {"name": {"type": "string"}, "age": {"type": "integer"}}},
-        |            "authors": {"properties": {"name": {"type": "string"}, "age": {"type": "integer"}}}
+        |   "mappings" : {
+        |      "Book" : {
+        |         "properties" : {
+        |            "title" : {"type" : "string"},
+        |            "year" : {"type" : "integer"},
+        |            "owner" : {"properties" : {"name" : {"type" : "string"}, "age" : {"type" : "integer"}}},
+        |            "authors" : {"properties" : {"name" : {"type" : "string"}, "age" : {"type" : "integer"}}}
         |         }
         |      }
         |   }
@@ -111,11 +111,11 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
   test("index option") {
     val expected =
       """{
-        |   "mappings": {
-        |      "PersonEsIndexSettings": {
-        |         "properties": {
-        |            "name": {"type": "string", "index": "not_analyzed"},
-        |            "age": {"type": "integer"}
+        |   "mappings" : {
+        |      "PersonEsIndexSettings" : {
+        |         "properties" : {
+        |            "name" : {"type" : "string", "index" : "not_analyzed"},
+        |            "age" : {"type" : "integer"}
         |         }
         |      }
         |   }
@@ -129,11 +129,11 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
   test("format option") {
     val expected =
       """{
-        |   "mappings": {
-        |      "PersonWithDateFormat": {
-        |         "properties": {
-        |            "name": {"type": "string"},
-        |            "birthday": {"type": "date", "format": "yyyy-MM-dd"}
+        |   "mappings" : {
+        |      "PersonWithDateFormat" : {
+        |         "properties" : {
+        |            "name" : {"type" : "string"},
+        |            "birthday" : {"type" : "date", "format" : "yyyy-MM-dd"}
         |         }
         |      }
         |   }
@@ -141,6 +141,30 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonWithDateFormat](ElasticsearchDialect)
+    }
+  }
+
+  test("index settings") {
+    val expected =
+      """{
+        |   "settings" : {
+        |      "number_of_shards" : 1,
+        |      "number_of_replicas" : 3,
+        |      "blocks.read_only" : "true",
+        |      "codec" : "best_compression"
+        |   },
+        |   "mappings" : {
+        |      "PersonWithIndexSettings" : {
+        |         "properties" : {
+        |            "name" : {"type" : "string"},
+        |            "age" : {"type" : "integer"}
+        |         }
+        |      }
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithIndexSettings](ElasticsearchDialect)
     }
   }
 
