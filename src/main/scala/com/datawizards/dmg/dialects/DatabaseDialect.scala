@@ -1,40 +1,30 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model._
+import com.datawizards.dmg.metadata._
 
 trait DatabaseDialect extends Dialect {
 
-  override def generateDataModel(classMetaData: ClassMetaData): String = {
-    val columnsExpression = generateColumnsExpression(classMetaData)
+  override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
+    createTableExpression(classTypeMetaData) +
+    generateColumnsExpression(classTypeMetaData, fieldsExpressions) +
+    additionalTableProperties(classTypeMetaData) + ";" +
+    additionalTableExpressions(classTypeMetaData)
 
-    s"CREATE TABLE ${classMetaData.className}(\n" +
-      s"   $columnsExpression" +
-      s"\n)${additionalTableProperties(classMetaData)};${additionalTableExpressions(classMetaData)}"
-  }
+  protected def createTableExpression(classTypeMetaData: ClassTypeMetaData): String =
+    s"CREATE TABLE ${classTypeMetaData.typeName}"
 
-  private def generateColumnsExpression(classMetaData: ClassMetaData): String =
-    classMetaData
-      .fields
-      .map(f =>
-        f.name + " " + getFieldType(f.targetType) +
-        (if(f.length.isEmpty) "" else s"(${f.length.get})") +
-        fieldAdditionalExpressions(f)
-      ).mkString(",\n   ")
+  protected def generateColumnsExpression(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
+    "(\n   " + fieldsExpressions.mkString(",\n   ") + "\n)"
 
-  protected def fieldAdditionalExpressions(f: FieldMetaData): String
+  override def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String, level: Int): String =
+    f.fieldName + " " + typeExpression +
+      (if(fieldLength(f).isEmpty) "" else s"(${fieldLength(f).get})") +
+      fieldAdditionalExpressions(f)
 
-  protected def additionalTableProperties(classMetaData: ClassMetaData): String
+  protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String
 
-  protected def additionalTableExpressions(classMetaData: ClassMetaData): String
+  protected def additionalTableProperties(classTypeMetaData: ClassTypeMetaData): String
 
-  protected def getFieldType(fieldType: FieldType): String = fieldType match {
-    case p:PrimitiveFieldType => p.name
-    case a:ArrayFieldType => getArrayType(a)
-    case s:StructFieldType => getStructType(s)
-  }
-
-  protected def getArrayType(a: ArrayFieldType): String
-
-  protected def getStructType(s: StructFieldType): String
+  protected def additionalTableExpressions(classTypeMetaData: ClassTypeMetaData): String
 
 }

@@ -1,28 +1,28 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model._
+import com.datawizards.dmg.metadata._
 import org.apache.log4j.Logger
-import org.apache.spark.sql.types._
 
 trait Dialect {
   protected val log:Logger = Logger.getLogger(getClass.getName)
 
-  def generateDataModel(classMetaData: ClassMetaData): String
+  private val Length = "com.datawizards.dmg.annotations.length"
+  private val Comment = "com.datawizards.dmg.annotations.comment"
 
-  def mapDataType(dataType: DataType): FieldType = dataType match {
-    case IntegerType => PrimitiveFieldType(intType)
-    case StringType => PrimitiveFieldType(stringType)
-    case LongType => PrimitiveFieldType(longType)
-    case DoubleType => PrimitiveFieldType(doubleType)
-    case FloatType => PrimitiveFieldType(floatType)
-    case ShortType => PrimitiveFieldType(shortType)
-    case BooleanType => PrimitiveFieldType(booleanType)
-    case ByteType => PrimitiveFieldType(byteType)
-    case DateType => PrimitiveFieldType(dateType)
-    case TimestampType => PrimitiveFieldType(timestampType)
-    case a:ArrayType => ArrayFieldType(arrayType, mapDataType(a.elementType))
-    case s:StructType => StructFieldType(structType, s.fields.map(x => x.name -> mapDataType(x.dataType)).toMap)
-    case _ => throw new Exception("Not supported type: " + dataType)
+  def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String
+
+  def mapPrimitiveDataType(primitiveType: PrimitiveTypeMetaData): String = primitiveType match {
+    case IntegerType => intType
+    case StringType => stringType
+    case LongType => longType
+    case DoubleType => doubleType
+    case FloatType => floatType
+    case ShortType => shortType
+    case BooleanType => booleanType
+    case ByteType => byteType
+    case DateType => dateType
+    case TimestampType => timestampType
+    case _ => throw new Exception("Not supported type: " + primitiveType)
   }
 
   def intType: String
@@ -35,8 +35,45 @@ trait Dialect {
   def byteType: String
   def dateType: String
   def timestampType: String
-  def arrayType: String
-  def structType: String
+
+  def fieldLength(f: ClassFieldMetaData): Option[String] = f.getAnnotationValue(Length)
+
+  def comment(a: HasAnnotations): Option[String] = a.getAnnotationValue(Comment)
+
+  def generateClassFieldExpression(f: ClassFieldMetaData): String =
+    generateClassFieldExpression(f, 0)
+
+  def generateClassFieldExpression(f: ClassFieldMetaData, level: Int): String = {
+    val typeExpression = generateTypeExpression(f.fieldType, level)
+    generateClassFieldExpression(f, typeExpression, level)
+  }
+
+  def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String): String =
+    generateClassFieldExpression(f, typeExpression, 0)
+
+  def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String, level: Int): String
+
+  def generateTypeExpression(typeMetaData: TypeMetaData): String =
+    generateTypeExpression(typeMetaData, 0)
+
+  def generateTypeExpression(typeMetaData: TypeMetaData, level: Int): String = typeMetaData match {
+    case p:PrimitiveTypeMetaData => generatePrimitiveTypeExpression(p)
+    case c:CollectionTypeMetaData => generateArrayTypeExpression(generateTypeExpression(c.elementType, level))
+    case m:MapTypeMetaData => generateMapTypeExpression(generateTypeExpression(m.keyType, level), generateTypeExpression(m.valueType, level))
+    case c:ClassTypeMetaData => generateClassTypeExpression(c, c.fields.map(f => (f.fieldName, generateClassFieldExpression(f, level+1))))
+  }
+
+  def generatePrimitiveTypeExpression(p:PrimitiveTypeMetaData): String =
+    mapPrimitiveDataType(p)
+
+  def generateArrayTypeExpression(elementTypeExpression: String): String
+
+  def generateMapTypeExpression(keyExpression: String, valueExpression: String): String =
+    throw new Exception("Map type not supported")
+
+  def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String
+
+  def generateColumn(f: ClassFieldMetaData): Boolean = true
 }
 
 

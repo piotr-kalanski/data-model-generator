@@ -16,11 +16,18 @@ Data model generator based on Scala case classes.
   * [Redshift dialect](#redshift-dialect)
   * [Avro schema dialect](#avro-schema-dialect)
   * [Elasticsearch dialect](#elasticsearch-dialect)
+  * [Java dialect](#java-dialect)
+- [Executors](#executors)
+  * [Register Avro schema to Avro schema registry](#register-avro-schema-to-avro-schema-registry)
+  * [Create Elasticsearch index](#create-elasticsearc-index)
+  * [Create Elasticsearch template](#create-elasticsearch-template)
 - [Customizations](#customizations)
   * [Custom column name](#custom-column-name)
   * [Custom table name](#custom-table-name)
   * [Documentation comments](#documentation-comments)
   * [Column length](#column-length)
+  * [Hive customizations](#hive-customizations)
+  * [Elasticsearch customizations](#elasticsearch-customizations)
 
 # Goals
 
@@ -31,7 +38,7 @@ Data model generator based on Scala case classes.
 Include dependency:
 
 ```scala
-"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.2.0"
+"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.3.0"
 ```
 
 or
@@ -40,7 +47,7 @@ or
 <dependency>
     <groupId>com.github.piotr-kalanski</groupId>
     <artifactId>data-model-generator_2.11</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 
@@ -162,7 +169,82 @@ DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
 }
 ```
 
-### Registering Avro schema to Avro schema registry
+## Elasticsearch dialect
+
+```scala
+
+case class Person(name: String, age: Int)
+case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
+
+DataModelGenerator.generate[Book](dialects.Elasticsearch)
+```
+
+```json
+{
+   "mappings" : {
+      "Book" : {
+         "properties" : {
+            "title" : {"type" : "string"},
+            "year" : {"type" : "integer"},
+            "owner" : {
+               "properties" : {
+                  "name" : {"type" : "string"},
+                  "age" : {"type" : "integer"}
+               }
+            },
+            "authors" : {
+               "properties" : {
+                  "name" : {"type" : "string"},
+                  "age" : {"type" : "integer"}
+               }
+            }
+         }
+      }
+   }
+}
+```
+
+## Java dialect
+
+```scala
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Java)
+```
+
+```java
+public class Person {
+   private String name;
+   private Integer age;
+
+   public Person() {}
+
+   public Person(String name, Integer age) {
+      this.name = name;
+      this.age = age;
+   }
+
+   public String getName() {
+      return name;
+   }
+
+   public void setName(String name) {
+      this.name = name;
+   }
+
+   public Integer getAge() {
+      return age;
+   }
+
+   public void setAge(Integer age) {
+      this.age = age;
+   }
+}
+```
+
+# Executors
+
+## Register Avro schema to Avro schema registry
 
 ```scala
 import com.datawizards.dmg.service.AvroSchemaRegistryServiceImpl
@@ -188,40 +270,34 @@ object RegisterAvroSchema extends App {
 {"type":"record","name":"Person","namespace":"com.datawizards.dmg.examples","fields":[{"name":"name","type":"string"},{"name":"age","type":"int"}]}
 ```
 
-## Elasticsearch dialect
-
-### Elasticsearch mapping
+## Create Elasticsearch index
 
 ```scala
+import com.datawizards.dmg.service.ElasticsearchServiceImpl
 
 case class Person(name: String, age: Int)
-case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
-DataModelGenerator.generate[Book](dialects.Elasticsearch)
+object CreateElasticsearchIndex extends App {
+  val service = new ElasticsearchServiceImpl("http://localhost:9200")
+  service.createIndex[Person]("person")
+
+  println("Index:")
+  println(service.getIndexSettings("person"))
+}
 ```
 
-```json
-{
-   "mappings": {
-      "Book": {
-         "properties": {
-            "title": {"type": "string"},
-            "year": {"type": "integer"},
-            "owner": {
-               "properties": {
-                  "name": {"type": "string"},
-                  "age": {"type": "integer"}
-               }
-            },
-            "authors": {
-               "properties": {
-                  "name": {"type": "string"},
-                  "age": {"type": "integer"}
-               }
-            }
-         }
-      }
-   }
+## Create Elasticsearch template
+
+```scala
+import com.datawizards.dmg.examples.TestModel.PersonWithMultipleEsAnnotations
+import com.datawizards.dmg.service.ElasticsearchServiceImpl
+
+object CreateElasticsearchTemplate extends App {
+  val service = new ElasticsearchServiceImpl("http://localhost:9200")
+  service.updateTemplate[PersonWithMultipleEsAnnotations]("people")
+
+  println("Template:")
+  println(service.getTemplate("people"))
 }
 ```
 
@@ -275,10 +351,10 @@ CREATE TABLE PEOPLE(
 
 ```json
 {
-   "mappings": {
-      "person": {
-         "personName": {"type": "string"},
-         "personAge": {"type": "integer"}
+   "mappings" : {
+      "person" : {
+         "personName" : {"type" : "string"},
+         "personAge" : {"type" : "integer"}
       }
    }
 }
@@ -330,10 +406,10 @@ CREATE TABLE PEOPLE(
 
 ```json
 {
-   "mappings": {
-      "person": {
-         "name": {"type": "string"},
-         "age": {"type": "integer"}
+   "mappings" : {
+      "person" : {
+         "name" : {"type" : "string"},
+         "age" : {"type" : "integer"}
       }
    }
 }
@@ -429,4 +505,392 @@ CREATE TABLE PEOPLE(
    name VARCHAR(1000),
    age INT
 );
+```
+
+## Hive customizations
+
+### Hive external table
+
+```scala
+
+@hiveExternalTable(location="hdfs:///data/people")
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Hive)
+```
+
+```sql
+CREATE EXTERNAL TABLE Person(
+   name STRING,
+   age INT
+)
+LOCATION 'hdfs:///data/people';
+```
+
+### Hive ROW FORMAT SERDE
+
+```scala
+@hiveRowFormatSerde(format="org.apache.hadoop.hive.serde2.avro.AvroSerDe")
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Hive)
+```
+
+```sql
+CREATE TABLE Person(
+   name STRING,
+   age INT
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe';
+```
+
+### Hive STORED AS
+
+```scala
+@hiveStoredAs(format="PARQUET")
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Hive)
+```
+
+```sql
+CREATE TABLE Person(
+   name STRING,
+   age INT
+)
+STORED AS PARQUET;
+```
+
+### Hive TABLE PROPERTIES
+
+```scala
+@hiveTableProperty("key1", "value1")
+@hiveTableProperty("key2", "value2")
+@hiveTableProperty("key3", "value3")
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Hive)
+```
+
+```sql
+CREATE TABLE Person(
+   name STRING,
+   age INT
+)
+TBLPROPERTIES(
+   'key1' = 'value1',
+   'key2' = 'value2',
+   'key3' = 'value3'
+);
+```
+
+### Hive avro schema url property
+
+```scala
+@hiveTableProperty("avro.schema.url", "hdfs:///metadata/person.avro")
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Hive)
+```
+
+If "avro.schema.url" table property is provided then generated data model doesn't have any columns definitions, because they are taken by Hive from avro schema.
+
+```sql
+CREATE TABLE Person
+TBLPROPERTIES(
+   'avro.schema.url' = 'hdfs:///metadata/person.avro'
+);
+```
+
+### Hive partition columns
+
+```scala
+case class ClicksPartitioned(
+    time: Timestamp,
+    event: String,
+    user: String,
+    @hivePartitionColumn
+    year: Int,
+    @hivePartitionColumn
+    month: Int,
+    @hivePartitionColumn
+    day: Int
+)
+
+DataModelGenerator.generate[ClicksPartitioned](dialects.Hive)
+```
+
+```sql
+CREATE TABLE ClicksPartitioned(
+   time TIMESTAMP,
+   event STRING,
+   user STRING
+)
+PARTITIONED BY(year INT, month INT, day INT);
+```
+
+### Hive partition columns - order
+
+```scala
+case class ClicksPartitioned(
+    time: Timestamp,
+    event: String,
+    user: String,
+    @hivePartitionColumn(order=3)
+    day: Int,
+    @hivePartitionColumn(order=1)
+    year: Int,
+    @hivePartitionColumn(order=2)
+    month: Int
+)
+
+DataModelGenerator.generate[ClicksPartitionedWithOrder](dialects.Hive)
+```
+
+```sql
+CREATE TABLE ClicksPartitionedWithOrder(
+   time TIMESTAMP,
+   event STRING,
+   user STRING
+)
+PARTITIONED BY(year INT, month INT, day INT);
+```
+
+### Hive Parquet table with many annotations
+
+```scala
+@table("CUSTOM_TABLE_NAME")
+@comment("Table comment")
+@hiveStoredAs(format="PARQUET")
+@hiveExternalTable(location="hdfs:///data/table")
+@hiveTableProperty("key1", "value1")
+@hiveTableProperty("key2", "value2")
+@hiveTableProperty("key3", "value3")
+case class ParquetTableWithManyAnnotations(
+    @column("eventTime")
+    @comment("Event time")
+    time: Timestamp,
+    @comment("Event name")
+    event: String,
+    @comment("User id")
+    user: String,
+    @hivePartitionColumn(order=3)
+    day: Int,
+    @hivePartitionColumn(order=1)
+    year: Int,
+    @hivePartitionColumn(order=2)
+    month: Int
+)
+
+DataModelGenerator.generate[ParquetTableWithManyAnnotations](dialects.Hive)
+```
+
+```sql
+CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME(
+   eventTime TIMESTAMP COMMENT 'Event time',
+   event STRING COMMENT 'Event name',
+   user STRING COMMENT 'User id'
+)
+COMMENT 'Table comment'
+PARTITIONED BY(year INT, month INT, day INT)
+STORED AS PARQUET
+LOCATION 'hdfs:///data/table'
+TBLPROPERTIES(
+   'key1' = 'value1',
+   'key2' = 'value2',
+   'key3' = 'value3'
+);
+```
+
+### Hive Avro table with many annotations
+
+```scala
+@table("CUSTOM_TABLE_NAME")
+@comment("Table comment")
+@hiveRowFormatSerde(format="org.apache.hadoop.hive.serde2.avro.AvroSerDe")
+@hiveStoredAs("INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'")
+@hiveExternalTable(location="hdfs:///data/table")
+@hiveTableProperty("avro.schema.url", "hdfs:///metadata/table.avro")
+@hiveTableProperty("key1", "value1")
+@hiveTableProperty("key2", "value2")
+@hiveTableProperty("key3", "value3")
+case class AvroTableWithManyAnnotations(
+    @column("eventTime")
+    @comment("Event time")
+    time: Timestamp,
+    @comment("Event name")
+    event: String,
+    @comment("User id")
+    user: String,
+    @hivePartitionColumn(order=3)
+    day: Int,
+    @hivePartitionColumn(order=1)
+    year: Int,
+    @hivePartitionColumn(order=2)
+    month: Int
+)
+
+DataModelGenerator.generate[AvroTableWithManyAnnotations](dialects.Hive)
+```
+
+```sql
+CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME
+COMMENT 'Table comment'
+PARTITIONED BY(year INT, month INT, day INT)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+LOCATION 'hdfs:///data/table'
+TBLPROPERTIES(
+   'avro.schema.url' = 'hdfs:///metadata/table.avro',
+   'key1' = 'value1',
+   'key2' = 'value2',
+   'key3' = 'value3'
+);
+```
+
+## Elasticsearch customizations
+
+### index settings
+
+```scala
+@esSetting("number_of_shards", 1)
+@esSetting("number_of_replicas", 3)
+@esSetting("blocks.read_only", true)
+@esSetting("codec", "best_compression")
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Elasticsearch)
+```
+
+```json
+{
+   "settings" : {
+      "number_of_shards" : 1,
+      "number_of_replicas" : 3,
+      "blocks.read_only" : "true",
+      "codec" : "best_compression"
+   },
+   "mappings" : {
+      "Person" : {
+         "properties" : {
+            "name" : {"type" : "string"},
+            "age" : {"type" : "integer"}
+         }
+      }
+   }
+}
+```
+
+### index parameter
+
+Index parameter: https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-index.html
+
+```scala
+case class Person(
+    @esIndex("not_analyzed") name: String,
+    age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.Elasticsearch)
+```
+
+```json
+{
+   "mappings" : {
+      "PersonEsIndexSettings" : {
+         "properties" : {
+            "name" : {"type" : "string", "index" : "not_analyzed"},
+            "age" : {"type" : "integer"}
+         }
+      }
+   }
+}
+```
+
+### format parameter
+
+Date format parameter: https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html
+
+```scala
+case class Person(
+    name: String,
+    @esFormat("yyyy-MM-dd") birthday: Date
+)
+
+DataModelGenerator.generate[Person](dialects.Elasticsearch)
+```
+
+```json
+{
+   "mappings" : {
+      "Person" : {
+         "properties" : {
+            "name" : {"type" : "string"},
+            "birthday" : {"type" : "date", "format" : "yyyy-MM-dd"}
+         }
+      }
+   }
+}
+```
+
+## Elasticsearch template
+
+https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates.html
+
+```scala
+@esTemplate("people*")
+case class PersonWithEsTemplate(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Elasticsearch)
+```
+
+```json
+{
+   "template" : "people*",
+   "mappings" : {
+      "PersonWithEsTemplate" : {
+         "properties" : {
+            "name" : {"type" : "string"},
+            "age" : {"type" : "integer"}
+         }
+      }
+   }
+}
+```
+
+## Elasticsearch multiple annotations
+
+```scala
+@table("people")
+@esTemplate("people*")
+@esSetting("number_of_shards", 1)
+@esSetting("number_of_replicas", 3)
+case class PersonWithMultipleEsAnnotations(
+    @esIndex("not_analyzed")
+    @column("personName")
+    name: String,
+    @column("personBirthday")
+    @esFormat("yyyy-MM-dd")
+    birthday: Date
+)
+
+DataModelGenerator.generate[PersonWithMultipleEsAnnotations](dialects.Elasticsearch)
+```
+
+```json
+{
+   "template" : "people*",
+   "settings" : {
+      "number_of_shards" : 1,
+      "number_of_replicas" : 3
+   },
+   "mappings" : {
+      "people" : {
+         "properties" : {
+            "personName" : {"type" : "string", "index" : "not_analyzed"},
+            "personBirthday" : {"type" : "date", "format" : "yyyy-MM-dd"}
+         }
+      }
+   }
+}
 ```

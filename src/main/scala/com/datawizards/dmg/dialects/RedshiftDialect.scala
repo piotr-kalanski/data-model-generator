@@ -1,6 +1,6 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.model.{ArrayFieldType, ClassMetaData, FieldMetaData, StructFieldType}
+import com.datawizards.dmg.metadata._
 
 object RedshiftDialect extends DatabaseDialect {
   override def intType: String = "INTEGER"
@@ -23,36 +23,31 @@ object RedshiftDialect extends DatabaseDialect {
 
   override def timestampType: String = "TIMESTAMP"
 
-  override def arrayType: String = "VARCHAR"
-
-  override def structType: String = "VARCHAR"
-
-  override protected def fieldAdditionalExpressions(f: FieldMetaData): String = ""
-
-  override protected def additionalTableProperties(classMetaData: ClassMetaData): String = ""
-
-  override protected def additionalTableExpressions(classMetaData: ClassMetaData): String =
-    (
-      if(classMetaData.comment.isDefined)
-        s"\nCOMMENT ON TABLE ${classMetaData.className} IS '${classMetaData.comment.get}';"
-      else ""
-    ) + classMetaData.fields.map(f =>
-      if(f.comment.isDefined)
-        s"\nCOMMENT ON COLUMN ${classMetaData.className}.${f.name} IS '${f.comment.get}';"
-      else ""
-    ).mkString("")
-
-
-  override protected def getArrayType(a: ArrayFieldType): String = {
+  override def generateArrayTypeExpression(elementTypeExpression: String): String = {
     log.warn("Redshift doesn't support ARRAY type. Column converted to VARCHAR.")
     "VARCHAR"
   }
 
-  override protected def getStructType(s: StructFieldType): String = {
+  override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String = {
     log.warn("Redshift doesn't support Struct type. Column converted to VARCHAR.")
     "VARCHAR"
   }
 
   override def toString: String = "RedshiftDialect"
+
+  override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String = ""
+
+  override protected def additionalTableProperties(classTypeMetaData: ClassTypeMetaData): String = ""
+
+  override protected def additionalTableExpressions(classTypeMetaData: ClassTypeMetaData): String =
+    (
+      if(comment(classTypeMetaData).isDefined)
+        s"\nCOMMENT ON TABLE ${classTypeMetaData.typeName} IS '${comment(classTypeMetaData).get}';"
+      else ""
+    ) + classTypeMetaData.fields.map(f =>
+      if(comment(f).isDefined)
+        s"\nCOMMENT ON COLUMN ${classTypeMetaData.typeName}.${f.fieldName} IS '${comment(f).get}';"
+      else ""
+    ).mkString("")
 
 }

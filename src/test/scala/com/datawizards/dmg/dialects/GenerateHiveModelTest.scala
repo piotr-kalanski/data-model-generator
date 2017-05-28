@@ -103,4 +103,158 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("External table") {
+    val expected =
+      """CREATE EXTERNAL TABLE PersonExternalTable(
+        |   name STRING,
+        |   age INT
+        |)
+        |LOCATION 'hdfs:///data/people';""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonExternalTable](HiveDialect)
+    }
+  }
+
+  test("STORED AS PARQUET") {
+    val expected =
+      """CREATE TABLE PersonStoredAsParquet(
+        |   name STRING,
+        |   age INT
+        |)
+        |STORED AS PARQUET;""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonStoredAsParquet](HiveDialect)
+    }
+  }
+
+  test("STORED AS avro") {
+    val expected =
+      """CREATE TABLE PersonStoredAsAvro(
+        |   name STRING,
+        |   age INT
+        |)
+        |STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat';""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonStoredAsAvro](HiveDialect)
+    }
+  }
+
+  test("ROW FORMAT SERDE") {
+    val expected =
+      """CREATE TABLE PersonRowFormatSerde(
+        |   name STRING,
+        |   age INT
+        |)
+        |ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe';""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonRowFormatSerde](HiveDialect)
+    }
+  }
+
+  test("Multiple table properties") {
+    val expected =
+      """CREATE TABLE PersonMultipleTableProperties(
+        |   name STRING,
+        |   age INT
+        |)
+        |TBLPROPERTIES(
+        |   'key1' = 'value1',
+        |   'key2' = 'value2',
+        |   'key3' = 'value3'
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonMultipleTableProperties](HiveDialect)
+    }
+  }
+
+  test("Table properties - avro schema url") {
+    val expected =
+      """CREATE TABLE PersonAvroSchemaURL
+        |TBLPROPERTIES(
+        |   'avro.schema.url' = 'hdfs:///metadata/person.avro'
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonAvroSchemaURL](HiveDialect)
+    }
+  }
+
+  test("Paritioned by") {
+    val expected =
+      """CREATE TABLE ClicksPartitioned(
+        |   time TIMESTAMP,
+        |   event STRING,
+        |   user STRING
+        |)
+        |PARTITIONED BY(year INT, month INT, day INT);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClicksPartitioned](HiveDialect)
+    }
+  }
+
+  test("Paritioned by - order") {
+    val expected =
+      """CREATE TABLE ClicksPartitionedWithOrder(
+        |   time TIMESTAMP,
+        |   event STRING,
+        |   user STRING
+        |)
+        |PARTITIONED BY(year INT, month INT, day INT);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClicksPartitionedWithOrder](HiveDialect)
+    }
+  }
+
+  test("ParquetTableWithManyAnnotations") {
+    val expected =
+      """CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME(
+        |   eventTime TIMESTAMP COMMENT 'Event time',
+        |   event STRING COMMENT 'Event name',
+        |   user STRING COMMENT 'User id'
+        |)
+        |COMMENT 'Table comment'
+        |PARTITIONED BY(year INT, month INT, day INT)
+        |STORED AS PARQUET
+        |LOCATION 'hdfs:///data/table'
+        |TBLPROPERTIES(
+        |   'key1' = 'value1',
+        |   'key2' = 'value2',
+        |   'key3' = 'value3'
+        |);""".stripMargin
+
+    println(expected)
+    println(DataModelGenerator.generate[ParquetTableWithManyAnnotations](HiveDialect))
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ParquetTableWithManyAnnotations](HiveDialect)
+    }
+  }
+
+  test("AvroTableWithManyAnnotations") {
+    val expected =
+      """CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME
+        |COMMENT 'Table comment'
+        |PARTITIONED BY(year INT, month INT, day INT)
+        |ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+        |STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+        |LOCATION 'hdfs:///data/table'
+        |TBLPROPERTIES(
+        |   'avro.schema.url' = 'hdfs:///metadata/table.avro',
+        |   'key1' = 'value1',
+        |   'key2' = 'value2',
+        |   'key3' = 'value3'
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[AvroTableWithManyAnnotations](HiveDialect)
+    }
+  }
+
 }

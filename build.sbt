@@ -2,7 +2,7 @@ name := "data-model-generator"
 
 organization := "com.github.piotr-kalanski"
 
-version := "0.2.0"
+version := "0.3.0"
 
 scalaVersion := "2.11.8"
 
@@ -27,7 +27,8 @@ developers := List(
 )
 
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-sql" % "2.1.0",
+  "org.scala-lang" % "scala-reflect" % "2.11.8",
+  "log4j" % "log4j" % "1.2.17",
   "org.scalaj" %% "scalaj-http" % "2.3.0",
   "org.json4s" %% "json4s-native" % "3.5.2",
   "org.scalatest" %% "scalatest" % "2.2.6" % "test",
