@@ -21,4 +21,11 @@ package object es {
     */
   final class esFormat(value: String) extends StaticAnnotation
 
+  /**
+    * Index settings
+    * [[https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules.html]]
+    *
+    */
+  final class esSetting(key: String, value: Any) extends StaticAnnotation
+
 }

@@ -64,11 +64,11 @@ class MultipleCustomNamesTest extends DataModelGeneratorBaseTest {
   test("Elasticsearch") {
     val expected =
       """{
-        |   "mappings": {
-        |      "person": {
-        |         "properties": {
-        |            "personNameEs": {"type": "string"},
-        |            "personAgeEs": {"type": "integer"}
+        |   "mappings" : {
+        |      "person" : {
+        |         "properties" : {
+        |            "personNameEs" : {"type" : "string"},
+        |            "personAgeEs" : {"type" : "integer"}
         |         }
         |      }
         |   }

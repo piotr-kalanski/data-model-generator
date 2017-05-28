@@ -442,23 +442,54 @@ DataModelGenerator.generate[Book](dialects.Elasticsearch)
 
 ```json
 {
-   "mappings": {
-      "Book": {
-         "properties": {
-            "title": {"type": "string"},
-            "year": {"type": "integer"},
-            "owner": {
-               "properties": {
-                  "name": {"type": "string"},
-                  "age": {"type": "integer"}
+   "mappings" : {
+      "Book" : {
+         "properties" : {
+            "title" : {"type" : "string"},
+            "year" : {"type" : "integer"},
+            "owner" : {
+               "properties" : {
+                  "name" : {"type" : "string"},
+                  "age" : {"type" : "integer"}
                }
             },
-            "authors": {
-               "properties": {
-                  "name": {"type": "string"},
-                  "age": {"type": "integer"}
+            "authors" : {
+               "properties" : {
+                  "name" : {"type" : "string"},
+                  "age" : {"type" : "integer"}
                }
             }
+         }
+      }
+   }
+}
+```
+
+### index settings
+
+```scala
+@esSetting("number_of_shards", 1)
+@esSetting("number_of_replicas", 3)
+@esSetting("blocks.read_only", true)
+@esSetting("codec", "best_compression")
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Elasticsearch)
+```
+
+```json
+{
+   "settings" : {
+      "number_of_shards" : 1,
+      "number_of_replicas" : 3,
+      "blocks.read_only" : "true",
+      "codec" : "best_compression"
+   },
+   "mappings" : {
+      "Person" : {
+         "properties" : {
+            "name" : {"type" : "string"},
+            "age" : {"type" : "integer"}
          }
       }
    }
@@ -480,11 +511,11 @@ DataModelGenerator.generate[Person](dialects.Elasticsearch)
 
 ```json
 {
-   "mappings": {
-      "PersonEsIndexSettings": {
-         "properties": {
-            "name": {"type": "string", "index": "not_analyzed"},
-            "age": {"type": "integer"}
+   "mappings" : {
+      "PersonEsIndexSettings" : {
+         "properties" : {
+            "name" : {"type" : "string", "index" : "not_analyzed"},
+            "age" : {"type" : "integer"}
          }
       }
    }
@@ -506,11 +537,11 @@ DataModelGenerator.generate[Person](dialects.Elasticsearch)
 
 ```json
 {
-   "mappings": {
-      "Person": {
-         "properties": {
-            "name": {"type": "string"},
-            "birthday": {"type": "date", "format": "yyyy-MM-dd"}
+   "mappings" : {
+      "Person" : {
+         "properties" : {
+            "name" : {"type" : "string"},
+            "birthday" : {"type" : "date", "format" : "yyyy-MM-dd"}
          }
       }
    }
@@ -605,10 +636,10 @@ CREATE TABLE PEOPLE(
 
 ```json
 {
-   "mappings": {
-      "person": {
-         "personName": {"type": "string"},
-         "personAge": {"type": "integer"}
+   "mappings" : {
+      "person" : {
+         "personName" : {"type" : "string"},
+         "personAge" : {"type" : "integer"}
       }
    }
 }
@@ -660,10 +691,10 @@ CREATE TABLE PEOPLE(
 
 ```json
 {
-   "mappings": {
-      "person": {
-         "name": {"type": "string"},
-         "age": {"type": "integer"}
+   "mappings" : {
+      "person" : {
+         "name" : {"type" : "string"},
+         "age" : {"type" : "integer"}
       }
    }
 }

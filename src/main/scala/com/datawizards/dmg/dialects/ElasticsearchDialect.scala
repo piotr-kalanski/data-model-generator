@@ -27,10 +27,10 @@ object ElasticsearchDialect extends Dialect {
   override def toString: String = "ElasticsearchDialect"
 
   override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
-    s"""{
-       |   "mappings": {
-       |      "${classTypeMetaData.typeName}": {
-       |         "properties": {
+    s"""{${settingsExpression(classTypeMetaData)}
+       |   "mappings" : {
+       |      "${classTypeMetaData.typeName}" : {
+       |         "properties" : {
        |            ${fieldsExpressions.mkString(",\n            ")}
        |         }
        |      }
@@ -38,13 +38,13 @@ object ElasticsearchDialect extends Dialect {
        |}""".stripMargin
 
   override def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String, level: Int): String =
-    s""""${f.fieldName}": """ + (f.fieldType match {
+    s""""${f.fieldName}" : """ + (f.fieldType match {
     case _:ClassTypeMetaData => typeExpression
     case c:CollectionTypeMetaData => c.elementType match {
       case _:ClassTypeMetaData => typeExpression
-      case _ => s"""{"type": $typeExpression}"""
+      case _ => s"""{"type" : $typeExpression}"""
     }
-    case _ => s"""{"type": $typeExpression${fieldParametersExpressions(f)}}"""
+    case _ => s"""{"type" : $typeExpression${fieldParametersExpressions(f)}}"""
   })
 
   override def generatePrimitiveTypeExpression(p: PrimitiveTypeMetaData): String =
@@ -54,7 +54,7 @@ object ElasticsearchDialect extends Dialect {
     elementTypeExpression
 
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String =
-    s"""{"properties": {${fieldNamesWithExpressions.map{case (k,v) => v}.mkString(", ")}}}"""
+    s"""{"properties" : {${fieldNamesWithExpressions.map{case (k,v) => v}.mkString(", ")}}}"""
 
   private def fieldParametersExpressions(f: ClassFieldMetaData): String =
     indexParameterExpression(f) +
@@ -68,7 +68,31 @@ object ElasticsearchDialect extends Dialect {
 
   private def generateFieldParameterExpression(f: ClassFieldMetaData, annotationName: String, parameterName: String): String = {
     val annotation = f.getAnnotationValue(annotationName)
-    if(annotation.isDefined) s""", "$parameterName": "${annotation.get}""""
+    if(annotation.isDefined) s""", "$parameterName" : "${annotation.get}""""
     else ""
   }
+
+  private val EsSetting: String = "com.datawizards.dmg.annotations.es.esSetting"
+
+  private def settingsExpression(classTypeMetaData: ClassTypeMetaData): String =
+  {
+    val settings = classTypeMetaData.annotations.filter(_.name == EsSetting)
+    if(settings.isEmpty)
+      ""
+    else
+      "\n   \"settings\" : {\n      " +
+        settings
+          .map(a => {
+            val key = a.attributes.find(_.name == "key").get.value
+            val value = a.attributes.find(_.name == "value").get.value
+            s""""$key" : ${addApostrophesIfRequired(value)}"""
+          })
+          .mkString(",\n      ") +
+        "\n   },"
+  }
+
+  private def addApostrophesIfRequired(value: String): String =
+    if(value.exists(_.isLetter)) "\"" + value + "\""
+    else value
+
 }

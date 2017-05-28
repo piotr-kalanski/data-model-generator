@@ -58,7 +58,7 @@ object HiveDialect extends DatabaseDialect {
 
   private val HivePartitionColumn: String = "com.datawizards.dmg.annotations.hive.hivePartitionColumn"
   private val HiveRowFormatSerde: String = "com.datawizards.dmg.annotations.hive.hiveRowFormatSerde"
-  private val HieTableProperty: String = "com.datawizards.dmg.annotations.hive.hiveTableProperty"
+  private val HiveTableProperty: String = "com.datawizards.dmg.annotations.hive.hiveTableProperty"
   private val HiveStoredAs: String = "com.datawizards.dmg.annotations.hive.hiveStoredAs"
   private val HiveExternalTable: String = "com.datawizards.dmg.annotations.hive.hiveExternalTable"
 
@@ -70,7 +70,7 @@ object HiveDialect extends DatabaseDialect {
   private def isAvroSchemaURLProvided(classTypeMetaData: ClassTypeMetaData): Boolean =
     classTypeMetaData
       .annotations
-      .filter(_.name == HieTableProperty)
+      .filter(_.name == HiveTableProperty)
       .exists(_.attributes.exists(_.value == "avro.schema.url"))
 
   private def commentExpression(classTypeMetaData: ClassTypeMetaData): String =
@@ -132,7 +132,7 @@ object HiveDialect extends DatabaseDialect {
 
   private def tablePropertiesExpression(classTypeMetaData: ClassTypeMetaData): String =
   {
-    val tableProperties = classTypeMetaData.annotations.filter(_.name == HieTableProperty)
+    val tableProperties = classTypeMetaData.annotations.filter(_.name == HiveTableProperty)
     if(tableProperties.isEmpty)
       ""
     else
