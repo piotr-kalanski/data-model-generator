@@ -17,11 +17,17 @@ Data model generator based on Scala case classes.
   * [Avro schema dialect](#avro-schema-dialect)
   * [Elasticsearch dialect](#elasticsearch-dialect)
   * [Java dialect](#java-dialect)
+- [Executors](#executors)
+  * [Register Avro schema to Avro schema registry](#register-avro-schema-to-avro-schema-registry)
+  * [Create Elasticsearch index](#create-elasticsearc-index)
+  * [Create Elasticsearch template](#create-elasticsearch-template)
 - [Customizations](#customizations)
   * [Custom column name](#custom-column-name)
   * [Custom table name](#custom-table-name)
   * [Documentation comments](#documentation-comments)
   * [Column length](#column-length)
+  * [Hive customizations](#hive-customizations)
+  * [Elasticsearch customizations](#elasticsearch-customizations)
 
 # Goals
 
@@ -90,6 +96,418 @@ CREATE TABLE Book(
    authors ARRAY<STRUCT<name : STRING, age : INT>>
 );
 ```
+
+## Redshift dialect
+
+```scala
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
+case class Person(name: String, age: Int)
+case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
+
+object RedshiftExample extends App {
+  println(DataModelGenerator.generate[Book](dialects.Redshift))
+}
+```
+
+```sql
+CREATE TABLE Book(
+   title VARCHAR,
+   year INTEGER,
+   owner VARCHAR,
+   authors VARCHAR
+);
+```
+
+## Avro schema dialect
+
+### Avro schema
+
+```scala
+
+case class Person(name: String, age: Int)
+case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
+
+DataModelGenerator.generate[Book](dialects.AvroSchema)
+```
+
+```json
+{
+   "namespace": "com.datawizards.dmg.examples",
+   "type": "record",
+   "name": "Book",
+   "fields": [
+      {"name": "title", "type": "string"},
+      {"name": "year", "type": "int"},
+      {"name": "owner", "type": "record", "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}]},
+      {"name": "authors", "type": "array", "items": {"type": "record", "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}]}}
+   ]
+}
+```
+
+### Avro schema for Avro Schema Registry
+
+```scala
+
+case class Person(name: String, age: Int, skills: Seq[String])
+
+DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
+```
+
+```json
+{"schema":
+"{
+   \"namespace\": \"com.datawizards.dmg.examples\",
+   \"type\": \"record\",
+   \"name\": \"Person\",
+   \"fields\": [
+      {\"name\": \"name\", \"type\": \"string\"},
+      {\"name\": \"age\", \"type\": \"int\"},
+      {\"name\": \"skills\", \"type\": \"array\", \"items\": \"string\"}
+   ]
+}"
+}
+```
+
+## Elasticsearch dialect
+
+```scala
+
+case class Person(name: String, age: Int)
+case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
+
+DataModelGenerator.generate[Book](dialects.Elasticsearch)
+```
+
+```json
+{
+   "mappings" : {
+      "Book" : {
+         "properties" : {
+            "title" : {"type" : "string"},
+            "year" : {"type" : "integer"},
+            "owner" : {
+               "properties" : {
+                  "name" : {"type" : "string"},
+                  "age" : {"type" : "integer"}
+               }
+            },
+            "authors" : {
+               "properties" : {
+                  "name" : {"type" : "string"},
+                  "age" : {"type" : "integer"}
+               }
+            }
+         }
+      }
+   }
+}
+```
+
+## Java dialect
+
+```scala
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](dialects.Java)
+```
+
+```java
+public class Person {
+   private String name;
+   private Integer age;
+
+   public Person() {}
+
+   public Person(String name, Integer age) {
+      this.name = name;
+      this.age = age;
+   }
+
+   public String getName() {
+      return name;
+   }
+
+   public void setName(String name) {
+      this.name = name;
+   }
+
+   public Integer getAge() {
+      return age;
+   }
+
+   public void setAge(Integer age) {
+      this.age = age;
+   }
+}
+```
+
+# Executors
+
+## Register Avro schema to Avro schema registry
+
+```scala
+import com.datawizards.dmg.service.AvroSchemaRegistryServiceImpl
+
+case class Person(name: String, age: Int)
+
+object RegisterAvroSchema extends App {
+  val service = new AvroSchemaRegistryServiceImpl("http://localhost:8081")
+  service.registerSchema[Person]("person")
+
+  println("Subjects:")
+  println(service.subjects())
+
+  println("Registered schema:")
+  println(service.fetchSchema("person"))
+}
+```
+
+```scala
+"Subjects:"
+["person"]
+"Registered schema:"
+{"type":"record","name":"Person","namespace":"com.datawizards.dmg.examples","fields":[{"name":"name","type":"string"},{"name":"age","type":"int"}]}
+```
+
+## Create Elasticsearch index
+
+```scala
+import com.datawizards.dmg.service.ElasticsearchServiceImpl
+
+case class Person(name: String, age: Int)
+
+object CreateElasticsearchIndex extends App {
+  val service = new ElasticsearchServiceImpl("http://localhost:9200")
+  service.createIndex[Person]("person")
+
+  println("Index:")
+  println(service.getIndexSettings("person"))
+}
+```
+
+## Create Elasticsearch template
+
+```scala
+import com.datawizards.dmg.examples.TestModel.PersonWithMultipleEsAnnotations
+import com.datawizards.dmg.service.ElasticsearchServiceImpl
+
+object CreateElasticsearchTemplate extends App {
+  val service = new ElasticsearchServiceImpl("http://localhost:9200")
+  service.updateTemplate[PersonWithMultipleEsAnnotations]("people")
+
+  println("Template:")
+  println(service.getTemplate("people"))
+}
+```
+
+# Customizations
+
+## Custom column name
+
+```scala
+import com.datawizards.dmg.annotations._
+
+case class Person(
+  @column(name="personName")
+  name: String,
+  age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.H2)
+```
+
+```sql
+CREATE TABLE Person(
+   personName VARCHAR,
+   age INT
+);
+```
+
+### Custom column name specific for dialect
+
+```scala
+import com.datawizards.dmg.annotations._
+
+case class Person(
+  @column(name="NAME")
+  @column(name="personName", dialects.Elasticsearch)
+  name: String,
+  @column(name="AGE")
+  @column(name="personAge", dialects.Elasticsearch)
+  age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.H2)
+DataModelGenerator.generate[Person](dialects.Elasticsearch)
+```
+
+```sql
+CREATE TABLE PEOPLE(
+   NAME VARCHAR,
+   AGE INT
+);
+```
+
+```json
+{
+   "mappings" : {
+      "person" : {
+         "personName" : {"type" : "string"},
+         "personAge" : {"type" : "integer"}
+      }
+   }
+}
+```
+
+## Custom table name
+
+```scala
+import com.datawizards.dmg.annotations._
+
+@table("PEOPLE")
+case class Person(
+  name: String,
+  age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.H2)
+```
+
+```sql
+CREATE TABLE PEOPLE(
+   name VARCHAR,
+   age INT
+);
+```
+
+### Custom table name specific for dialect
+
+```scala
+import com.datawizards.dmg.annotations._
+
+@table("PEOPLE")
+@table("person", dialects.Elasticsearch)
+case class Person(
+  name: String,
+  age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.H2)
+DataModelGenerator.generate[Person](dialects.Elasticsearch)
+```
+
+```sql
+CREATE TABLE PEOPLE(
+   name VARCHAR,
+   age INT
+);
+```
+
+```json
+{
+   "mappings" : {
+      "person" : {
+         "name" : {"type" : "string"},
+         "age" : {"type" : "integer"}
+      }
+   }
+}
+```
+
+## Documentation comments
+
+```scala
+@comment("People data")
+case class PersonWithComments(
+    @comment("Person name") name: String,
+    age: Int
+)
+```
+
+### H2
+
+```scala
+DataModelGenerator.generate[PersonWithComments](dialects.H2)
+```
+
+```sql
+CREATE TABLE PersonWithComments(
+   name VARCHAR COMMENT 'Person name',
+   age INT
+);
+COMMENT ON TABLE PersonWithComments IS 'People data';
+```
+
+### Hive
+
+```scala
+DataModelGenerator.generate[PersonWithComments](dialects.Hive)
+```
+
+```sql
+CREATE TABLE PersonWithComments(
+   name STRING COMMENT 'Person name',
+   age INT
+)
+COMMENT 'People data';
+```
+
+### Redshift
+
+```scala
+DataModelGenerator.generate[PersonWithComments](dialects.Redshift)
+```
+
+```sql
+CREATE TABLE PersonWithComments(
+   name VARCHAR,
+   age INTEGER
+);
+COMMENT ON TABLE PersonWithComments IS 'People data';
+COMMENT ON COLUMN PersonWithComments.name IS 'Person name';
+```
+
+### Avro schema
+
+```scala
+DataModelGenerator.generate[PersonWithComments](dialects.AvroSchema)
+```
+
+```json
+{
+   "namespace": "com.datawizards.dmg.examples",
+   "type": "record",
+   "name": "PersonWithComments",
+   "doc": "People data",
+   "fields": [
+      {"name": "name", "type": "string", "doc": "Person name"},
+      {"name": "age", "type": "int"}
+   ]
+}
+```
+
+## Column length
+
+```scala
+import com.datawizards.dmg.annotations._
+
+case class Person(
+  @length(1000) name: String,
+  age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.H2)
+```
+
+```sql
+CREATE TABLE PEOPLE(
+   name VARCHAR(1000),
+   age INT
+);
+```
+
+## Hive customizations
 
 ### Hive external table
 
@@ -330,140 +748,7 @@ TBLPROPERTIES(
 );
 ```
 
-## Redshift dialect
-
-```scala
-import com.datawizards.dmg.{DataModelGenerator, dialects}
-
-case class Person(name: String, age: Int)
-case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
-
-object RedshiftExample extends App {
-  println(DataModelGenerator.generate[Book](dialects.Redshift))
-}
-```
-
-```sql
-CREATE TABLE Book(
-   title VARCHAR,
-   year INTEGER,
-   owner VARCHAR,
-   authors VARCHAR
-);
-```
-
-## Avro schema dialect
-
-### Avro schema
-
-```scala
-
-case class Person(name: String, age: Int)
-case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
-
-DataModelGenerator.generate[Book](dialects.AvroSchema)
-```
-
-```json
-{
-   "namespace": "com.datawizards.dmg.examples",
-   "type": "record",
-   "name": "Book",
-   "fields": [
-      {"name": "title", "type": "string"},
-      {"name": "year", "type": "int"},
-      {"name": "owner", "type": "record", "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}]},
-      {"name": "authors", "type": "array", "items": {"type": "record", "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}]}}
-   ]
-}
-```
-
-### Avro schema for Avro Schema Registry
-
-```scala
-
-case class Person(name: String, age: Int, skills: Seq[String])
-
-DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
-```
-
-```json
-{"schema":
-"{
-   \"namespace\": \"com.datawizards.dmg.examples\",
-   \"type\": \"record\",
-   \"name\": \"Person\",
-   \"fields\": [
-      {\"name\": \"name\", \"type\": \"string\"},
-      {\"name\": \"age\", \"type\": \"int\"},
-      {\"name\": \"skills\", \"type\": \"array\", \"items\": \"string\"}
-   ]
-}"
-}
-```
-
-### Registering Avro schema to Avro schema registry
-
-```scala
-import com.datawizards.dmg.service.AvroSchemaRegistryServiceImpl
-
-case class Person(name: String, age: Int)
-
-object RegisterAvroSchema extends App {
-  val service = new AvroSchemaRegistryServiceImpl("http://localhost:8081")
-  service.registerSchema[Person]("person")
-
-  println("Subjects:")
-  println(service.subjects())
-
-  println("Registered schema:")
-  println(service.fetchSchema("person"))
-}
-```
-
-```scala
-"Subjects:"
-["person"]
-"Registered schema:"
-{"type":"record","name":"Person","namespace":"com.datawizards.dmg.examples","fields":[{"name":"name","type":"string"},{"name":"age","type":"int"}]}
-```
-
-## Elasticsearch dialect
-
-### Elasticsearch mapping
-
-```scala
-
-case class Person(name: String, age: Int)
-case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
-
-DataModelGenerator.generate[Book](dialects.Elasticsearch)
-```
-
-```json
-{
-   "mappings" : {
-      "Book" : {
-         "properties" : {
-            "title" : {"type" : "string"},
-            "year" : {"type" : "integer"},
-            "owner" : {
-               "properties" : {
-                  "name" : {"type" : "string"},
-                  "age" : {"type" : "integer"}
-               }
-            },
-            "authors" : {
-               "properties" : {
-                  "name" : {"type" : "string"},
-                  "age" : {"type" : "integer"}
-               }
-            }
-         }
-      }
-   }
-}
-```
+## Elasticsearch customizations
 
 ### index settings
 
@@ -548,246 +833,64 @@ DataModelGenerator.generate[Person](dialects.Elasticsearch)
 }
 ```
 
-## Java dialect
+## Elasticsearch template
+
+https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates.html
 
 ```scala
-case class Person(name: String, age: Int)
+@esTemplate("people*")
+case class PersonWithEsTemplate(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.Java)
-```
-
-```java
-public class Person {
-   private String name;
-   private Integer age;
-
-   public Person() {}
-
-   public Person(String name, Integer age) {
-      this.name = name;
-      this.age = age;
-   }
-
-   public String getName() {
-      return name;
-   }
-
-   public void setName(String name) {
-      this.name = name;
-   }
-
-   public Integer getAge() {
-      return age;
-   }
-
-   public void setAge(Integer age) {
-      this.age = age;
-   }
-}
-```
-
-# Customizations
-
-## Custom column name
-
-```scala
-import com.datawizards.dmg.annotations._
-
-case class Person(
-  @column(name="personName")
-  name: String,
-  age: Int
-)
-
-DataModelGenerator.generate[Person](dialects.H2)
-```
-
-```sql
-CREATE TABLE Person(
-   personName VARCHAR,
-   age INT
-);
-```
-
-### Custom column name specific for dialect
-
-```scala
-import com.datawizards.dmg.annotations._
-
-case class Person(
-  @column(name="NAME")
-  @column(name="personName", dialects.Elasticsearch)
-  name: String,
-  @column(name="AGE")
-  @column(name="personAge", dialects.Elasticsearch)
-  age: Int
-)
-
-DataModelGenerator.generate[Person](dialects.H2)
 DataModelGenerator.generate[Person](dialects.Elasticsearch)
-```
-
-```sql
-CREATE TABLE PEOPLE(
-   NAME VARCHAR,
-   AGE INT
-);
 ```
 
 ```json
 {
+   "template" : "people*",
    "mappings" : {
-      "person" : {
-         "personName" : {"type" : "string"},
-         "personAge" : {"type" : "integer"}
+      "PersonWithEsTemplate" : {
+         "properties" : {
+            "name" : {"type" : "string"},
+            "age" : {"type" : "integer"}
+         }
       }
    }
 }
 ```
 
-## Custom table name
+## Elasticsearch multiple annotations
 
 ```scala
-import com.datawizards.dmg.annotations._
-
-@table("PEOPLE")
-case class Person(
-  name: String,
-  age: Int
+@table("people")
+@esTemplate("people*")
+@esSetting("number_of_shards", 1)
+@esSetting("number_of_replicas", 3)
+case class PersonWithMultipleEsAnnotations(
+    @esIndex("not_analyzed")
+    @column("personName")
+    name: String,
+    @column("personBirthday")
+    @esFormat("yyyy-MM-dd")
+    birthday: Date
 )
 
-DataModelGenerator.generate[Person](dialects.H2)
-```
-
-```sql
-CREATE TABLE PEOPLE(
-   name VARCHAR,
-   age INT
-);
-```
-
-### Custom table name specific for dialect
-
-```scala
-import com.datawizards.dmg.annotations._
-
-@table("PEOPLE")
-@table("person", dialects.Elasticsearch)
-case class Person(
-  name: String,
-  age: Int
-)
-
-DataModelGenerator.generate[Person](dialects.H2)
-DataModelGenerator.generate[Person](dialects.Elasticsearch)
-```
-
-```sql
-CREATE TABLE PEOPLE(
-   name VARCHAR,
-   age INT
-);
+DataModelGenerator.generate[PersonWithMultipleEsAnnotations](dialects.Elasticsearch)
 ```
 
 ```json
 {
+   "template" : "people*",
+   "settings" : {
+      "number_of_shards" : 1,
+      "number_of_replicas" : 3
+   },
    "mappings" : {
-      "person" : {
-         "name" : {"type" : "string"},
-         "age" : {"type" : "integer"}
+      "people" : {
+         "properties" : {
+            "personName" : {"type" : "string", "index" : "not_analyzed"},
+            "personBirthday" : {"type" : "date", "format" : "yyyy-MM-dd"}
+         }
       }
    }
 }
-```
-
-## Documentation comments
-
-```scala
-@comment("People data")
-case class PersonWithComments(
-    @comment("Person name") name: String,
-    age: Int
-)
-```
-
-### H2
-
-```scala
-DataModelGenerator.generate[PersonWithComments](dialects.H2)
-```
-
-```sql
-CREATE TABLE PersonWithComments(
-   name VARCHAR COMMENT 'Person name',
-   age INT
-);
-COMMENT ON TABLE PersonWithComments IS 'People data';
-```
-
-### Hive
-
-```scala
-DataModelGenerator.generate[PersonWithComments](dialects.Hive)
-```
-
-```sql
-CREATE TABLE PersonWithComments(
-   name STRING COMMENT 'Person name',
-   age INT
-)
-COMMENT 'People data';
-```
-
-### Redshift
-
-```scala
-DataModelGenerator.generate[PersonWithComments](dialects.Redshift)
-```
-
-```sql
-CREATE TABLE PersonWithComments(
-   name VARCHAR,
-   age INTEGER
-);
-COMMENT ON TABLE PersonWithComments IS 'People data';
-COMMENT ON COLUMN PersonWithComments.name IS 'Person name';
-```
-
-### Avro schema
-
-```scala
-DataModelGenerator.generate[PersonWithComments](dialects.AvroSchema)
-```
-
-```json
-{
-   "namespace": "com.datawizards.dmg.examples",
-   "type": "record",
-   "name": "PersonWithComments",
-   "doc": "People data",
-   "fields": [
-      {"name": "name", "type": "string", "doc": "Person name"},
-      {"name": "age", "type": "int"}
-   ]
-}
-```
-
-## Column length
-
-```scala
-import com.datawizards.dmg.annotations._
-
-case class Person(
-  @length(1000) name: String,
-  age: Int
-)
-
-DataModelGenerator.generate[Person](dialects.H2)
-```
-
-```sql
-CREATE TABLE PEOPLE(
-   name VARCHAR(1000),
-   age INT
-);
 ```

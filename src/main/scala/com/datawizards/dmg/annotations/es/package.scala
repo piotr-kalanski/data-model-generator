@@ -28,4 +28,10 @@ package object es {
     */
   final class esSetting(key: String, value: Any) extends StaticAnnotation
 
+  /**
+    * Elasticsearch template
+    * [[https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates.html]]
+    *
+    */
+  final class esTemplate(value: String) extends StaticAnnotation
 }

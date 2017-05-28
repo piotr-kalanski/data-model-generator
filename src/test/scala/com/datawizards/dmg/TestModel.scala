@@ -163,4 +163,20 @@ object TestModel {
   @esSetting("blocks.read_only", true)
   @esSetting("codec", "best_compression")
   case class PersonWithIndexSettings(name: String, age: Int)
+
+  @esTemplate("people*")
+  case class PersonWithEsTemplate(name: String, age: Int)
+
+  @table("people")
+  @esTemplate("people*")
+  @esSetting("number_of_shards", 1)
+  @esSetting("number_of_replicas", 3)
+  case class PersonWithMultipleEsAnnotations(
+    @esIndex("not_analyzed")
+    @column("personName")
+    name: String,
+    @column("personBirthday")
+    @esFormat("yyyy-MM-dd")
+    birthday: Date
+  )
 }

@@ -3,6 +3,7 @@ package com.datawizards.dmg.examples
 import java.sql.{Date, Timestamp}
 
 import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.es.{esFormat, esIndex, esSetting, esTemplate}
 import com.datawizards.dmg.annotations.hive._
 import com.datawizards.dmg.dialects
 
@@ -92,4 +93,17 @@ object TestModel {
                                            @hivePartitionColumn(order=2)
                                            month: Int
                                          )
+
+  @table("people")
+  @esTemplate("people*")
+  @esSetting("number_of_shards", 1)
+  @esSetting("number_of_replicas", 3)
+  case class PersonWithMultipleEsAnnotations(
+                                              @esIndex("not_analyzed")
+                                              @column("personName")
+                                              name: String,
+                                              @column("personBirthday")
+                                              @esFormat("yyyy-MM-dd")
+                                              birthday: Date
+                                            )
 }

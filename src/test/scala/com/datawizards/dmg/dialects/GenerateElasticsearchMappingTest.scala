@@ -168,4 +168,46 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Template") {
+    val expected =
+      """{
+        |   "template" : "people*",
+        |   "mappings" : {
+        |      "PersonWithEsTemplate" : {
+        |         "properties" : {
+        |            "name" : {"type" : "string"},
+        |            "age" : {"type" : "integer"}
+        |         }
+        |      }
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithEsTemplate](ElasticsearchDialect)
+    }
+  }
+
+  test("Multiple options") {
+    val expected =
+      """{
+        |   "template" : "people*",
+        |   "settings" : {
+        |      "number_of_shards" : 1,
+        |      "number_of_replicas" : 3
+        |   },
+        |   "mappings" : {
+        |      "people" : {
+        |         "properties" : {
+        |            "personName" : {"type" : "string", "index" : "not_analyzed"},
+        |            "personBirthday" : {"type" : "date", "format" : "yyyy-MM-dd"}
+        |         }
+        |      }
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithMultipleEsAnnotations](ElasticsearchDialect)
+    }
+  }
+
 }
