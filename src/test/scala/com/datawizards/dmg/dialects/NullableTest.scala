@@ -6,41 +6,41 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class MultipleCustomNamesTest extends DataModelGeneratorBaseTest {
+class NullableTest extends DataModelGeneratorBaseTest {
 
   test("H2") {
     val expected =
-      """CREATE TABLE PEOPLE(
-        |   NAME VARCHAR,
-        |   AGE INT
+      """CREATE TABLE PersonWithNull(
+        |   name VARCHAR NOT NULL,
+        |   age INT
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonWithMultipleCustomNames](H2Dialect)
+      DataModelGenerator.generate[PersonWithNull](H2Dialect)
     }
   }
 
   test("Hive") {
     val expected =
-      """CREATE TABLE people(
+      """CREATE TABLE PersonWithNull(
         |   name STRING,
-        |   personAge INT
+        |   age INT
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonWithMultipleCustomNames](HiveDialect)
+      DataModelGenerator.generate[PersonWithNull](HiveDialect)
     }
   }
 
   test("Redshift") {
     val expected =
-      """CREATE TABLE people(
-        |   name VARCHAR,
-        |   personAge INTEGER
+      """CREATE TABLE PersonWithNull(
+        |   name VARCHAR NOT NULL,
+        |   age INTEGER
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonWithMultipleCustomNames](RedshiftDialect)
+      DataModelGenerator.generate[PersonWithNull](RedshiftDialect)
     }
   }
 
@@ -49,15 +49,15 @@ class MultipleCustomNamesTest extends DataModelGeneratorBaseTest {
       """{
         |   "namespace": "com.datawizards.dmg",
         |   "type": "record",
-        |   "name": "people",
+        |   "name": "PersonWithNull",
         |   "fields": [
-        |      {"name": "name", "type": ["null", "string"]},
-        |      {"name": "personAge", "type": ["null", "int"]}
+        |      {"name": "name", "type": "string"},
+        |      {"name": "age", "type": ["null", "int"]}
         |   ]
         |}""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonWithMultipleCustomNames](AvroSchemaDialect)
+      DataModelGenerator.generate[PersonWithNull](AvroSchemaDialect)
     }
   }
 
@@ -65,17 +65,17 @@ class MultipleCustomNamesTest extends DataModelGeneratorBaseTest {
     val expected =
       """{
         |   "mappings" : {
-        |      "person" : {
+        |      "PersonWithNull" : {
         |         "properties" : {
-        |            "personNameEs" : {"type" : "string"},
-        |            "personAgeEs" : {"type" : "integer"}
+        |            "name" : {"type" : "string"},
+        |            "age" : {"type" : "integer"}
         |         }
         |      }
         |   }
         |}""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonWithMultipleCustomNames](ElasticsearchDialect)
+      DataModelGenerator.generate[PersonWithNull](ElasticsearchDialect)
     }
   }
 

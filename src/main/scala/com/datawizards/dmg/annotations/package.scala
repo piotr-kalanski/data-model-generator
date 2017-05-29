@@ -31,4 +31,9 @@ package object annotations {
     * @param value column length
     */
   final class length(val value: Int) extends StaticAnnotation
+
+  /**
+    * Not null field
+    */
+  final class notNull extends StaticAnnotation
 }

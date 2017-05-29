@@ -19,13 +19,14 @@ Data model generator based on Scala case classes.
   * [Java dialect](#java-dialect)
 - [Executors](#executors)
   * [Register Avro schema to Avro schema registry](#register-avro-schema-to-avro-schema-registry)
-  * [Create Elasticsearch index](#create-elasticsearc-index)
+  * [Create Elasticsearch index](#create-elasticsearch-index)
   * [Create Elasticsearch template](#create-elasticsearch-template)
 - [Customizations](#customizations)
   * [Custom column name](#custom-column-name)
   * [Custom table name](#custom-table-name)
   * [Documentation comments](#documentation-comments)
   * [Column length](#column-length)
+  * [Not null](#not-null)
   * [Hive customizations](#hive-customizations)
   * [Elasticsearch customizations](#elasticsearch-customizations)
 
@@ -505,6 +506,53 @@ CREATE TABLE PEOPLE(
    name VARCHAR(1000),
    age INT
 );
+```
+
+## Not null
+
+```scala
+import com.datawizards.dmg.annotations._
+
+case class Person(
+  @notNull name: String,
+  age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.H2)
+DataModelGenerator.generate[Person](dialects.Redshift)
+DataModelGenerator.generate[Person](dialects.AvroSchema)
+```
+
+### H2 - not null
+
+```sql
+CREATE TABLE PersonWithNull(
+   name VARCHAR NOT NULL,
+   age INT
+);
+```
+
+### Redshift - not null
+
+```sql
+CREATE TABLE PersonWithNull(
+   name VARCHAR NOT NULL,
+   age INTEGER
+);
+```
+
+### Avro schema - not null
+
+```json
+{
+   "namespace": "com.datawizards.dmg",
+   "type": "record",
+   "name": "PersonWithNull",
+   "fields": [
+      {"name": "name", "type": "string"},
+      {"name": "age", "type": ["null", "int"]}
+   ]
+}
 ```
 
 ## Hive customizations

@@ -16,6 +16,11 @@ package object metadata {
         None
     }
 
+    def annotationExists(annotationName: String): Boolean = {
+      val annotation = annotations.find(_.name == annotationName)
+      annotation.isDefined
+    }
+
     def getAnnotationsByName(annotationName: String): Iterable[AnnotationMetaData] =
       annotations.filter(_.name == annotationName)
   }
