@@ -1,6 +1,5 @@
 package com.datawizards.dmg.dialects
 
-import com.datawizards.dmg.dialects.H2Dialect.{notNull, notNullExpression}
 import com.datawizards.dmg.metadata._
 
 object RedshiftDialect extends DatabaseDialect {
