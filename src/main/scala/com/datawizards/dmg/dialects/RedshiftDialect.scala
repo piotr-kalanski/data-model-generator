@@ -1,5 +1,6 @@
 package com.datawizards.dmg.dialects
 
+import com.datawizards.dmg.dialects.H2Dialect.{notNull, notNullExpression}
 import com.datawizards.dmg.metadata._
 
 object RedshiftDialect extends DatabaseDialect {
@@ -35,7 +36,8 @@ object RedshiftDialect extends DatabaseDialect {
 
   override def toString: String = "RedshiftDialect"
 
-  override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String = ""
+  override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String =
+    notNullExpression(f)
 
   override protected def additionalTableProperties(classTypeMetaData: ClassTypeMetaData): String = ""
 
@@ -50,4 +52,6 @@ object RedshiftDialect extends DatabaseDialect {
       else ""
     ).mkString("")
 
+  private def notNullExpression(f: ClassFieldMetaData): String =
+    if(notNull(f)) " NOT NULL" else ""
 }

@@ -55,7 +55,7 @@ object AvroSchemaDialect extends Dialect {
 
   override def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String, level: Int): String =
     s"""{"name": "${f.fieldName}", """ +
-      s""""type": "${getAvroTypeName(f.fieldType)}"""" +
+      s""""type": ${getAvroTypeName(f)}""" +
       (f.fieldType match {
         case a:CollectionTypeMetaData => s""", "items": ${getArrayItemsType(a.elementType)}"""
         case s:ClassTypeMetaData => s""", "fields": [${s.fields.map(f => s"""{"name": "${f.fieldName}", "type": ${generateTypeExpression(f.fieldType)}}""").mkString(", ")}]"""
@@ -70,11 +70,13 @@ object AvroSchemaDialect extends Dialect {
     case _ => throw new Exception("Not supported type: " + typeMetaData)
   }
 
-  private def getAvroTypeName(typeMetaData: TypeMetaData): String  = typeMetaData match {
-    case p:PrimitiveTypeMetaData => mapPrimitiveDataType(p)
-    case c:CollectionTypeMetaData => "array"
-    case c:ClassTypeMetaData => "record"
-    case _ => throw new Exception("Not supported type: " + typeMetaData)
+  private def getAvroTypeName(f: ClassFieldMetaData): String  = f.fieldType match {
+    case p:PrimitiveTypeMetaData =>
+      if(notNull(f)) s""""${mapPrimitiveDataType(p)}""""
+      else s"""["null", "${mapPrimitiveDataType(p)}"]"""
+    case c:CollectionTypeMetaData => "\"array\""
+    case c:ClassTypeMetaData => "\"record\""
+    case _ => throw new Exception("Not supported type: " + f.fieldType)
   }
 
 }

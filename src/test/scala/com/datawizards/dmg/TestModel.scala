@@ -76,6 +76,12 @@ object TestModel {
   @hiveTableProperty("avro.schema.url", "hdfs:///metadata/person.avro")
   case class PersonAvroSchemaURL(name: String, age: Int)
 
+  case class PersonWithNull(
+    @notNull
+    name: String,
+    age: Int
+  )
+
   case class ClicksPartitioned(
     time: Timestamp,
     event: String,

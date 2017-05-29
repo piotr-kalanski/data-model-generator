@@ -29,7 +29,8 @@ object H2Dialect extends DatabaseDialect {
   override def toString: String = "H2Dialect"
 
   override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String =
-    if(comment(f).isEmpty) "" else s" COMMENT '${comment(f).get}'"
+    notNullExpression(f) +
+    commentExpression(f)
 
   override protected def additionalTableProperties(classTypeMetaData: ClassTypeMetaData): String = ""
 
@@ -38,5 +39,11 @@ object H2Dialect extends DatabaseDialect {
       s"""
          |COMMENT ON TABLE ${classTypeMetaData.typeName} IS '${comment(classTypeMetaData).get}';""".stripMargin
     else ""
+
+  private def notNullExpression(f: ClassFieldMetaData): String =
+    if(notNull(f)) " NOT NULL" else ""
+
+  private def commentExpression(f: ClassFieldMetaData): String =
+    if(comment(f).isEmpty) "" else s" COMMENT '${comment(f).get}'"
 
 }

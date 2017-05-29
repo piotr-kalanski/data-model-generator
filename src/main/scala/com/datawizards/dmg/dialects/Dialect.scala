@@ -8,6 +8,7 @@ trait Dialect {
 
   private val Length = "com.datawizards.dmg.annotations.length"
   private val Comment = "com.datawizards.dmg.annotations.comment"
+  private val NotNull = "com.datawizards.dmg.annotations.notNull"
 
   def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String
 
@@ -39,6 +40,8 @@ trait Dialect {
   def fieldLength(f: ClassFieldMetaData): Option[String] = f.getAnnotationValue(Length)
 
   def comment(a: HasAnnotations): Option[String] = a.getAnnotationValue(Comment)
+
+  def notNull(f: ClassFieldMetaData): Boolean = f.annotationExists(NotNull)
 
   def generateClassFieldExpression(f: ClassFieldMetaData): String =
     generateClassFieldExpression(f, 0)
