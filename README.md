@@ -14,6 +14,7 @@ Data model generator based on Scala case classes.
   * [H2 dialect](#h2-dialect)
   * [Hive dialect](#hive-dialect)
   * [Redshift dialect](#redshift-dialect)
+  * [MySQL dialect](#mysql-dialect)
   * [Avro schema dialect](#avro-schema-dialect)
   * [Elasticsearch dialect](#elasticsearch-dialect)
   * [Java dialect](#java-dialect)
@@ -117,6 +118,28 @@ CREATE TABLE Book(
    year INTEGER,
    owner VARCHAR,
    authors VARCHAR
+);
+```
+
+## MySQL dialect
+
+```scala
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
+case class Person(name: String, age: Int)
+case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
+
+object MySQLExample extends App {
+  println(DataModelGenerator.generate[Book](dialects.MySQL))
+}
+```
+
+```sql
+CREATE TABLE Book(
+   title VARCHAR,
+   year INTEGER,
+   owner JSON,
+   authors JSON
 );
 ```
 

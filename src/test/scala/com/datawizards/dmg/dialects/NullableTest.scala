@@ -44,6 +44,18 @@ class NullableTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("MySQL") {
+    val expected =
+      """CREATE TABLE PersonWithNull(
+        |   name VARCHAR NOT NULL,
+        |   age INT
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithNull](MySQLDialect)
+    }
+  }
+
   test("Avro schema") {
     val expected =
       """{
