@@ -28,6 +28,7 @@ Data model generator based on Scala case classes.
   * [Documentation comments](#documentation-comments)
   * [Column length](#column-length)
   * [Not null](#not-null)
+  * [Underscore](#underscore)
   * [Hive customizations](#hive-customizations)
   * [Elasticsearch customizations](#elasticsearch-customizations)
 
@@ -576,6 +577,25 @@ CREATE TABLE PersonWithNull(
       {"name": "age", "type": ["null", "int"]}
    ]
 }
+```
+
+## Underscore
+
+Convert table and column names for selected dialect to underscore convention.
+
+```scala
+@underscore(dialect=dialects.H2)
+case class PersonWithUnderscore(
+    personName: String,
+    personAge: Int
+)
+```
+
+```sql
+CREATE TABLE person_with_underscore(
+   person_name VARCHAR,
+   person_age INT
+);
 ```
 
 ## Hive customizations

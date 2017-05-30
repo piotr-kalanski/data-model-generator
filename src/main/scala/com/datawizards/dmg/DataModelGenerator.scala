@@ -29,12 +29,12 @@ object DataModelGenerator {
   private def changeName(dialect: Dialect, c: ClassTypeMetaData): ClassTypeMetaData =
     c.copy(
       typeName = getClassName(dialect, c),
-      fields = c.fields.map(f => changeName(dialect, f))
+      fields = c.fields.map(f => changeName(dialect, f, c))
     )
 
-  private def changeName(dialect: Dialect, classFieldMetaData: ClassFieldMetaData): ClassFieldMetaData =
+  private def changeName(dialect: Dialect, classFieldMetaData: ClassFieldMetaData, classTypeMetaData: ClassTypeMetaData): ClassFieldMetaData =
     classFieldMetaData.copy(
-      fieldName = getFieldName(dialect, classFieldMetaData),
+      fieldName = getFieldName(dialect, classFieldMetaData, classTypeMetaData),
       fieldType = changeName(dialect, classFieldMetaData.fieldType)
     )
 
@@ -47,6 +47,7 @@ object DataModelGenerator {
 
   private val Table = "com.datawizards.dmg.annotations.table"
   private val Column = "com.datawizards.dmg.annotations.column"
+  private val Underscore = "com.datawizards.dmg.annotations.underscore"
 
   private def getClassName(dialect: Dialect, classMetaData: ClassTypeMetaData): String = {
     val tableAnnotations = classMetaData.annotations.filter(_.name == Table)
@@ -59,14 +60,14 @@ object DataModelGenerator {
         if(defaultTableAnnotation.isDefined)
           defaultTableAnnotation.get.attributes.filter(_.name == "name").head.value
         else
-          classMetaData.typeName
+          convertToUnderscoreIfRequired(classMetaData.typeName, dialect, classMetaData)
       }
     }
     else
-      classMetaData.typeName
+      convertToUnderscoreIfRequired(classMetaData.typeName, dialect, classMetaData)
   }
 
-  private def getFieldName(dialect: Dialect, classFieldMetaData: ClassFieldMetaData): String = {
+  private def getFieldName(dialect: Dialect, classFieldMetaData: ClassFieldMetaData, classTypeMetaData: ClassTypeMetaData): String = {
     val columnAnnotations = classFieldMetaData.annotations.filter(_.name == Column)
     if(columnAnnotations.nonEmpty) {
       val dialectSpecificColumnAnnotation = columnAnnotations.find(_.attributes.exists(aa => aa.name == "dialect" && aa.value.contains(dialect.toString.replace("Dialect",""))))
@@ -77,12 +78,26 @@ object DataModelGenerator {
         if(defaultColumnAnnotation.isDefined)
           defaultColumnAnnotation.get.attributes.filter(_.name == "name").head.value
         else
-          classFieldMetaData.fieldName
+          convertToUnderscoreIfRequired(classFieldMetaData.fieldName, dialect, classTypeMetaData)
       }
     }
     else
-      classFieldMetaData.fieldName
+      convertToUnderscoreIfRequired(classFieldMetaData.fieldName, dialect, classTypeMetaData)
   }
+
+  private def convertToUnderscoreIfRequired(name: String, dialect: Dialect, classTypeMetaData: ClassTypeMetaData): String = {
+    val underscoreAnnotations = classTypeMetaData.annotations.filter(_.name == Underscore)
+    if(underscoreAnnotations.nonEmpty) {
+      val dialectSpecificUnderscoreAnnotation = underscoreAnnotations.find(_.attributes.exists(aa => aa.name == "dialect" && aa.value.contains(dialect.toString.replace("Dialect",""))))
+      if(dialectSpecificUnderscoreAnnotation.isDefined)
+        name.replaceAll("(.)(\\p{Upper})","$1_$2").toLowerCase
+      else
+        name
+    }
+    else
+      name
+  }
+
 
   private def generateDataModel(dialect: Dialect, classTypeMetaData: ClassTypeMetaData): String = {
     dialect.generateDataModel(classTypeMetaData, generateFieldsExpressions(dialect, classTypeMetaData))

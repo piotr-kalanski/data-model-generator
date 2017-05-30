@@ -36,4 +36,13 @@ package object annotations {
     * Not null field
     */
   final class notNull extends StaticAnnotation
+
+  /**
+    * Convert table name and column names to underscore.
+    *
+    * Example: personName -> person_name
+    *
+    * @param dialect Dialect for which make conversion
+    */
+  final class underscore(val dialect: Dialect) extends StaticAnnotation
 }
