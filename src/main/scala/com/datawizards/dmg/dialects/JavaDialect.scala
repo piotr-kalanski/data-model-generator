@@ -27,6 +27,9 @@ object JavaDialect extends Dialect {
   override def generateArrayTypeExpression(elementTypeExpression: String): String =
     s"java.util.List<$elementTypeExpression>"
 
+  override def generateMapTypeExpression(keyExpression: String, valueExpression: String): String =
+    s"""java.util.Map<$keyExpression, $valueExpression>"""
+
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String =
     classTypeMetaData.packageName + "." + classTypeMetaData.typeName
 

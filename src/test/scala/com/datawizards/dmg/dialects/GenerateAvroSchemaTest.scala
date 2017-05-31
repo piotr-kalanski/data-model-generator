@@ -15,8 +15,8 @@ class GenerateAvroSchemaTest extends DataModelGeneratorBaseTest {
         |   "type": "record",
         |   "name": "Person",
         |   "fields": [
-        |      {"name": "name", "type": "string"},
-        |      {"name": "age", "type": "int"}
+        |      {"name": "name", "type": ["null", "string"]},
+        |      {"name": "age", "type": ["null", "int"]}
         |   ]
         |}""".stripMargin
 
@@ -32,16 +32,16 @@ class GenerateAvroSchemaTest extends DataModelGeneratorBaseTest {
         |   "type": "record",
         |   "name": "ClassWithAllSimpleTypes",
         |   "fields": [
-        |      {"name": "strVal", "type": "string"},
-        |      {"name": "intVal", "type": "int"},
-        |      {"name": "longVal", "type": "long"},
-        |      {"name": "doubleVal", "type": "double"},
-        |      {"name": "floatVal", "type": "float"},
-        |      {"name": "shortVal", "type": "bytes"},
-        |      {"name": "booleanVal", "type": "boolean"},
-        |      {"name": "byteVal", "type": "bytes"},
-        |      {"name": "dateVal", "type": "int"},
-        |      {"name": "timestampVal", "type": "long"}
+        |      {"name": "strVal", "type": ["null", "string"]},
+        |      {"name": "intVal", "type": ["null", "int"]},
+        |      {"name": "longVal", "type": ["null", "long"]},
+        |      {"name": "doubleVal", "type": ["null", "double"]},
+        |      {"name": "floatVal", "type": ["null", "float"]},
+        |      {"name": "shortVal", "type": ["null", "bytes"]},
+        |      {"name": "booleanVal", "type": ["null", "boolean"]},
+        |      {"name": "byteVal", "type": ["null", "bytes"]},
+        |      {"name": "dateVal", "type": ["null", "int"]},
+        |      {"name": "timestampVal", "type": ["null", "long"]}
         |   ]
         |}""".stripMargin
 
@@ -58,8 +58,8 @@ class GenerateAvroSchemaTest extends DataModelGeneratorBaseTest {
         |   "name": "PersonWithComments",
         |   "doc": "People data",
         |   "fields": [
-        |      {"name": "name", "type": "string", "doc": "Person name"},
-        |      {"name": "age", "type": "int"}
+        |      {"name": "name", "type": ["null", "string"], "doc": "Person name"},
+        |      {"name": "age", "type": ["null", "int"]}
         |   ]
         |}""".stripMargin
 
@@ -109,8 +109,8 @@ class GenerateAvroSchemaTest extends DataModelGeneratorBaseTest {
         |   "type": "record",
         |   "name": "Book",
         |   "fields": [
-        |      {"name": "title", "type": "string"},
-        |      {"name": "year", "type": "int"},
+        |      {"name": "title", "type": ["null", "string"]},
+        |      {"name": "year", "type": ["null", "int"]},
         |      {"name": "owner", "type": "record", "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}]},
         |      {"name": "authors", "type": "array", "items": {"type": "record", "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}]}}
         |   ]
@@ -118,6 +118,22 @@ class GenerateAvroSchemaTest extends DataModelGeneratorBaseTest {
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[Book](AvroSchemaDialect)
+    }
+  }
+
+  test("Map type") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "ClassWithMap",
+        |   "fields": [
+        |      {"name": "map", "type": "map", "values": "boolean"}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithMap](AvroSchemaDialect)
     }
   }
 

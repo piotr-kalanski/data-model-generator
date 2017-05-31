@@ -14,14 +14,18 @@ object DataModelGenerator {
   /**
     * Generate data model for provided class
     *
-    * @param dialect DB dialect e.g. H2, Hive, Redshift, Avro schema, Elasticsearch maping
+    * @param dialect DB dialect e.g. H2, Hive, Redshift, Avro schema, Elasticsearch mapping
+    * @param variables key-value map used to replace placeholder variables
     * @tparam T type for which generate data model
     */
-  def generate[T: ClassTag: TypeTag](dialect: Dialect): String = {
+  def generate[T: ClassTag: TypeTag](dialect: Dialect, variables: Map[String, String] = Map.empty): String = {
     val ct = implicitly[ClassTag[T]].runtimeClass
     log.info(s"Generating model for class: [${ct.getName}], dialect: [$dialect]")
-    generateDataModel(dialect, getClassMetaData[T](dialect))
+    replacePlaceholderVariables(generateDataModel(dialect, getClassMetaData[T](dialect)), variables)
   }
+
+  def getTargetNameForClass[T: ClassTag: TypeTag](dialect: Dialect): String =
+    getClassName(dialect, getClassMetaData[T](dialect))
 
   private def getClassMetaData[T: ClassTag: TypeTag](dialect: Dialect): ClassTypeMetaData =
     changeName(dialect, MetaDataExtractor.extractClassMetaData[T]())
@@ -29,12 +33,12 @@ object DataModelGenerator {
   private def changeName(dialect: Dialect, c: ClassTypeMetaData): ClassTypeMetaData =
     c.copy(
       typeName = getClassName(dialect, c),
-      fields = c.fields.map(f => changeName(dialect, f))
+      fields = c.fields.map(f => changeName(dialect, f, c))
     )
 
-  private def changeName(dialect: Dialect, classFieldMetaData: ClassFieldMetaData): ClassFieldMetaData =
+  private def changeName(dialect: Dialect, classFieldMetaData: ClassFieldMetaData, classTypeMetaData: ClassTypeMetaData): ClassFieldMetaData =
     classFieldMetaData.copy(
-      fieldName = getFieldName(dialect, classFieldMetaData),
+      fieldName = getFieldName(dialect, classFieldMetaData, classTypeMetaData),
       fieldType = changeName(dialect, classFieldMetaData.fieldType)
     )
 
@@ -47,6 +51,7 @@ object DataModelGenerator {
 
   private val Table = "com.datawizards.dmg.annotations.table"
   private val Column = "com.datawizards.dmg.annotations.column"
+  private val Underscore = "com.datawizards.dmg.annotations.underscore"
 
   private def getClassName(dialect: Dialect, classMetaData: ClassTypeMetaData): String = {
     val tableAnnotations = classMetaData.annotations.filter(_.name == Table)
@@ -59,14 +64,14 @@ object DataModelGenerator {
         if(defaultTableAnnotation.isDefined)
           defaultTableAnnotation.get.attributes.filter(_.name == "name").head.value
         else
-          classMetaData.typeName
+          convertToUnderscoreIfRequired(classMetaData.typeName, dialect, classMetaData)
       }
     }
     else
-      classMetaData.typeName
+      convertToUnderscoreIfRequired(classMetaData.typeName, dialect, classMetaData)
   }
 
-  private def getFieldName(dialect: Dialect, classFieldMetaData: ClassFieldMetaData): String = {
+  private def getFieldName(dialect: Dialect, classFieldMetaData: ClassFieldMetaData, classTypeMetaData: ClassTypeMetaData): String = {
     val columnAnnotations = classFieldMetaData.annotations.filter(_.name == Column)
     if(columnAnnotations.nonEmpty) {
       val dialectSpecificColumnAnnotation = columnAnnotations.find(_.attributes.exists(aa => aa.name == "dialect" && aa.value.contains(dialect.toString.replace("Dialect",""))))
@@ -77,12 +82,26 @@ object DataModelGenerator {
         if(defaultColumnAnnotation.isDefined)
           defaultColumnAnnotation.get.attributes.filter(_.name == "name").head.value
         else
-          classFieldMetaData.fieldName
+          convertToUnderscoreIfRequired(classFieldMetaData.fieldName, dialect, classTypeMetaData)
       }
     }
     else
-      classFieldMetaData.fieldName
+      convertToUnderscoreIfRequired(classFieldMetaData.fieldName, dialect, classTypeMetaData)
   }
+
+  private def convertToUnderscoreIfRequired(name: String, dialect: Dialect, classTypeMetaData: ClassTypeMetaData): String = {
+    val underscoreAnnotations = classTypeMetaData.annotations.filter(_.name == Underscore)
+    if(underscoreAnnotations.nonEmpty) {
+      val dialectSpecificUnderscoreAnnotation = underscoreAnnotations.find(_.attributes.exists(aa => aa.name == "dialect" && aa.value.contains(dialect.toString.replace("Dialect",""))))
+      if(dialectSpecificUnderscoreAnnotation.isDefined)
+        name.replaceAll("(.)(\\p{Upper})","$1_$2").toLowerCase
+      else
+        name
+    }
+    else
+      name
+  }
+
 
   private def generateDataModel(dialect: Dialect, classTypeMetaData: ClassTypeMetaData): String = {
     dialect.generateDataModel(classTypeMetaData, generateFieldsExpressions(dialect, classTypeMetaData))
@@ -94,5 +113,15 @@ object DataModelGenerator {
       .withFilter(f => dialect.generateColumn(f))
       .map(f => dialect.generateClassFieldExpression(f))
   }
+
+
+  private def replacePlaceholderVariables(template: String, variables: Map[String, String]): String = {
+    val re = "\\$\\{.*?\\}".r
+    var result = template
+    for(k <- re.findAllIn(template))
+      result = result.replace(k, variables(k.substring(2, k.length-1)))
+    result
+  }
+
 
 }

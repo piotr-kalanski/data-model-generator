@@ -16,8 +16,8 @@ class GenerateAvroSchemaRegistryTest extends DataModelGeneratorBaseTest {
         |   \"type\": \"record\",
         |   \"name\": \"Person\",
         |   \"fields\": [
-        |      {\"name\": \"name\", \"type\": \"string\"},
-        |      {\"name\": \"age\", \"type\": \"int\"}
+        |      {\"name\": \"name\", \"type\": [\"null\", \"string\"]},
+        |      {\"name\": \"age\", \"type\": [\"null\", \"int\"]}
         |   ]
         |}"
         |}""".stripMargin
@@ -35,16 +35,16 @@ class GenerateAvroSchemaRegistryTest extends DataModelGeneratorBaseTest {
         |   \"type\": \"record\",
         |   \"name\": \"ClassWithAllSimpleTypes\",
         |   \"fields\": [
-        |      {\"name\": \"strVal\", \"type\": \"string\"},
-        |      {\"name\": \"intVal\", \"type\": \"int\"},
-        |      {\"name\": \"longVal\", \"type\": \"long\"},
-        |      {\"name\": \"doubleVal\", \"type\": \"double\"},
-        |      {\"name\": \"floatVal\", \"type\": \"float\"},
-        |      {\"name\": \"shortVal\", \"type\": \"bytes\"},
-        |      {\"name\": \"booleanVal\", \"type\": \"boolean\"},
-        |      {\"name\": \"byteVal\", \"type\": \"bytes\"},
-        |      {\"name\": \"dateVal\", \"type\": \"int\"},
-        |      {\"name\": \"timestampVal\", \"type\": \"long\"}
+        |      {\"name\": \"strVal\", \"type\": [\"null\", \"string\"]},
+        |      {\"name\": \"intVal\", \"type\": [\"null\", \"int\"]},
+        |      {\"name\": \"longVal\", \"type\": [\"null\", \"long\"]},
+        |      {\"name\": \"doubleVal\", \"type\": [\"null\", \"double\"]},
+        |      {\"name\": \"floatVal\", \"type\": [\"null\", \"float\"]},
+        |      {\"name\": \"shortVal\", \"type\": [\"null\", \"bytes\"]},
+        |      {\"name\": \"booleanVal\", \"type\": [\"null\", \"boolean\"]},
+        |      {\"name\": \"byteVal\", \"type\": [\"null\", \"bytes\"]},
+        |      {\"name\": \"dateVal\", \"type\": [\"null\", \"int\"]},
+        |      {\"name\": \"timestampVal\", \"type\": [\"null\", \"long\"]}
         |   ]
         |}"
         |}""".stripMargin

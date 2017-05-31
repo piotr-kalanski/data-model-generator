@@ -6,6 +6,7 @@ import java.sql.Date
 import com.datawizards.dmg.annotations._
 import com.datawizards.dmg.annotations.hive._
 import com.datawizards.dmg.annotations.es._
+import com.datawizards.dmg.dialects.H2Dialect
 
 object TestModel {
   case class Person(name: String, age: Int)
@@ -75,6 +76,12 @@ object TestModel {
 
   @hiveTableProperty("avro.schema.url", "hdfs:///metadata/person.avro")
   case class PersonAvroSchemaURL(name: String, age: Int)
+
+  case class PersonWithNull(
+    @notNull
+    name: String,
+    age: Int
+  )
 
   case class ClicksPartitioned(
     time: Timestamp,
@@ -179,4 +186,30 @@ object TestModel {
     @esFormat("yyyy-MM-dd")
     birthday: Date
   )
+
+  @underscore(dialect = dialects.H2)
+  case class PersonWithUnderscore(
+    personName: String,
+    personAge: Int
+  )
+
+  @underscore(dialect = dialects.H2)
+  @underscore(dialect = dialects.Hive)
+  @underscore(dialect = dialects.Redshift)
+  @table("PEOPLE", dialect = dialects.Hive)
+  case class PersonWithUnderscoreWithMultipleNames(
+    @column("name", dialect = dialects.Hive)
+    @column("name", dialect = dialects.Redshift)
+    personName: String,
+    @column("age", dialect = dialects.Redshift)
+    personAge: Int
+  )
+
+  @table("${table_name}")
+  case class PersonWithPlaceholderVariables(
+    @comment("Person ${name_comment}") name: String,
+    age: Int
+  )
+
+  case class ClassWithMap(map: Map[Int, Boolean])
 }

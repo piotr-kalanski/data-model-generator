@@ -115,4 +115,27 @@ class GenerateH2ModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Underscore conversion") {
+    val expected =
+      """CREATE TABLE person_with_underscore(
+        |   person_name VARCHAR,
+        |   person_age INT
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[PersonWithUnderscore](H2Dialect)
+    }
+  }
+
+  test("Map type") {
+    val expected =
+      """CREATE TABLE ClassWithMap(
+        |   map VARCHAR
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithMap](H2Dialect)
+    }
+  }
+
 }

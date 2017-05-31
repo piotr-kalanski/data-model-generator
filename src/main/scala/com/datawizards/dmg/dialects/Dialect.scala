@@ -8,6 +8,7 @@ trait Dialect {
 
   private val Length = "com.datawizards.dmg.annotations.length"
   private val Comment = "com.datawizards.dmg.annotations.comment"
+  private val NotNull = "com.datawizards.dmg.annotations.notNull"
 
   def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String
 
@@ -40,6 +41,8 @@ trait Dialect {
 
   def comment(a: HasAnnotations): Option[String] = a.getAnnotationValue(Comment)
 
+  def notNull(f: ClassFieldMetaData): Boolean = f.annotationExists(NotNull)
+
   def generateClassFieldExpression(f: ClassFieldMetaData): String =
     generateClassFieldExpression(f, 0)
 
@@ -68,8 +71,7 @@ trait Dialect {
 
   def generateArrayTypeExpression(elementTypeExpression: String): String
 
-  def generateMapTypeExpression(keyExpression: String, valueExpression: String): String =
-    throw new Exception("Map type not supported")
+  def generateMapTypeExpression(keyExpression: String, valueExpression: String): String
 
   def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String
 

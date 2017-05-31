@@ -14,18 +14,23 @@ Data model generator based on Scala case classes.
   * [H2 dialect](#h2-dialect)
   * [Hive dialect](#hive-dialect)
   * [Redshift dialect](#redshift-dialect)
+  * [MySQL dialect](#mysql-dialect)
   * [Avro schema dialect](#avro-schema-dialect)
   * [Elasticsearch dialect](#elasticsearch-dialect)
   * [Java dialect](#java-dialect)
-- [Executors](#executors)
+- [Installers](#installers)
   * [Register Avro schema to Avro schema registry](#register-avro-schema-to-avro-schema-registry)
-  * [Create Elasticsearch index](#create-elasticsearc-index)
+  * [Create Elasticsearch index](#create-elasticsearch-index)
   * [Create Elasticsearch template](#create-elasticsearch-template)
+  * [Create Hive table](#create-hive-table)
 - [Customizations](#customizations)
   * [Custom column name](#custom-column-name)
   * [Custom table name](#custom-table-name)
+  * [Placeholders](#placeholders)
   * [Documentation comments](#documentation-comments)
   * [Column length](#column-length)
+  * [Not null](#not-null)
+  * [Underscore](#underscore)
   * [Hive customizations](#hive-customizations)
   * [Elasticsearch customizations](#elasticsearch-customizations)
 
@@ -38,7 +43,7 @@ Data model generator based on Scala case classes.
 Include dependency:
 
 ```scala
-"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.3.0"
+"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.4.0"
 ```
 
 or
@@ -47,7 +52,7 @@ or
 <dependency>
     <groupId>com.github.piotr-kalanski</groupId>
     <artifactId>data-model-generator_2.11</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 
@@ -116,6 +121,28 @@ CREATE TABLE Book(
    year INTEGER,
    owner VARCHAR,
    authors VARCHAR
+);
+```
+
+## MySQL dialect
+
+```scala
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
+case class Person(name: String, age: Int)
+case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
+
+object MySQLExample extends App {
+  println(DataModelGenerator.generate[Book](dialects.MySQL))
+}
+```
+
+```sql
+CREATE TABLE Book(
+   title VARCHAR,
+   year INTEGER,
+   owner JSON,
+   authors JSON
 );
 ```
 
@@ -242,7 +269,9 @@ public class Person {
 }
 ```
 
-# Executors
+# Installers
+
+Library enables installing generated data model at target data store e.g. registering generated avro schema at Avro Schema Registry, creating Elasticsearch index or creating Hive table.
 
 ## Register Avro schema to Avro schema registry
 
@@ -299,6 +328,14 @@ object CreateElasticsearchTemplate extends App {
   println("Template:")
   println(service.getTemplate("people"))
 }
+```
+
+## Create Hive table
+
+```scala
+import com.datawizards.dmg.service.HiveServiceImpl
+
+HiveServiceImpl.createHiveTable[Person]()
 ```
 
 # Customizations
@@ -415,6 +452,42 @@ CREATE TABLE PEOPLE(
 }
 ```
 
+## Placeholders
+
+data-model-generator supports placeholder variables when generating data model.
+Placeholder variables can be used in any annotation.
+
+Example use case for placeholder variables is to use them for generating table name dependent on environment.
+For example, each environment has dedicated DB schema e.g. development, uat, production.
+
+```scala
+@table("${environment}.people")
+case class Person(
+    name: String,
+    age: Int
+)
+
+DataModelGenerator.generate[Person](H2Dialect, Map("environment" -> "development"))
+```
+
+```sql
+CREATE TABLE development.people(
+   name VARCHAR,
+   age INT
+);
+```
+
+```scala
+DataModelGenerator.generate[Person](H2Dialect, Map("environment" -> "production"))
+```
+
+```sql
+CREATE TABLE production.people(
+   name VARCHAR,
+   age INT
+);
+```
+
 ## Documentation comments
 
 ```scala
@@ -504,6 +577,72 @@ DataModelGenerator.generate[Person](dialects.H2)
 CREATE TABLE PEOPLE(
    name VARCHAR(1000),
    age INT
+);
+```
+
+## Not null
+
+```scala
+import com.datawizards.dmg.annotations._
+
+case class Person(
+  @notNull name: String,
+  age: Int
+)
+
+DataModelGenerator.generate[Person](dialects.H2)
+DataModelGenerator.generate[Person](dialects.Redshift)
+DataModelGenerator.generate[Person](dialects.AvroSchema)
+```
+
+### H2 - not null
+
+```sql
+CREATE TABLE PersonWithNull(
+   name VARCHAR NOT NULL,
+   age INT
+);
+```
+
+### Redshift - not null
+
+```sql
+CREATE TABLE PersonWithNull(
+   name VARCHAR NOT NULL,
+   age INTEGER
+);
+```
+
+### Avro schema - not null
+
+```json
+{
+   "namespace": "com.datawizards.dmg",
+   "type": "record",
+   "name": "PersonWithNull",
+   "fields": [
+      {"name": "name", "type": "string"},
+      {"name": "age", "type": ["null", "int"]}
+   ]
+}
+```
+
+## Underscore
+
+Convert table and column names for selected dialect to underscore convention.
+
+```scala
+@underscore(dialect=dialects.H2)
+case class PersonWithUnderscore(
+    personName: String,
+    personAge: Int
+)
+```
+
+```sql
+CREATE TABLE person_with_underscore(
+   person_name VARCHAR,
+   person_age INT
 );
 ```
 

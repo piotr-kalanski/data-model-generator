@@ -210,4 +210,21 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Map type") {
+    val expected =
+      """{
+        |   "mappings" : {
+        |      "ClassWithMap" : {
+        |         "properties" : {
+        |            "map" : {"type" : "string"}
+        |         }
+        |      }
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithMap](ElasticsearchDialect)
+    }
+  }
+
 }

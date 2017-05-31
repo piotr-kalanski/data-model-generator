@@ -1,6 +1,7 @@
-package com.datawizards.dmg.dialects
+package com.datawizards.dmg.customizations
 
 import com.datawizards.dmg.TestModel._
+import com.datawizards.dmg.dialects._
 import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -51,8 +52,8 @@ class MultipleCustomNamesTest extends DataModelGeneratorBaseTest {
         |   "type": "record",
         |   "name": "people",
         |   "fields": [
-        |      {"name": "name", "type": "string"},
-        |      {"name": "personAge", "type": "int"}
+        |      {"name": "name", "type": ["null", "string"]},
+        |      {"name": "personAge", "type": ["null", "int"]}
         |   ]
         |}""".stripMargin
 

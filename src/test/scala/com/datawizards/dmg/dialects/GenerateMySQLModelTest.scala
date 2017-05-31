@@ -6,17 +6,17 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class GenerateRedshiftModelTest extends DataModelGeneratorBaseTest {
+class GenerateMySQLModelTest extends DataModelGeneratorBaseTest {
 
   test("Simple model") {
     val expected =
       """CREATE TABLE Person(
         |   name VARCHAR,
-        |   age INTEGER
+        |   age INT
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[Person](RedshiftDialect)
+      DataModelGenerator.generate[Person](MySQLDialect)
     }
   }
 
@@ -24,10 +24,10 @@ class GenerateRedshiftModelTest extends DataModelGeneratorBaseTest {
     val expected =
       """CREATE TABLE ClassWithAllSimpleTypes(
         |   strVal VARCHAR,
-        |   intVal INTEGER,
+        |   intVal INT,
         |   longVal BIGINT,
-        |   doubleVal DOUBLE PRECISION,
-        |   floatVal REAL,
+        |   doubleVal DOUBLE,
+        |   floatVal FLOAT,
         |   shortVal SMALLINT,
         |   booleanVal BOOLEAN,
         |   byteVal SMALLINT,
@@ -36,21 +36,20 @@ class GenerateRedshiftModelTest extends DataModelGeneratorBaseTest {
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ClassWithAllSimpleTypes](RedshiftDialect)
+      DataModelGenerator.generate[ClassWithAllSimpleTypes](MySQLDialect)
     }
   }
 
   test("Table and column comment") {
     val expected =
       """CREATE TABLE PersonWithComments(
-        |   name VARCHAR,
-        |   age INTEGER
-        |);
-        |COMMENT ON TABLE PersonWithComments IS 'People data';
-        |COMMENT ON COLUMN PersonWithComments.name IS 'Person name';""".stripMargin
+        |   name VARCHAR COMMENT 'Person name',
+        |   age INT
+        |)
+        |COMMENT = 'People data';""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonWithComments](RedshiftDialect)
+      DataModelGenerator.generate[PersonWithComments](MySQLDialect)
     }
   }
 
@@ -58,35 +57,35 @@ class GenerateRedshiftModelTest extends DataModelGeneratorBaseTest {
     val expected =
       """CREATE TABLE PersonWithCustomLength(
         |   name VARCHAR(1000),
-        |   age INTEGER
+        |   age INT
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonWithCustomLength](RedshiftDialect)
+      DataModelGenerator.generate[PersonWithCustomLength](MySQLDialect)
     }
   }
 
   test("Array type") {
     val expected =
       """CREATE TABLE CV(
-        |   skills VARCHAR,
-        |   grades VARCHAR
+        |   skills JSON,
+        |   grades JSON
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[CV](RedshiftDialect)
+      DataModelGenerator.generate[CV](MySQLDialect)
     }
   }
 
   test("Nested array type") {
     val expected =
       """CREATE TABLE NestedArray(
-        |   nested VARCHAR,
-        |   nested3 VARCHAR
+        |   nested JSON,
+        |   nested3 JSON
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[NestedArray](RedshiftDialect)
+      DataModelGenerator.generate[NestedArray](MySQLDialect)
     }
   }
 
@@ -94,24 +93,24 @@ class GenerateRedshiftModelTest extends DataModelGeneratorBaseTest {
     val expected =
       """CREATE TABLE Book(
         |   title VARCHAR,
-        |   year INTEGER,
-        |   owner VARCHAR,
-        |   authors VARCHAR
+        |   year INT,
+        |   owner JSON,
+        |   authors JSON
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[Book](RedshiftDialect)
+      DataModelGenerator.generate[Book](MySQLDialect)
     }
   }
 
   test("Map type") {
     val expected =
       """CREATE TABLE ClassWithMap(
-        |   map VARCHAR
+        |   map JSON
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ClassWithMap](H2Dialect)
+      DataModelGenerator.generate[ClassWithMap](MySQLDialect)
     }
   }
 

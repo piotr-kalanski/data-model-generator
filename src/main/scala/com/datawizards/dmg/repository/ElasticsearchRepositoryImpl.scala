@@ -36,4 +36,36 @@ class ElasticsearchRepositoryImpl(url: String) extends ElasticsearchRepository {
     response.body
   }
 
+  override def deleteTemplate(templateName: String): Unit = {
+    val endpoint = url + "/_template/" + templateName
+    val request = Http(endpoint).method("DELETE")
+    val response: HttpResponse[String] = request.asString
+    if(response.code != 200) {
+      throw new Exception(response.body)
+    }
+  }
+
+  override def deleteIndex(indexName: String): Unit = {
+    val endpoint = url + "/" + indexName
+    val request = Http(endpoint).method("DELETE")
+    val response: HttpResponse[String] = request.asString
+    if(response.code != 200) {
+      throw new Exception(response.body)
+    }
+  }
+
+  override def templateExists(templateName: String): Boolean = {
+    val endpoint = url + "/_template/" + templateName
+    val request = Http(endpoint).method("HEAD")
+    val response: HttpResponse[String] = request.asString
+    response.code == 200
+  }
+
+  override def indexExists(indexName: String): Boolean = {
+    val endpoint = url + "/" + indexName
+    val request = Http(endpoint).method("HEAD")
+    val response: HttpResponse[String] = request.asString
+    response.code == 200
+  }
+
 }
