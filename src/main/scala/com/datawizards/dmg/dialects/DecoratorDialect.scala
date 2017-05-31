@@ -35,6 +35,9 @@ abstract class DecoratorDialect(dialect: Dialect) extends Dialect {
   override def generateArrayTypeExpression(elementTypeExpression: String): String =
     dialect.generateArrayTypeExpression(elementTypeExpression)
 
+  override def generateMapTypeExpression(keyExpression: String, valueExpression: String): String =
+    dialect.generateMapTypeExpression(keyExpression, valueExpression)
+
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String =
     dialect.generateClassTypeExpression(classTypeMetaData, fieldNamesWithExpressions)
 }

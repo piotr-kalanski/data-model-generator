@@ -26,6 +26,7 @@ Data model generator based on Scala case classes.
 - [Customizations](#customizations)
   * [Custom column name](#custom-column-name)
   * [Custom table name](#custom-table-name)
+  * [Placeholders](#placeholders)
   * [Documentation comments](#documentation-comments)
   * [Column length](#column-length)
   * [Not null](#not-null)
@@ -449,6 +450,42 @@ CREATE TABLE PEOPLE(
       }
    }
 }
+```
+
+## Placeholders
+
+data-model-generator supports placeholder variables when generating data model.
+Placeholder variables can be used in any annotation.
+
+Example use case for placeholder variables is to use them for generating table name dependent on environment.
+For example, each environment has dedicated DB schema e.g. development, uat, production.
+
+```scala
+@table("${environment}.people")
+case class Person(
+    name: String,
+    age: Int
+)
+
+DataModelGenerator.generate[Person](H2Dialect, Map("environment" -> "development"))
+```
+
+```sql
+CREATE TABLE development.people(
+   name VARCHAR,
+   age INT
+);
+```
+
+```scala
+DataModelGenerator.generate[Person](H2Dialect, Map("environment" -> "production"))
+```
+
+```sql
+CREATE TABLE production.people(
+   name VARCHAR,
+   age INT
+);
 ```
 
 ## Documentation comments

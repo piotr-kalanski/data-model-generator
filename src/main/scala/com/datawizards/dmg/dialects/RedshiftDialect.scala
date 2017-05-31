@@ -33,6 +33,11 @@ object RedshiftDialect extends DatabaseDialect {
     "VARCHAR"
   }
 
+  override def generateMapTypeExpression(keyExpression: String, valueExpression: String): String = {
+    log.warn("Redshift doesn't support Map type. Column converted to VARCHAR")
+    "VARCHAR"
+  }
+
   override def toString: String = "RedshiftDialect"
 
   override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String =

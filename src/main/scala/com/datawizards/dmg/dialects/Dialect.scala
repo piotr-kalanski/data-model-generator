@@ -71,8 +71,7 @@ trait Dialect {
 
   def generateArrayTypeExpression(elementTypeExpression: String): String
 
-  def generateMapTypeExpression(keyExpression: String, valueExpression: String): String =
-    throw new Exception("Map type not supported")
+  def generateMapTypeExpression(keyExpression: String, valueExpression: String): String
 
   def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String
 

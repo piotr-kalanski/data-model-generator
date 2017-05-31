@@ -33,6 +33,10 @@ object AvroSchemaDialect extends Dialect {
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String =
     s""""record", "fields": [${fieldNamesWithExpressions.map{case (k,v) => s"""{"name": "$k", "type": $v}"""}.mkString(", ")}]"""
 
+
+  override def generateMapTypeExpression(keyExpression: String, valueExpression: String): String =
+    s""""map", "values": $valueExpression"""
+
   override def toString: String = "AvroSchemaDialect"
 
   override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String = {
@@ -59,6 +63,7 @@ object AvroSchemaDialect extends Dialect {
       (f.fieldType match {
         case a:CollectionTypeMetaData => s""", "items": ${getArrayItemsType(a.elementType)}"""
         case s:ClassTypeMetaData => s""", "fields": [${s.fields.map(f => s"""{"name": "${f.fieldName}", "type": ${generateTypeExpression(f.fieldType)}}""").mkString(", ")}]"""
+        case m:MapTypeMetaData => s""", "values": ${generateTypeExpression(m.valueType)}"""
         case _ => ""
       }) +
       s"""${if(comment(f).isEmpty) "" else s""", "doc": "${comment(f).get}""""}}"""
@@ -76,7 +81,7 @@ object AvroSchemaDialect extends Dialect {
       else s"""["null", "${mapPrimitiveDataType(p)}"]"""
     case c:CollectionTypeMetaData => "\"array\""
     case c:ClassTypeMetaData => "\"record\""
+    case m:MapTypeMetaData => "\"map\""
     case _ => throw new Exception("Not supported type: " + f.fieldType)
   }
-
 }
