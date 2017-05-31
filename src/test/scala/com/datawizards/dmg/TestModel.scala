@@ -204,4 +204,10 @@ object TestModel {
     @column("age", dialect = dialects.Redshift)
     personAge: Int
   )
+
+  @table("${table_name}")
+  case class PersonWithPlaceholderVariables(
+    @comment("Person ${name_comment}") name: String,
+    age: Int
+  )
 }
