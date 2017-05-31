@@ -14,14 +14,18 @@ object DataModelGenerator {
   /**
     * Generate data model for provided class
     *
-    * @param dialect DB dialect e.g. H2, Hive, Redshift, Avro schema, Elasticsearch maping
+    * @param dialect DB dialect e.g. H2, Hive, Redshift, Avro schema, Elasticsearch mapping
+    * @param variables key-value map used to replace placeholder variables
     * @tparam T type for which generate data model
     */
-  def generate[T: ClassTag: TypeTag](dialect: Dialect): String = {
+  def generate[T: ClassTag: TypeTag](dialect: Dialect, variables: Map[String, String] = Map.empty): String = {
     val ct = implicitly[ClassTag[T]].runtimeClass
     log.info(s"Generating model for class: [${ct.getName}], dialect: [$dialect]")
-    generateDataModel(dialect, getClassMetaData[T](dialect))
+    replacePlaceholderVariables(generateDataModel(dialect, getClassMetaData[T](dialect)), variables)
   }
+
+  def getTargetNameForClass[T: ClassTag: TypeTag](dialect: Dialect): String =
+    getClassName(dialect, getClassMetaData[T](dialect))
 
   private def getClassMetaData[T: ClassTag: TypeTag](dialect: Dialect): ClassTypeMetaData =
     changeName(dialect, MetaDataExtractor.extractClassMetaData[T]())
@@ -109,5 +113,15 @@ object DataModelGenerator {
       .withFilter(f => dialect.generateColumn(f))
       .map(f => dialect.generateClassFieldExpression(f))
   }
+
+
+  private def replacePlaceholderVariables(template: String, variables: Map[String, String]): String = {
+    val re = "\\$\\{.*?\\}".r
+    var result = template
+    for(k <- re.findAllIn(template))
+      result = result.replace(k, variables(k.substring(2, k.length-1)))
+    result
+  }
+
 
 }

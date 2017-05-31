@@ -18,10 +18,11 @@ Data model generator based on Scala case classes.
   * [Avro schema dialect](#avro-schema-dialect)
   * [Elasticsearch dialect](#elasticsearch-dialect)
   * [Java dialect](#java-dialect)
-- [Executors](#executors)
+- [Installers](#installers)
   * [Register Avro schema to Avro schema registry](#register-avro-schema-to-avro-schema-registry)
   * [Create Elasticsearch index](#create-elasticsearch-index)
   * [Create Elasticsearch template](#create-elasticsearch-template)
+  * [Create Hive table](#create-hive-table)
 - [Customizations](#customizations)
   * [Custom column name](#custom-column-name)
   * [Custom table name](#custom-table-name)
@@ -267,7 +268,9 @@ public class Person {
 }
 ```
 
-# Executors
+# Installers
+
+Library enables installing generated data model at target data store e.g. registering generated avro schema at Avro Schema Registry, creating Elasticsearch index or creating Hive table.
 
 ## Register Avro schema to Avro schema registry
 
@@ -324,6 +327,14 @@ object CreateElasticsearchTemplate extends App {
   println("Template:")
   println(service.getTemplate("people"))
 }
+```
+
+## Create Hive table
+
+```scala
+import com.datawizards.dmg.service.HiveServiceImpl
+
+HiveServiceImpl.createHiveTable[Person]()
 ```
 
 # Customizations
