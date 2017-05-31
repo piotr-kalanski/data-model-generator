@@ -94,6 +94,11 @@ object ElasticsearchDialect extends Dialect {
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String =
     s"""{"properties" : {${fieldNamesWithExpressions.map{case (k,v) => v}.mkString(", ")}}}"""
 
+  override def generateMapTypeExpression(keyExpression: String, valueExpression: String): String = {
+    log.warn("Elasticsearch doesn't support Map type. Column converted to string")
+    "\"string\""
+  }
+
   private def fieldParametersExpressions(f: ClassFieldMetaData): String =
     indexParameterExpression(f) +
       formatParameterExpression(f)

@@ -210,4 +210,6 @@ object TestModel {
     @comment("Person ${name_comment}") name: String,
     age: Int
   )
+
+  case class ClassWithMap(map: Map[Int, Boolean])
 }

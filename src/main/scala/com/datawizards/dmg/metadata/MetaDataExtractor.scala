@@ -34,12 +34,12 @@ object MetaDataExtractor {
     case t if t <:< localTypeOf[Seq[_]] =>
       val TypeRef(_, _, Seq(elementType)) = t
       CollectionTypeMetaData(extractTypeMetaData(elementType))
-    case t if t <:< localTypeOf[Iterable[_]] =>
-      val TypeRef(_, _, Seq(elementType)) = t
-      CollectionTypeMetaData(extractTypeMetaData(elementType))
     case t if t <:< localTypeOf[Map[_, _]] =>
       val TypeRef(_, _, Seq(keyType, valueType)) = t
       MapTypeMetaData(extractTypeMetaData(keyType), extractTypeMetaData(valueType))
+    case t if t <:< localTypeOf[Iterable[_]] =>
+      val TypeRef(_, _, Seq(elementType)) = t
+      CollectionTypeMetaData(extractTypeMetaData(elementType))
     case t if t <:< localTypeOf[String] => StringType
     case t if t <:< localTypeOf[java.sql.Timestamp] => TimestampType
     case t if t <:< localTypeOf[java.util.Date] => DateType

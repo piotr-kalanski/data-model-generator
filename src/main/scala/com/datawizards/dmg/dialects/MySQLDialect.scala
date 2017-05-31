@@ -33,6 +33,11 @@ object MySQLDialect extends DatabaseDialect {
     "JSON"
   }
 
+  override def generateMapTypeExpression(keyExpression: String, valueExpression: String): String = {
+    log.warn("MySQL doesn't support Map type. Column converted to JSON")
+    "JSON"
+  }
+
   override def toString: String = "MySQLDialect"
 
   override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String =

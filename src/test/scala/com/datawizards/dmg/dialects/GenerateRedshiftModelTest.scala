@@ -104,4 +104,15 @@ class GenerateRedshiftModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Map type") {
+    val expected =
+      """CREATE TABLE ClassWithMap(
+        |   map VARCHAR
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithMap](H2Dialect)
+    }
+  }
+
 }

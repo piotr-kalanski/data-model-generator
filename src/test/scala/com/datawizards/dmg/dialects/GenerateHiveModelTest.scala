@@ -257,4 +257,15 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Map type") {
+    val expected =
+      """CREATE TABLE ClassWithMap(
+        |   map MAP<INT, BOOLEAN>
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithMap](HiveDialect)
+    }
+  }
+
 }

@@ -121,4 +121,20 @@ class GenerateAvroSchemaTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Map type") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "ClassWithMap",
+        |   "fields": [
+        |      {"name": "map", "type": "map", "values": "boolean"}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithMap](AvroSchemaDialect)
+    }
+  }
+
 }

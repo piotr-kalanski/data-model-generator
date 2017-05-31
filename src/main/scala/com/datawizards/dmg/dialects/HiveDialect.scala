@@ -31,6 +31,9 @@ object HiveDialect extends DatabaseDialect {
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String =
     s"STRUCT<${classTypeMetaData.fields.map(f => s"${f.fieldName} : ${generateTypeExpression(f.fieldType)}").mkString(", ")}>"
 
+  override def generateMapTypeExpression(keyExpression: String, valueExpression: String): String =
+    s"MAP<$keyExpression, $valueExpression>"
+
   override def toString: String = "HiveDialect"
 
   override protected def generateColumnsExpression(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =

@@ -103,4 +103,15 @@ class GenerateMySQLModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Map type") {
+    val expected =
+      """CREATE TABLE ClassWithMap(
+        |   map JSON
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithMap](MySQLDialect)
+    }
+  }
+
 }

@@ -283,4 +283,29 @@ class GenerateJavaClassTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Map type") {
+    val expected =
+      """public class ClassWithMap {
+        |   private java.util.Map<Integer, Boolean> map;
+        |
+        |   public ClassWithMap() {}
+        |
+        |   public ClassWithMap(java.util.Map<Integer, Boolean> map) {
+        |      this.map = map;
+        |   }
+        |
+        |   public java.util.Map<Integer, Boolean> getMap() {
+        |      return map;
+        |   }
+        |
+        |   public void setMap(java.util.Map<Integer, Boolean> map) {
+        |      this.map = map;
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithMap](JavaDialect)
+    }
+  }
+
 }

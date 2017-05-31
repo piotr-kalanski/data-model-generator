@@ -26,6 +26,11 @@ object H2Dialect extends DatabaseDialect {
 
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String = "OTHER"
 
+  override def generateMapTypeExpression(keyExpression: String, valueExpression: String): String = {
+    log.warn("H2 doesn't support Map type. Column converted to VARCHAR")
+    "VARCHAR"
+  }
+
   override def toString: String = "H2Dialect"
 
   override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String =
@@ -45,5 +50,4 @@ object H2Dialect extends DatabaseDialect {
 
   private def commentExpression(f: ClassFieldMetaData): String =
     if(comment(f).isEmpty) "" else s" COMMENT '${comment(f).get}'"
-
 }
