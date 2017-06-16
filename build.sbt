@@ -2,7 +2,7 @@ name := "data-model-generator"
 
 organization := "com.github.piotr-kalanski"
 
-version := "0.4.0"
+version := "0.5.0-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
@@ -31,6 +31,7 @@ libraryDependencies ++= Seq(
   "log4j" % "log4j" % "1.2.17",
   "org.scalaj" %% "scalaj-http" % "2.3.0",
   "org.json4s" %% "json4s-native" % "3.5.2",
+  "com.github.piotr-kalanski" %% "es-client" % "0.1.0",
   "org.scalatest" %% "scalatest" % "2.2.6" % "test",
   "junit" % "junit" % "4.10" % "test"
 )
