@@ -1,7 +1,7 @@
 package com.datawizards.dmg.service
 
-import com.datawizards.dmg.repository.ElasticsearchRepository
 import com.datawizards.dmg.{DataModelGenerator, dialects}
+import com.datawizards.esclient.repository.ElasticsearchRepository
 import org.apache.log4j.Logger
 
 import scala.reflect.ClassTag

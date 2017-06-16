@@ -3,12 +3,14 @@ package com.datawizards.dmg.service
 import com.datawizards.dmg.DataModelGenerator
 import com.datawizards.dmg.TestModel._
 import com.datawizards.dmg.dialects._
-import com.datawizards.dmg.repository.ElasticsearchRepository
+import com.datawizards.esclient.repository.ElasticsearchRepository
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import scala.collection.mutable
+import scala.reflect.ClassTag
+import scala.reflect.runtime.universe
 
 @RunWith(classOf[JUnitRunner])
 class CreateElasticsearchIndexTest extends FunSuite {
@@ -42,6 +44,17 @@ class CreateElasticsearchIndexTest extends FunSuite {
 
       override def indexExists(indexName: String): Boolean =
         indexes.contains(indexName)
+
+      override def status(): Boolean = true
+
+      override def index[T <: AnyRef](indexName: String, typeName: String, documentId: String, document: T): Unit =
+        { /* do nothing */ }
+
+      override def index(indexName: String, typeName: String, documentId: String, document: String): Unit =
+        { /* do nothing */ }
+
+      override def read[T](indexName: String, typeName: String, documentId: String)(implicit ct: ClassTag[T], tt: universe.TypeTag[T]): T = "".asInstanceOf[T]
+
     }
   }
 
