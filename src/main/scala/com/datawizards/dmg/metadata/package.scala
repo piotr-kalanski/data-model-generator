@@ -62,6 +62,14 @@ package object metadata {
   }
 
   case class ClassFieldMetaData(
+    /**
+      * Original Scala class field name
+      */
+    originalFieldName: String,
+
+    /**
+      * Field name taking into account annotations
+      */
     fieldName: String,
     fieldType: TypeMetaData,
     annotations: Iterable[AnnotationMetaData]
@@ -69,6 +77,15 @@ package object metadata {
 
   case class ClassTypeMetaData(
     packageName: String,
+
+    /**
+      * Original Scala class name
+      */
+    originalTypeName: String,
+
+    /**
+      * Type name taking into account annotations
+      */
     typeName: String,
     annotations: Iterable[AnnotationMetaData],
     fields: Iterable[ClassFieldMetaData]
