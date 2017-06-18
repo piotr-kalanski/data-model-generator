@@ -1,5 +1,7 @@
 package com.datawizards.dmg.metadata
 
+import com.datawizards.dmg.dialects.Dialect
+
 import scala.reflect.runtime.universe._
 
 /**
@@ -11,6 +13,9 @@ object MetaDataExtractor {
   private def mirror =
     runtimeMirror(Thread.currentThread().getContextClassLoader)
 
+  /**
+    * Extract class metadata
+    */
   def extractClassMetaData[T: TypeTag](): ClassTypeMetaData = {
     val tpe = localTypeOf[T]
     tpe match {
@@ -19,6 +24,12 @@ object MetaDataExtractor {
         throw new UnsupportedOperationException(s"MetaData for type $other is not supported")
     }
   }
+
+  /**
+    * Extract class metadata and change types and fields taking into account dialect as context
+    */
+  def extractClassMetaDataForDialect[T: TypeTag](dialect: Dialect): ClassTypeMetaData =
+    changeName(dialect, extractClassMetaData[T]())
 
   def extractTypeMetaData[T : TypeTag](): TypeMetaData =
     extractTypeMetaData(localTypeOf[T])
@@ -71,6 +82,7 @@ object MetaDataExtractor {
     val cls = mirror.runtimeClass(tpe)
     ClassTypeMetaData(
       packageName = cls.getPackage.getName,
+      originalTypeName = cls.getSimpleName,
       typeName = cls.getSimpleName,
       annotations = extractAnnotations(tpe.typeSymbol),
       fields = extractClassFields(tpe)
@@ -97,6 +109,7 @@ object MetaDataExtractor {
       .paramLists
       .head
       .map(f => ClassFieldMetaData(
+        originalFieldName = f.name.toString,
         fieldName = f.name.toString,
         fieldType = extractTypeMetaData(f.typeSignature),
         annotations = extractAnnotations(f)
@@ -119,4 +132,77 @@ object MetaDataExtractor {
           }
         )
       )
+
+  private def changeName(dialect: Dialect, c: ClassTypeMetaData): ClassTypeMetaData =
+    c.copy(
+      typeName = getClassName(dialect, c),
+      fields = c.fields.map(f => changeName(dialect, f, c))
+    )
+
+  private def changeName(dialect: Dialect, classFieldMetaData: ClassFieldMetaData, classTypeMetaData: ClassTypeMetaData): ClassFieldMetaData =
+    classFieldMetaData.copy(
+      fieldName = getFieldName(dialect, classFieldMetaData, classTypeMetaData),
+      fieldType = changeName(dialect, classFieldMetaData.fieldType)
+    )
+
+  private def changeName(dialect: Dialect, typeMetaData: TypeMetaData): TypeMetaData = typeMetaData match {
+    case p:PrimitiveTypeMetaData => p
+    case c:CollectionTypeMetaData => c
+    case m:MapTypeMetaData => m
+    case c:ClassTypeMetaData => changeName(dialect, c)
+  }
+
+  private val Table = "com.datawizards.dmg.annotations.table"
+  private val Column = "com.datawizards.dmg.annotations.column"
+  private val Underscore = "com.datawizards.dmg.annotations.underscore"
+
+  private def getClassName(dialect: Dialect, classMetaData: ClassTypeMetaData): String = {
+    val tableAnnotations = classMetaData.annotations.filter(_.name == Table)
+    if(tableAnnotations.nonEmpty) {
+      val dialectSpecificTableAnnotation = tableAnnotations.find(_.attributes.exists(aa => aa.name == "dialect" && aa.value.contains(dialect.toString.replace("Dialect",""))))
+      if(dialectSpecificTableAnnotation.isDefined)
+        dialectSpecificTableAnnotation.get.attributes.filter(_.name == "name").head.value
+      else {
+        val defaultTableAnnotation = tableAnnotations.find(!_.attributes.exists(aa => aa.name == "dialect"))
+        if(defaultTableAnnotation.isDefined)
+          defaultTableAnnotation.get.attributes.filter(_.name == "name").head.value
+        else
+          convertToUnderscoreIfRequired(classMetaData.typeName, dialect, classMetaData)
+      }
+    }
+    else
+      convertToUnderscoreIfRequired(classMetaData.typeName, dialect, classMetaData)
+  }
+
+  private def getFieldName(dialect: Dialect, classFieldMetaData: ClassFieldMetaData, classTypeMetaData: ClassTypeMetaData): String = {
+    val columnAnnotations = classFieldMetaData.annotations.filter(_.name == Column)
+    if(columnAnnotations.nonEmpty) {
+      val dialectSpecificColumnAnnotation = columnAnnotations.find(_.attributes.exists(aa => aa.name == "dialect" && aa.value.contains(dialect.toString.replace("Dialect",""))))
+      if(dialectSpecificColumnAnnotation.isDefined)
+        dialectSpecificColumnAnnotation.get.attributes.filter(_.name == "name").head.value
+      else {
+        val defaultColumnAnnotation = columnAnnotations.find(!_.attributes.exists(aa => aa.name == "dialect"))
+        if(defaultColumnAnnotation.isDefined)
+          defaultColumnAnnotation.get.attributes.filter(_.name == "name").head.value
+        else
+          convertToUnderscoreIfRequired(classFieldMetaData.fieldName, dialect, classTypeMetaData)
+      }
+    }
+    else
+      convertToUnderscoreIfRequired(classFieldMetaData.fieldName, dialect, classTypeMetaData)
+  }
+
+  private def convertToUnderscoreIfRequired(name: String, dialect: Dialect, classTypeMetaData: ClassTypeMetaData): String = {
+    val underscoreAnnotations = classTypeMetaData.annotations.filter(_.name == Underscore)
+    if(underscoreAnnotations.nonEmpty) {
+      val dialectSpecificUnderscoreAnnotation = underscoreAnnotations.find(_.attributes.exists(aa => aa.name == "dialect" && aa.value.contains(dialect.toString.replace("Dialect",""))))
+      if(dialectSpecificUnderscoreAnnotation.isDefined)
+        name.replaceAll("(.)(\\p{Upper})","$1_$2").toLowerCase
+      else
+        name
+    }
+    else
+      name
+  }
+
 }

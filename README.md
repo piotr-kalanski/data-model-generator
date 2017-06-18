@@ -23,6 +23,7 @@ Data model generator based on Scala case classes.
   * [Create Elasticsearch index](#create-elasticsearch-index)
   * [Create Elasticsearch template](#create-elasticsearch-template)
   * [Create Hive table](#create-hive-table)
+- [Extracting class metadata](#extracting-class-metadata)
 - [Customizations](#customizations)
   * [Custom column name](#custom-column-name)
   * [Custom table name](#custom-table-name)
@@ -43,7 +44,7 @@ Data model generator based on Scala case classes.
 Include dependency:
 
 ```scala
-"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.4.0"
+"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.5.0"
 ```
 
 or
@@ -52,7 +53,7 @@ or
 <dependency>
     <groupId>com.github.piotr-kalanski</groupId>
     <artifactId>data-model-generator_2.11</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
 </dependency>
 ```
 
@@ -336,6 +337,13 @@ object CreateElasticsearchTemplate extends App {
 import com.datawizards.dmg.service.HiveServiceImpl
 
 HiveServiceImpl.createHiveTable[Person]()
+```
+
+# Extracting class metadata
+
+To extract class metadata you can use method `MetaDataExtractor.extractClassMetaDataForDialect`. Example:
+```scala
+MetaDataExtractor.extractClassMetaDataForDialect[T](dialects.Hive)
 ```
 
 # Customizations

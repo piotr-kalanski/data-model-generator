@@ -9,6 +9,7 @@ class MetaDataExtractorTest extends FunSuite {
 
   def personTypeMetaData = ClassTypeMetaData(
     packageName = "com.datawizards.dmg.metadata"
+    , originalTypeName = "Person"
     , typeName = "Person"
     , annotations = Seq(
       AnnotationMetaData(
@@ -23,7 +24,8 @@ class MetaDataExtractorTest extends FunSuite {
     )
     , fields = Seq(
       ClassFieldMetaData(
-        fieldName = "name"
+        originalFieldName = "name"
+        , fieldName = "name"
         , fieldType = StringType
         , annotations = Seq(
           AnnotationMetaData(
@@ -60,7 +62,8 @@ class MetaDataExtractorTest extends FunSuite {
         )
       ),
       ClassFieldMetaData(
-        fieldName = "age"
+        originalFieldName = "age"
+        , fieldName = "age"
         , fieldType = IntegerType
         , annotations = Seq(
           AnnotationMetaData(
@@ -79,7 +82,8 @@ class MetaDataExtractorTest extends FunSuite {
         )
       ),
       ClassFieldMetaData(
-        fieldName = "title"
+        originalFieldName = "title"
+        , fieldName = "title"
         , fieldType = StringType
         , annotations = Seq()
       )
@@ -96,46 +100,56 @@ class MetaDataExtractorTest extends FunSuite {
   test("Extract CV MetaData") {
     val expected = ClassTypeMetaData(
       packageName = "com.datawizards.dmg.metadata"
+      , originalTypeName = "CV"
       , typeName = "CV"
       , annotations = Seq.empty
       , fields = Seq(
           ClassFieldMetaData(
-            fieldName = "person"
+            originalFieldName = "person"
+            , fieldName = "person"
             , fieldType = personTypeMetaData
             , annotations = Seq.empty
           ),
           ClassFieldMetaData(
-            fieldName = "experience"
+            originalFieldName = "experience"
+            , fieldName = "experience"
             , fieldType = CollectionTypeMetaData(
                 elementType = ClassTypeMetaData(
                   packageName = "com.datawizards.dmg.metadata"
+                  , originalTypeName = "WorkExperience"
                   , typeName = "WorkExperience"
                   , annotations = Seq.empty
                   , fields = Seq(
                     ClassFieldMetaData(
-                      fieldName = "start"
+                      originalFieldName = "start"
+                      , fieldName = "start"
                       , fieldType = DateType
                       , annotations = Seq.empty
                     ),
                     ClassFieldMetaData(
-                      fieldName = "end"
+                      originalFieldName = "end"
+                      , fieldName = "end"
                       , fieldType = DateType
                       , annotations = Seq.empty
                     ),
                     ClassFieldMetaData(
-                      fieldName = "jobTitle"
+                      originalFieldName = "jobTitle"
+                      , fieldName = "jobTitle"
                       , fieldType = StringType
                       , annotations = Seq.empty
                     ),
                     ClassFieldMetaData(
-                      fieldName = "company"
+                      originalFieldName = "company"
+                      , fieldName = "company"
                       , fieldType = ClassTypeMetaData(
                         packageName = "com.datawizards.dmg.metadata"
+                        , originalTypeName = "Company"
                         , typeName = "Company"
                         , annotations = Seq.empty
                         , fields = Seq(
                           ClassFieldMetaData(
-                            fieldName = "name"
+                            originalFieldName = "name"
+                            , fieldName = "name"
                             , fieldType = StringType
                             , annotations = Seq(
                               AnnotationMetaData(
@@ -150,12 +164,14 @@ class MetaDataExtractorTest extends FunSuite {
                             )
                           ),
                           ClassFieldMetaData(
-                            fieldName = "address"
+                            originalFieldName = "address"
+                            , fieldName = "address"
                             , fieldType = StringType
                             , annotations = Seq.empty
                           ),
                           ClassFieldMetaData(
-                            fieldName = "industry"
+                            originalFieldName = "industry"
+                            , fieldName = "industry"
                             , fieldType = StringType
                             , annotations = Seq.empty
                           )

@@ -1,5 +1,6 @@
 package com.datawizards.dmg.service
 
+import com.datawizards.dmg.metadata.MetaDataExtractor
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 import org.apache.log4j.Logger
 
@@ -11,8 +12,9 @@ object HiveServiceImpl extends HiveService {
   private val log = Logger.getLogger(getClass.getName)
 
   override def createHiveTable[T: ClassTag: TypeTag](): Unit = {
-    val tableName = DataModelGenerator.getTargetNameForClass[T](dialects.Hive)
-    val createTableExpression = DataModelGenerator.generate[T](dialects.Hive)
+    val classTypeMetaData = MetaDataExtractor.extractClassMetaDataForDialect(dialects.Hive)
+    val tableName = classTypeMetaData.typeName
+    val createTableExpression = DataModelGenerator.generate[T](dialects.Hive, classTypeMetaData)
     val dropTableExpression = s"DROP TABLE $tableName;\n"
     executeHiveScript(dropTableExpression + createTableExpression)
   }
