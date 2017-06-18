@@ -3,6 +3,7 @@ package com.datawizards.dmg.service
 import com.datawizards.dmg.DataModelGenerator
 import com.datawizards.dmg.TestModel._
 import com.datawizards.dmg.dialects._
+import com.datawizards.esclient.dto.SearchResult
 import com.datawizards.esclient.repository.ElasticsearchRepository
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -53,8 +54,17 @@ class CreateElasticsearchIndexTest extends FunSuite {
       override def index(indexName: String, typeName: String, documentId: String, document: String): Unit =
         { /* do nothing */ }
 
-      override def read[T](indexName: String, typeName: String, documentId: String)(implicit ct: ClassTag[T], tt: universe.TypeTag[T]): T = "".asInstanceOf[T]
+      override def read[T](indexName: String, typeName: String, documentId: String)(implicit ct: ClassTag[T], tt: universe.TypeTag[T]): T =
+        "".asInstanceOf[T]
 
+      override def append[T <: AnyRef](indexName: String, typeName: String, document: T): Unit =
+        { /* do nothing */ }
+
+      override def append(indexName: String, typeName: String, document: String): Unit =
+        { /* do nothing */ }
+
+      override def search[T](indexName: String)(implicit evidence$3: ClassTag[T], evidence$4: universe.TypeTag[T]): SearchResult[T] =
+        SearchResult(0, Traversable.empty)
     }
   }
 
