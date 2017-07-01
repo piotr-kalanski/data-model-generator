@@ -29,7 +29,7 @@ object DataModelGenerator {
     * @tparam T type for which generate data model
     */
   def generate[T: ClassTag: TypeTag](dialect: Dialect, classTypeMetaData: ClassTypeMetaData): String =
-    generate(dialect, getClassMetaData[T](dialect), Map.empty)
+    generate(dialect, classTypeMetaData, Map.empty)
 
   /**
     * Generate data model for provided class
