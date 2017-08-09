@@ -189,7 +189,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
       """CREATE TABLE ClicksPartitioned(
         |   time TIMESTAMP,
         |   event STRING,
-        |   user STRING
+        |   `user` STRING
         |)
         |PARTITIONED BY(year INT, month INT, day INT);""".stripMargin
 
@@ -203,7 +203,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
       """CREATE TABLE ClicksPartitionedWithOrder(
         |   time TIMESTAMP,
         |   event STRING,
-        |   user STRING
+        |   `user` STRING
         |)
         |PARTITIONED BY(year INT, month INT, day INT);""".stripMargin
 
@@ -217,7 +217,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
       """CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME(
         |   eventTime TIMESTAMP COMMENT 'Event time',
         |   event STRING COMMENT 'Event name',
-        |   user STRING COMMENT 'User id'
+        |   `user` STRING COMMENT 'User id'
         |)
         |COMMENT 'Table comment'
         |PARTITIONED BY(year INT, month INT, day INT)
@@ -265,6 +265,29 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithMap](HiveDialect)
+    }
+  }
+
+  test("ClassWithDash") {
+    val expected =
+      """CREATE TABLE ClassWithDash(
+        |   `add-id` STRING
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithDash](HiveDialect)
+    }
+  }
+
+  test("reserverd keywords") {
+    val expected =
+      """CREATE TABLE ClassWithReservedKeywords(
+        |   `select` STRING,
+        |   `where` STRING
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithReservedKeywords](HiveDialect)
     }
   }
 

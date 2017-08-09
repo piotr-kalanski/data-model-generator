@@ -109,8 +109,8 @@ object MetaDataExtractor {
       .paramLists
       .head
       .map(f => ClassFieldMetaData(
-        originalFieldName = f.name.toString,
-        fieldName = f.name.toString,
+        originalFieldName = f.name.toString.replace("$minus", "-"),
+        fieldName = f.name.toString.replace("$minus", "-"),
         fieldType = extractTypeMetaData(f.typeSignature),
         annotations = extractAnnotations(f)
       ))

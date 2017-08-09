@@ -212,4 +212,6 @@ object TestModel {
   )
 
   case class ClassWithMap(map: Map[Int, Boolean])
+  case class ClassWithDash(`add-id`: String)
+  case class ClassWithReservedKeywords(select: String, where: String)
 }

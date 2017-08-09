@@ -111,8 +111,30 @@ class GenerateRedshiftModelTest extends DataModelGeneratorBaseTest {
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ClassWithMap](H2Dialect)
+      DataModelGenerator.generate[ClassWithMap](RedshiftDialect)
     }
   }
 
+  test("ClassWithDash") {
+    val expected =
+      """CREATE TABLE ClassWithDash(
+        |   "add-id" VARCHAR
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithDash](RedshiftDialect)
+    }
+  }
+
+  test("reserverd keywords") {
+    val expected =
+      """CREATE TABLE ClassWithReservedKeywords(
+        |   "select" VARCHAR,
+        |   "where" VARCHAR
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithReservedKeywords](RedshiftDialect)
+    }
+  }
 }

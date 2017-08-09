@@ -138,4 +138,26 @@ class GenerateH2ModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("ClassWithDash") {
+    val expected =
+      """CREATE TABLE ClassWithDash(
+        |   "add-id" VARCHAR
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithDash](H2Dialect)
+    }
+  }
+
+  test("reserverd keywords") {
+    val expected =
+      """CREATE TABLE ClassWithReservedKeywords(
+        |   "select" VARCHAR,
+        |   "where" VARCHAR
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithReservedKeywords](H2Dialect)
+    }
+  }
 }
