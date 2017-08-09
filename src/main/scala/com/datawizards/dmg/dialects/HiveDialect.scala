@@ -153,4 +153,51 @@ object HiveDialect extends DatabaseDialect {
   private def hiveExternalTableLocation(classTypeMetaData: ClassTypeMetaData): Option[String] =
     classTypeMetaData.getAnnotationValue(HiveExternalTable)
 
+  override protected def reservedKeywords = Seq(
+    "ALL",
+    "ALTER",
+    "AND",
+    "AS",
+    "BETWEEN",
+    "CASE",
+    "COLUMN",
+    "CREATE",
+    "DATABASE",
+    "DATE",
+    "DELETE",
+    "DISTINCT",
+    "DROP",
+    "ELSE",
+    "END",
+    "EXISTS",
+    "FALSE",
+    "FETCH",
+    "FULL",
+    "GRANT",
+    "GROUP",
+    "HAVING",
+    "INNER",
+    "INSERT",
+    "INTO",
+    "JOIN",
+    "LEFT",
+    "NOT",
+    "NULL",
+    "OR",
+    "ORDER",
+    "OUTER",
+    "SELECT",
+    "TABLE",
+    "TRUE",
+    "UNION",
+    "UPDATE",
+    "USER",
+    "USING",
+    "VALUES",
+    "WHEN",
+    "WHERE"
+  )
+
+  override protected def escapeColumnName(columnName: String) =
+    s"`$columnName`"
 }

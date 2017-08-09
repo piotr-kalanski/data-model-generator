@@ -1,8 +1,8 @@
 package com.datawizards.dmg
 
-import org.scalatest.FunSuite
+import org.scalatest.{FunSuite, Matchers}
 
-trait DataModelGeneratorBaseTest extends FunSuite {
+trait DataModelGeneratorBaseTest extends FunSuite with Matchers {
   def assertResultIgnoringNewLines(expected: String)(result: String): Unit =
-    assertResult(expected.replace("\n", "").replace("\r", ""))(result.replace("\n", "").replace("\r", ""))
+    expected.replace("\n", "").replace("\r", "") should equal(result.replace("\n", "").replace("\r", ""))
 }

@@ -17,7 +17,7 @@ trait DatabaseDialect extends Dialect {
     "(\n   " + fieldsExpressions.mkString(",\n   ") + "\n)"
 
   override def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String, level: Int): String =
-    f.fieldName + " " + typeExpression +
+    generateFieldName(f.fieldName) + " " + typeExpression +
       (if(fieldLength(f).isEmpty) "" else s"(${fieldLength(f).get})") +
       fieldAdditionalExpressions(f)
 
@@ -26,5 +26,17 @@ trait DatabaseDialect extends Dialect {
   protected def additionalTableProperties(classTypeMetaData: ClassTypeMetaData): String
 
   protected def additionalTableExpressions(classTypeMetaData: ClassTypeMetaData): String
+
+  private def generateFieldName(columnName: String): String =
+    if(reservedKeywords.contains(columnName.toUpperCase))
+      escapeColumnName(columnName)
+    else if(columnName.contains("-"))
+      escapeColumnName(columnName)
+    else
+      columnName
+
+  protected def reservedKeywords: Seq[String]
+
+  protected def escapeColumnName(columnName: String): String
 
 }
