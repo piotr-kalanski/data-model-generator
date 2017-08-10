@@ -160,4 +160,15 @@ class GenerateH2ModelTest extends DataModelGeneratorBaseTest {
       DataModelGenerator.generate[ClassWithReservedKeywords](H2Dialect)
     }
   }
+
+  test("ClassWithArrayByte") {
+    val expected =
+      """CREATE TABLE ClassWithArrayByte(
+        |   arr BINARY
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithArrayByte](H2Dialect)
+    }
+  }
 }

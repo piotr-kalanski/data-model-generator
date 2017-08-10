@@ -291,4 +291,15 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("ClassWithArrayByte") {
+    val expected =
+      """CREATE TABLE ClassWithArrayByte(
+        |   arr BINARY
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithArrayByte](HiveDialect)
+    }
+  }
+
 }

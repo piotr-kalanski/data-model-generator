@@ -137,4 +137,15 @@ class GenerateRedshiftModelTest extends DataModelGeneratorBaseTest {
       DataModelGenerator.generate[ClassWithReservedKeywords](RedshiftDialect)
     }
   }
+
+  test("ClassWithArrayByte") {
+    val expected =
+      """CREATE TABLE ClassWithArrayByte(
+        |   arr VARCHAR
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithArrayByte](RedshiftDialect)
+    }
+  }
 }

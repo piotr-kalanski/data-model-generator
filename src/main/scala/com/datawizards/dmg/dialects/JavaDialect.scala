@@ -24,6 +24,8 @@ object JavaDialect extends Dialect {
 
   override def timestampType: String = "java.sql.Timestamp"
 
+  override def binaryType: String = generateArrayTypeExpression(byteType)
+
   override def generateArrayTypeExpression(elementTypeExpression: String): String =
     s"java.util.List<$elementTypeExpression>"
 

@@ -227,4 +227,21 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("ClassWithArrayByte") {
+    val expected =
+      """{
+        |   "mappings" : {
+        |      "ClassWithArrayByte" : {
+        |         "properties" : {
+        |            "arr" : {"type" : "byte"}
+        |         }
+        |      }
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithArrayByte](ElasticsearchDialect)
+    }
+  }
+
 }
