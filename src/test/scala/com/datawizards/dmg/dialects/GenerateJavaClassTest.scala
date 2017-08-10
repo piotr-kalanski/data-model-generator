@@ -308,4 +308,29 @@ class GenerateJavaClassTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("ClassWithArrayByte") {
+    val expected =
+      """public class ClassWithArrayByte {
+        |   private java.util.List<Byte> arr;
+        |
+        |   public ClassWithArrayByte() {}
+        |
+        |   public ClassWithArrayByte(java.util.List<Byte> arr) {
+        |      this.arr = arr;
+        |   }
+        |
+        |   public java.util.List<Byte> getArr() {
+        |      return arr;
+        |   }
+        |
+        |   public void setArr(java.util.List<Byte> arr) {
+        |      this.arr = arr;
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithArrayByte](JavaDialect)
+    }
+  }
+
 }

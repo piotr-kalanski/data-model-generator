@@ -24,6 +24,8 @@ object ElasticsearchDialect extends Dialect {
 
   override def timestampType: String = "date"
 
+  override def binaryType: String = byteType
+
   override def toString: String = "ElasticsearchDialect"
 
   override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =

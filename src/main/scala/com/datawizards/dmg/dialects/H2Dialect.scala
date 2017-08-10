@@ -22,6 +22,8 @@ object H2Dialect extends DatabaseDialect {
 
   override def timestampType: String = "TIMESTAMP"
 
+  override def binaryType: String = "BINARY"
+
   override def generateArrayTypeExpression(elementTypeExpression: String): String = "ARRAY"
 
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String = "OTHER"

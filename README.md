@@ -44,7 +44,7 @@ Data model generator based on Scala case classes.
 Include dependency:
 
 ```scala
-"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.5.2"
+"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.5.3"
 ```
 
 or
@@ -53,7 +53,7 @@ or
 <dependency>
     <groupId>com.github.piotr-kalanski</groupId>
     <artifactId>data-model-generator_2.11</artifactId>
-    <version>0.5.2</version>
+    <version>0.5.3</version>
 </dependency>
 ```
 

@@ -137,4 +137,20 @@ class GenerateAvroSchemaTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("ClassWithArrayByte") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "ClassWithArrayByte",
+        |   "fields": [
+        |      {"name": "arr", "type": "array", "items": "bytes"}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithArrayByte](AvroSchemaDialect)
+    }
+  }
+
 }

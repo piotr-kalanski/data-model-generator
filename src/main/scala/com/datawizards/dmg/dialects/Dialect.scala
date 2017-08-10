@@ -23,6 +23,7 @@ trait Dialect {
     case ByteType => byteType
     case DateType => dateType
     case TimestampType => timestampType
+    case BinaryType => binaryType
     case _ => throw new Exception("Not supported type: " + primitiveType)
   }
 
@@ -36,6 +37,7 @@ trait Dialect {
   def byteType: String
   def dateType: String
   def timestampType: String
+  def binaryType: String
 
   def fieldLength(f: ClassFieldMetaData): Option[String] = f.getAnnotationValue(Length)
 

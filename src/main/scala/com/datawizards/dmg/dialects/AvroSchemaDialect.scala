@@ -24,6 +24,8 @@ object AvroSchemaDialect extends Dialect {
 
   override def timestampType: String = "long"
 
+  override def binaryType: String = generateArrayTypeExpression(generatePrimitiveTypeExpression(ByteType))
+
   override def generatePrimitiveTypeExpression(p: PrimitiveTypeMetaData): String =
     s""""${mapPrimitiveDataType(p)}""""
 
@@ -77,7 +79,8 @@ object AvroSchemaDialect extends Dialect {
 
   private def getAvroTypeName(f: ClassFieldMetaData): String  = f.fieldType match {
     case p:PrimitiveTypeMetaData =>
-      if(notNull(f)) s""""${mapPrimitiveDataType(p)}""""
+      if(p == BinaryType) binaryType
+      else if(notNull(f)) s""""${mapPrimitiveDataType(p)}""""
       else s"""["null", "${mapPrimitiveDataType(p)}"]"""
     case c:CollectionTypeMetaData => "\"array\""
     case c:ClassTypeMetaData => "\"record\""

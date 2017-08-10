@@ -23,6 +23,8 @@ object RedshiftDialect extends DatabaseDialect {
 
   override def timestampType: String = "TIMESTAMP"
 
+  override def binaryType: String = generateArrayTypeExpression(byteType)
+
   override def generateArrayTypeExpression(elementTypeExpression: String): String = {
     log.warn("Redshift doesn't support ARRAY type. Column converted to VARCHAR.")
     "VARCHAR"
