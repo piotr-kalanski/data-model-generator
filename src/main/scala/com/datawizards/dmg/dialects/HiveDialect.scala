@@ -175,6 +175,7 @@ object HiveDialect extends DatabaseDialect {
     "FALSE",
     "FETCH",
     "FULL",
+    "FUNCTION",
     "GRANT",
     "GROUP",
     "HAVING",
