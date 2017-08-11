@@ -24,6 +24,10 @@ object H2Dialect extends DatabaseDialect {
 
   override def binaryType: String = "BINARY"
 
+  override def bigDecimalType: String = "DECIMAL(38,18)"
+
+  override def bigIntegerType: String = "BIGINT"
+
   override def generateArrayTypeExpression(elementTypeExpression: String): String = "ARRAY"
 
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String = "OTHER"

@@ -153,4 +153,35 @@ class GenerateAvroSchemaTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("ClassWithBigInteger") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "ClassWithBigInteger",
+        |   "fields": [
+        |      {"name": "n1", "type": ["null", "double"]}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithBigInteger](AvroSchemaDialect)
+    }
+  }
+
+  test("ClassWithBigDecimal") {
+    val expected =
+      """{
+        |   "namespace": "com.datawizards.dmg",
+        |   "type": "record",
+        |   "name": "ClassWithBigDecimal",
+        |   "fields": [
+        |      {"name": "n1", "type": ["null", "double"]}
+        |   ]
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithBigDecimal](AvroSchemaDialect)
+    }
+  }
 }

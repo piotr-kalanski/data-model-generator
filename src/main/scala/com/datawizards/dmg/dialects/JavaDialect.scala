@@ -26,6 +26,10 @@ object JavaDialect extends Dialect {
 
   override def binaryType: String = generateArrayTypeExpression(byteType)
 
+  override def bigDecimalType: String = "java.math.BigDecimal"
+
+  override def bigIntegerType: String = "java.math.BigInteger"
+
   override def generateArrayTypeExpression(elementTypeExpression: String): String =
     s"java.util.List<$elementTypeExpression>"
 

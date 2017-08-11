@@ -148,4 +148,26 @@ class GenerateRedshiftModelTest extends DataModelGeneratorBaseTest {
       DataModelGenerator.generate[ClassWithArrayByte](RedshiftDialect)
     }
   }
+
+  test("ClassWithBigInteger") {
+    val expected =
+      """CREATE TABLE ClassWithBigInteger(
+        |   n1 BIGINT
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithBigInteger](RedshiftDialect)
+    }
+  }
+
+  test("ClassWithBigDecimal") {
+    val expected =
+      """CREATE TABLE ClassWithBigDecimal(
+        |   n1 DECIMAL(38,18)
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithBigDecimal](RedshiftDialect)
+    }
+  }
 }

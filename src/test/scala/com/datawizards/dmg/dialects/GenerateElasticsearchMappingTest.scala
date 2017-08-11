@@ -244,4 +244,37 @@ class GenerateElasticsearchMappingTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("ClassWithBigInteger") {
+    val expected =
+      """{
+        |   "mappings" : {
+        |      "ClassWithBigInteger" : {
+        |         "properties" : {
+        |            "n1" : {"type" : "double"}
+        |         }
+        |      }
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithBigInteger](ElasticsearchDialect)
+    }
+  }
+
+  test("ClassWithBigDecimal") {
+    val expected =
+      """{
+        |   "mappings" : {
+        |      "ClassWithBigDecimal" : {
+        |         "properties" : {
+        |            "n1" : {"type" : "double"}
+        |         }
+        |      }
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithBigDecimal](ElasticsearchDialect)
+    }
+  }
 }

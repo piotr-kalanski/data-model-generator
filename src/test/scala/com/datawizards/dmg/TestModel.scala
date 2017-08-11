@@ -215,4 +215,6 @@ object TestModel {
   case class ClassWithDash(`add-id`: String)
   case class ClassWithReservedKeywords(select: String, where: String)
   case class ClassWithArrayByte(arr: Array[Byte])
+  case class ClassWithBigInteger(n1: BigInt)
+  case class ClassWithBigDecimal(n1: BigDecimal)
 }

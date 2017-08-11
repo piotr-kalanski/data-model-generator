@@ -25,6 +25,10 @@ object RedshiftDialect extends DatabaseDialect {
 
   override def binaryType: String = generateArrayTypeExpression(byteType)
 
+  override def bigDecimalType: String = "DECIMAL(38,18)"
+
+  override def bigIntegerType: String = "BIGINT"
+
   override def generateArrayTypeExpression(elementTypeExpression: String): String = {
     log.warn("Redshift doesn't support ARRAY type. Column converted to VARCHAR.")
     "VARCHAR"

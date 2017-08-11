@@ -27,6 +27,10 @@ object HiveDialect extends DatabaseDialect {
 
   override def binaryType: String = "BINARY"
 
+  override def bigDecimalType: String = "DECIMAL(38,18)"
+
+  override def bigIntegerType: String = "BIGINT"
+
   override def generateArrayTypeExpression(elementTypeExpression: String): String =
     s"ARRAY<$elementTypeExpression>"
 
