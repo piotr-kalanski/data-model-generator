@@ -147,4 +147,26 @@ class GenerateMySQLModelTest extends DataModelGeneratorBaseTest {
       DataModelGenerator.generate[ClassWithArrayByte](MySQLDialect)
     }
   }
+
+  test("ClassWithBigInteger") {
+    val expected =
+      """CREATE TABLE ClassWithBigInteger(
+        |   n1 BIGINT
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithBigInteger](MySQLDialect)
+    }
+  }
+
+  test("ClassWithBigDecimal") {
+    val expected =
+      """CREATE TABLE ClassWithBigDecimal(
+        |   n1 DECIMAL(38,18)
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithBigDecimal](MySQLDialect)
+    }
+  }
 }

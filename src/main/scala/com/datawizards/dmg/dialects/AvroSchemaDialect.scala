@@ -26,6 +26,10 @@ object AvroSchemaDialect extends Dialect {
 
   override def binaryType: String = generateArrayTypeExpression(generatePrimitiveTypeExpression(ByteType))
 
+  override def bigDecimalType: String = "double"
+
+  override def bigIntegerType: String = "double"
+
   override def generatePrimitiveTypeExpression(p: PrimitiveTypeMetaData): String =
     s""""${mapPrimitiveDataType(p)}""""
 

@@ -26,6 +26,10 @@ abstract class DecoratorDialect(dialect: Dialect) extends Dialect {
 
   override def binaryType: String = dialect.binaryType
 
+  override def bigDecimalType: String = dialect.bigDecimalType
+
+  override def bigIntegerType: String = dialect.bigIntegerType
+
   override def generateClassFieldExpression(f: ClassFieldMetaData, typeExpression: String, level: Int): String =
     dialect.generateClassFieldExpression(f, typeExpression, level)
 

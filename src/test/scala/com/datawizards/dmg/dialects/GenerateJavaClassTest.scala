@@ -333,4 +333,54 @@ class GenerateJavaClassTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("ClassWithBigInteger") {
+    val expected =
+      """public class ClassWithBigInteger {
+        |   private java.math.BigInteger n1;
+        |
+        |   public ClassWithBigInteger() {}
+        |
+        |   public ClassWithBigInteger(java.math.BigInteger n1) {
+        |      this.n1 = n1;
+        |   }
+        |
+        |   public java.math.BigInteger getN1() {
+        |      return n1;
+        |   }
+        |
+        |   public void setN1(java.math.BigInteger n1) {
+        |      this.n1 = n1;
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithBigInteger](JavaDialect)
+    }
+  }
+
+  test("ClassWithBigDecimal") {
+    val expected =
+      """public class ClassWithBigDecimal {
+        |   private java.math.BigDecimal n1;
+        |
+        |   public ClassWithBigDecimal() {}
+        |
+        |   public ClassWithBigDecimal(java.math.BigDecimal n1) {
+        |      this.n1 = n1;
+        |   }
+        |
+        |   public java.math.BigDecimal getN1() {
+        |      return n1;
+        |   }
+        |
+        |   public void setN1(java.math.BigDecimal n1) {
+        |      this.n1 = n1;
+        |   }
+        |}""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithBigDecimal](JavaDialect)
+    }
+  }
+
 }

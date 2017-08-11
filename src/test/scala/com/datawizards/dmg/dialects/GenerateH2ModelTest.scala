@@ -171,4 +171,26 @@ class GenerateH2ModelTest extends DataModelGeneratorBaseTest {
       DataModelGenerator.generate[ClassWithArrayByte](H2Dialect)
     }
   }
+
+  test("ClassWithBigInteger") {
+    val expected =
+      """CREATE TABLE ClassWithBigInteger(
+        |   n1 BIGINT
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithBigInteger](H2Dialect)
+    }
+  }
+
+  test("ClassWithBigDecimal") {
+    val expected =
+      """CREATE TABLE ClassWithBigDecimal(
+        |   n1 DECIMAL(38,18)
+        |);""".stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithBigDecimal](H2Dialect)
+    }
+  }
 }
