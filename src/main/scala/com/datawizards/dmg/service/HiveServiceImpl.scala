@@ -4,7 +4,6 @@ import com.datawizards.dmg.metadata.MetaDataExtractor
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 import org.apache.log4j.Logger
 
-import sys.process._
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
 
@@ -30,9 +29,7 @@ object HiveServiceImpl extends HiveService {
     pw.write(sql)
     pw.close()
     val command = s"hive -f $file"
-    log.info(s"Executing hive command: [$command]")
-    val out: String = command.!!
-    log.info("Execute hive command. Output:\n" + out)
+    ConsoleCommandExecutor.execute(command)
   }
 
 }

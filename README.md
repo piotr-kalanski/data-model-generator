@@ -20,6 +20,7 @@ Data model generator based on Scala case classes.
   * [Java dialect](#java-dialect)
 - [Installers](#installers)
   * [Register Avro schema to Avro schema registry](#register-avro-schema-to-avro-schema-registry)
+  * [Copy Avro schema to HDFS](#copy-avro-schema-to-hdfs)
   * [Create Elasticsearch index](#create-elasticsearch-index)
   * [Create Elasticsearch template](#create-elasticsearch-template)
   * [Create Hive table](#create-hive-table)
@@ -44,7 +45,7 @@ Data model generator based on Scala case classes.
 Include dependency:
 
 ```scala
-"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.5.4"
+"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.6.0"
 ```
 
 or
@@ -53,7 +54,7 @@ or
 <dependency>
     <groupId>com.github.piotr-kalanski</groupId>
     <artifactId>data-model-generator_2.11</artifactId>
-    <version>0.5.4</version>
+    <version>0.6.0</version>
 </dependency>
 ```
 
@@ -298,6 +299,19 @@ object RegisterAvroSchema extends App {
 ["person"]
 "Registered schema:"
 {"type":"record","name":"Person","namespace":"com.datawizards.dmg.examples","fields":[{"name":"name","type":"string"},{"name":"age","type":"int"}]}
+```
+
+## Copy Avro schema to HDFS
+
+```scala
+import com.datawizards.dmg.service.AvroSchemaRegistryServiceImpl
+
+case class Person(name: String, age: Int)
+
+object CopyAvroSchemaToHDFS extends App {
+  val service = new AvroSchemaRegistryServiceImpl("http://localhost:8081")
+  service.copyAvroSchemaToHdfs[Person]("/metadata/schemas/person")
+}
 ```
 
 ## Create Elasticsearch index
