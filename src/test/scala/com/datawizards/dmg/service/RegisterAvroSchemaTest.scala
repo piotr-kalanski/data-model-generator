@@ -28,6 +28,7 @@ class RegisterAvroSchemaTest extends FunSuite {
         schemas += subject -> schema
       }
     }
+    override protected val hdfsService:HDFSService = HDFSServiceImpl
   }
 
   test("Register and fetch avro schema") {

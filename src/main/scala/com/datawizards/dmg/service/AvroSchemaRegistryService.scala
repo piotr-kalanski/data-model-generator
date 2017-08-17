@@ -10,9 +10,22 @@ import org.apache.log4j.Logger
 trait AvroSchemaRegistryService {
   private val log = Logger.getLogger(getClass.getName)
   protected val repository: AvroSchemaRegistryRepository
+  protected val hdfsService: HDFSService
+
+  def generateSchema[T: ClassTag: TypeTag](): String = {
+    DataModelGenerator.generate[T](dialects.AvroSchema)
+  }
+
+  def generateSchemaForAvroSchemaRegistry[T: ClassTag: TypeTag](): String = {
+    DataModelGenerator.generate[T](dialects.AvroSchemaRegistry)
+  }
 
   def registerSchema[T: ClassTag: TypeTag](subject: String): Unit = {
-    val schema = DataModelGenerator.generate[T](dialects.AvroSchemaRegistry)
+    val schema = generateSchemaForAvroSchemaRegistry[T]()
+    registerSchema(schema, subject)
+  }
+
+  def registerSchema(schema: String, subject: String): Unit = {
     repository.registerSchema(subject, schema)
     log.info(s"Registered schema [$subject] at avro schema registry.")
   }
@@ -26,4 +39,13 @@ trait AvroSchemaRegistryService {
   def fetchSchema(subject: String): String =
     fetchSchema(subject, "latest")
 
+  def copyAvroSchemaToHdfs(schema: String, hdfsPath: String): Unit = {
+    val file = "/tmp/dmg_" + java.util.UUID.randomUUID().toString
+    hdfsService.copyLocalFileToHDFS(file, hdfsPath)
+  }
+
+  def copyAvroSchemaToHdfs[T: ClassTag: TypeTag](hdfsPath: String): Unit = {
+    val schema = generateSchema[T]()
+    copyAvroSchemaToHdfs(schema, hdfsPath)
+  }
 }
