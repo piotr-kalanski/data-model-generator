@@ -4,5 +4,7 @@ import org.scalatest.{FunSuite, Matchers}
 
 trait DataModelGeneratorBaseTest extends FunSuite with Matchers {
   def assertResultIgnoringNewLines(expected: String)(result: String): Unit =
-    expected.replace("\n", "").replace("\r", "") should equal(result.replace("\n", "").replace("\r", ""))
+    stripNewLines(result) should equal(stripNewLines(expected))
+
+  private def stripNewLines(v: String): String = v.replace("\n", "").replace("\r", "")
 }
