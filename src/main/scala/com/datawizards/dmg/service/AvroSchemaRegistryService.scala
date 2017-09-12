@@ -12,12 +12,12 @@ trait AvroSchemaRegistryService {
   protected val repository: AvroSchemaRegistryRepository
   protected val hdfsService: HDFSService
 
-  def generateSchema[T: ClassTag: TypeTag](): String = {
-    DataModelGenerator.generate[T](dialects.AvroSchema)
+  def generateSchema[T: ClassTag: TypeTag](variables: Map[String, String] = Map.empty): String = {
+    TemplateHandler.inflate(DataModelGenerator.generate[T](dialects.AvroSchema), variables)
   }
 
-  def generateSchemaForAvroSchemaRegistry[T: ClassTag: TypeTag](): String = {
-    DataModelGenerator.generate[T](dialects.AvroSchemaRegistry)
+  def generateSchemaForAvroSchemaRegistry[T: ClassTag: TypeTag](variables: Map[String, String] = Map.empty): String = {
+    TemplateHandler.inflate(DataModelGenerator.generate[T](dialects.AvroSchemaRegistry), variables)
   }
 
   def registerSchema[T: ClassTag: TypeTag](subject: String): Unit = {
