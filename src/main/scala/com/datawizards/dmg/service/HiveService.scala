@@ -9,10 +9,10 @@ trait HiveService {
     * Generates data model for provided type and creates new Hive table.
     * Before creating table it drops table with the same name.
     */
-  def createHiveTable[T: ClassTag: TypeTag](): Unit
+  def createHiveTable[T: ClassTag: TypeTag](variables: Map[String, String] = Map.empty): Unit
 
   /**
     * Generates data model for provided type and creates new Hive table.
     */
-  def createHiveTableIfNotExists[T: ClassTag: TypeTag](): Unit
+  def createHiveTableIfNotExists[T: ClassTag: TypeTag](variables: Map[String, String] = Map.empty): Unit
 }

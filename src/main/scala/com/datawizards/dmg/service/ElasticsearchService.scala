@@ -11,15 +11,15 @@ trait ElasticsearchService {
   private val log = Logger.getLogger(getClass.getName)
   protected val repository: ElasticsearchRepository
 
-  def updateTemplate[T: ClassTag: TypeTag](templateName: String): Unit = {
-    val template = DataModelGenerator.generate[T](dialects.Elasticsearch)
+  def updateTemplate[T: ClassTag: TypeTag](templateName: String, variables: Map[String, String] = Map.empty): Unit = {
+    val template = TemplateHandler.inflate(DataModelGenerator.generate[T](dialects.Elasticsearch), variables)
     repository.deleteTemplate(templateName)
     repository.updateTemplate(templateName, template)
     log.info(s"Updated template [$templateName] at Elasticsearch.")
   }
 
-  def updateTemplateIfNotExists[T: ClassTag: TypeTag](templateName: String): Unit = {
-    val template = DataModelGenerator.generate[T](dialects.Elasticsearch)
+  def updateTemplateIfNotExists[T: ClassTag: TypeTag](templateName: String, variables: Map[String, String] = Map.empty): Unit = {
+    val template = TemplateHandler.inflate(DataModelGenerator.generate[T](dialects.Elasticsearch), variables)
     if(!repository.templateExists(templateName)) {
       repository.updateTemplate(templateName, template)
       log.info(s"Updated template [$templateName] at Elasticsearch.")
@@ -29,16 +29,16 @@ trait ElasticsearchService {
   def getTemplate(templateName: String): String =
     repository.getTemplate(templateName)
 
-  def createIndexIfNotExists[T: ClassTag: TypeTag](indexName: String): Unit = {
-    val mapping = DataModelGenerator.generate[T](dialects.Elasticsearch)
+  def createIndexIfNotExists[T: ClassTag: TypeTag](indexName: String, variables: Map[String, String] = Map.empty): Unit = {
+    val mapping = TemplateHandler.inflate(DataModelGenerator.generate[T](dialects.Elasticsearch), variables)
     if(!repository.indexExists(indexName)) {
       repository.createIndex(indexName, mapping)
       log.info(s"Created index [$indexName] at Elasticsearch.")
     }
   }
 
-  def createIndex[T: ClassTag: TypeTag](indexName: String): Unit = {
-    val mapping = DataModelGenerator.generate[T](dialects.Elasticsearch)
+  def createIndex[T: ClassTag: TypeTag](indexName: String, variables: Map[String, String] = Map.empty): Unit = {
+    val mapping = TemplateHandler.inflate(DataModelGenerator.generate[T](dialects.Elasticsearch), variables)
     repository.deleteIndex(indexName)
     repository.createIndex(indexName, mapping)
     log.info(s"Created index [$indexName] at Elasticsearch.")

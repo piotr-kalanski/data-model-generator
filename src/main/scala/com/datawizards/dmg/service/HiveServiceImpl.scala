@@ -10,17 +10,17 @@ import scala.reflect.runtime.universe.TypeTag
 object HiveServiceImpl extends HiveService {
   private val log = Logger.getLogger(getClass.getName)
 
-  override def createHiveTable[T: ClassTag: TypeTag](): Unit = {
+  override def createHiveTable[T: ClassTag: TypeTag](variables: Map[String, String] = Map.empty): Unit = {
     val classTypeMetaData = MetaDataExtractor.extractClassMetaDataForDialect(dialects.Hive)
     val tableName = classTypeMetaData.typeName
     val createTableExpression = DataModelGenerator.generate[T](dialects.Hive, classTypeMetaData)
     val dropTableExpression = s"DROP TABLE $tableName;\n"
-    executeHiveScript(dropTableExpression + createTableExpression)
+    executeHiveScript(TemplateHandler.inflate(dropTableExpression + createTableExpression, variables))
   }
 
-  override def createHiveTableIfNotExists[T: ClassTag: TypeTag](): Unit = {
+  override def createHiveTableIfNotExists[T: ClassTag: TypeTag](variables: Map[String, String] = Map.empty): Unit = {
     val createTableExpression = DataModelGenerator.generate[T](dialects.Hive)
-    executeHiveScript(createTableExpression)
+    executeHiveScript(TemplateHandler.inflate(createTableExpression, variables))
   }
 
   private def executeHiveScript(sql: String): Unit = {
