@@ -5,5 +5,6 @@ import com.datawizards.dmg.annotations.column
 case class CV(
   person: Person,
   @column(name="workExperience")
-  experience: Iterable[WorkExperience]
+  experience: Iterable[WorkExperience],
+  `Wierd chars - / +`: String
 )
