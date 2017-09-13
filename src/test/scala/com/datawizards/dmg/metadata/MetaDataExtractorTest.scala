@@ -193,6 +193,12 @@ class MetaDataExtractorTest extends FunSuite {
                 )
               )
             )
+          ),
+          ClassFieldMetaData(
+            originalFieldName = "Wierd chars - / +"
+            , fieldName = "Wierd chars - / +"
+            , fieldType = StringType
+            , annotations = Seq.empty
           )
       )
     )
