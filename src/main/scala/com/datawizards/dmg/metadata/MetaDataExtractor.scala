@@ -2,6 +2,7 @@ package com.datawizards.dmg.metadata
 
 import com.datawizards.dmg.dialects.Dialect
 
+import scala.reflect.NameTransformer
 import scala.reflect.runtime.universe._
 
 /**
@@ -109,8 +110,8 @@ object MetaDataExtractor {
       .paramLists
       .head
       .map(f => ClassFieldMetaData(
-        originalFieldName = f.name.toString.replace("$minus", "-"),
-        fieldName = f.name.toString.replace("$minus", "-"),
+        originalFieldName = NameTransformer.decode(f.name.toString),
+        fieldName = NameTransformer.decode(f.name.toString),
         fieldType = extractTypeMetaData(f.typeSignature),
         annotations = extractAnnotations(f)
       ))
