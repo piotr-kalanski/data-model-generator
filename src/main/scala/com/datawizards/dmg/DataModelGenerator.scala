@@ -34,7 +34,7 @@ object DataModelGenerator {
   }
 
   private def getClassMetaData[T: ClassTag: TypeTag](dialect: Dialect): ClassTypeMetaData =
-    MetaDataExtractor.extractClassMetaDataForDialect[T](dialect)
+    MetaDataExtractor.extractClassMetaDataForDialect[T](Some(dialect))
 
   private def generateDataModel(dialect: Dialect, classTypeMetaData: ClassTypeMetaData): String = {
     dialect.generateDataModel(classTypeMetaData, generateFieldsExpressions(dialect, classTypeMetaData))

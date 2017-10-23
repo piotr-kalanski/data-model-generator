@@ -6,7 +6,6 @@ import java.sql.Date
 import com.datawizards.dmg.annotations._
 import com.datawizards.dmg.annotations.hive._
 import com.datawizards.dmg.annotations.es._
-import com.datawizards.dmg.dialects.H2Dialect
 
 object TestModel {
   case class Person(name: String, age: Int)
@@ -41,15 +40,15 @@ object TestModel {
   )
 
   @table("people")
-  @table("PEOPLE", dialects.H2)
-  @table("person", dialects.Elasticsearch)
+  @table("PEOPLE", dialects.H2Dialect)
+  @table("person", dialects.ElasticsearchDialect)
   case class PersonWithMultipleCustomNames(
-    @column("NAME", dialects.H2)
-    @column("personNameEs", dialects.Elasticsearch)
+    @column("NAME", dialects.H2Dialect)
+    @column("personNameEs", dialects.ElasticsearchDialect)
     name: String,
     @column("personAge")
-    @column("AGE", dialects.H2)
-    @column("personAgeEs", dialects.Elasticsearch)
+    @column("AGE", dialects.H2Dialect)
+    @column("personAgeEs", dialects.ElasticsearchDialect)
     age: Int
   )
 
@@ -187,21 +186,21 @@ object TestModel {
     birthday: Date
   )
 
-  @underscore(dialect = dialects.H2)
+  @underscore(dialect = dialects.H2Dialect)
   case class PersonWithUnderscore(
     personName: String,
     personAge: Int
   )
 
-  @underscore(dialect = dialects.H2)
-  @underscore(dialect = dialects.Hive)
-  @underscore(dialect = dialects.Redshift)
-  @table("PEOPLE", dialect = dialects.Hive)
+  @underscore(dialect = dialects.H2Dialect)
+  @underscore(dialect = dialects.HiveDialect)
+  @underscore(dialect = dialects.RedshiftDialect)
+  @table("PEOPLE", dialect = dialects.HiveDialect)
   case class PersonWithUnderscoreWithMultipleNames(
-    @column("name", dialect = dialects.Hive)
-    @column("name", dialect = dialects.Redshift)
+    @column("name", dialect = dialects.HiveDialect)
+    @column("name", dialect = dialects.RedshiftDialect)
     personName: String,
-    @column("age", dialect = dialects.Redshift)
+    @column("age", dialect = dialects.RedshiftDialect)
     personAge: Int
   )
 

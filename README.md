@@ -69,7 +69,7 @@ case class Person(name: String, age: Int)
 case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
 object H2Example extends App {
-  println(DataModelGenerator.generate[Book](dialects.H2))
+  println(DataModelGenerator.generate[Book](dialects.H2Dialect))
 }
 ```
 
@@ -91,7 +91,7 @@ case class Person(name: String, age: Int)
 case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
 object HiveExample extends App {
-  println(DataModelGenerator.generate[Book](dialects.Hive))
+  println(DataModelGenerator.generate[Book](dialects.HiveDialect))
 }
 ```
 
@@ -113,7 +113,7 @@ case class Person(name: String, age: Int)
 case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
 object RedshiftExample extends App {
-  println(DataModelGenerator.generate[Book](dialects.Redshift))
+  println(DataModelGenerator.generate[Book](dialects.RedshiftDialect))
 }
 ```
 
@@ -135,7 +135,7 @@ case class Person(name: String, age: Int)
 case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
 object MySQLExample extends App {
-  println(DataModelGenerator.generate[Book](dialects.MySQL))
+  println(DataModelGenerator.generate[Book](dialects.MySQLDialect))
 }
 ```
 
@@ -157,7 +157,7 @@ CREATE TABLE Book(
 case class Person(name: String, age: Int)
 case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
-DataModelGenerator.generate[Book](dialects.AvroSchema)
+DataModelGenerator.generate[Book](dialects.AvroSchemaDialect)
 ```
 
 ```json
@@ -180,7 +180,7 @@ DataModelGenerator.generate[Book](dialects.AvroSchema)
 
 case class Person(name: String, age: Int, skills: Seq[String])
 
-DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
+DataModelGenerator.generate[Person](dialects.AvroSchemaRegistryDialect)
 ```
 
 ```json
@@ -205,7 +205,7 @@ DataModelGenerator.generate[Person](dialects.AvroSchemaRegistry)
 case class Person(name: String, age: Int)
 case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
-DataModelGenerator.generate[Book](dialects.Elasticsearch)
+DataModelGenerator.generate[Book](dialects.ElasticsearchDialect)
 ```
 
 ```json
@@ -357,7 +357,7 @@ HiveServiceImpl.createHiveTable[Person]()
 
 To extract class metadata you can use method `MetaDataExtractor.extractClassMetaDataForDialect`. Example:
 ```scala
-MetaDataExtractor.extractClassMetaDataForDialect[T](dialects.Hive)
+MetaDataExtractor.extractClassMetaDataForDialect[T](Some(dialects.HiveDialect))
 ```
 
 # Customizations
@@ -373,7 +373,7 @@ case class Person(
   age: Int
 )
 
-DataModelGenerator.generate[Person](dialects.H2)
+DataModelGenerator.generate[Person](dialects.H2Dialect)
 ```
 
 ```sql
@@ -390,15 +390,15 @@ import com.datawizards.dmg.annotations._
 
 case class Person(
   @column(name="NAME")
-  @column(name="personName", dialects.Elasticsearch)
+  @column(name="personName", dialects.ElasticsearchDialect)
   name: String,
   @column(name="AGE")
-  @column(name="personAge", dialects.Elasticsearch)
+  @column(name="personAge", dialects.ElasticsearchDialect)
   age: Int
 )
 
-DataModelGenerator.generate[Person](dialects.H2)
-DataModelGenerator.generate[Person](dialects.Elasticsearch)
+DataModelGenerator.generate[Person](dialects.H2Dialect)
+DataModelGenerator.generate[Person](dialects.ElasticsearchDialect)
 ```
 
 ```sql
@@ -430,7 +430,7 @@ case class Person(
   age: Int
 )
 
-DataModelGenerator.generate[Person](dialects.H2)
+DataModelGenerator.generate[Person](dialects.H2Dialect)
 ```
 
 ```sql
@@ -446,14 +446,14 @@ CREATE TABLE PEOPLE(
 import com.datawizards.dmg.annotations._
 
 @table("PEOPLE")
-@table("person", dialects.Elasticsearch)
+@table("person", dialects.ElasticsearchDialect)
 case class Person(
   name: String,
   age: Int
 )
 
-DataModelGenerator.generate[Person](dialects.H2)
-DataModelGenerator.generate[Person](dialects.Elasticsearch)
+DataModelGenerator.generate[Person](dialects.H2Dialect)
+DataModelGenerator.generate[Person](dialects.ElasticsearchDialect)
 ```
 
 ```sql
@@ -523,7 +523,7 @@ case class PersonWithComments(
 ### H2
 
 ```scala
-DataModelGenerator.generate[PersonWithComments](dialects.H2)
+DataModelGenerator.generate[PersonWithComments](dialects.H2Dialect)
 ```
 
 ```sql
@@ -537,7 +537,7 @@ COMMENT ON TABLE PersonWithComments IS 'People data';
 ### Hive
 
 ```scala
-DataModelGenerator.generate[PersonWithComments](dialects.Hive)
+DataModelGenerator.generate[PersonWithComments](dialects.HiveDialect)
 ```
 
 ```sql
@@ -551,7 +551,7 @@ COMMENT 'People data';
 ### Redshift
 
 ```scala
-DataModelGenerator.generate[PersonWithComments](dialects.Redshift)
+DataModelGenerator.generate[PersonWithComments](dialects.RedshiftDialect)
 ```
 
 ```sql
@@ -566,7 +566,7 @@ COMMENT ON COLUMN PersonWithComments.name IS 'Person name';
 ### Avro schema
 
 ```scala
-DataModelGenerator.generate[PersonWithComments](dialects.AvroSchema)
+DataModelGenerator.generate[PersonWithComments](dialects.AvroSchemaDialect)
 ```
 
 ```json
@@ -592,7 +592,7 @@ case class Person(
   age: Int
 )
 
-DataModelGenerator.generate[Person](dialects.H2)
+DataModelGenerator.generate[Person](dialects.H2Dialect)
 ```
 
 ```sql
@@ -612,9 +612,9 @@ case class Person(
   age: Int
 )
 
-DataModelGenerator.generate[Person](dialects.H2)
-DataModelGenerator.generate[Person](dialects.Redshift)
-DataModelGenerator.generate[Person](dialects.AvroSchema)
+DataModelGenerator.generate[Person](dialects.H2Dialect)
+DataModelGenerator.generate[Person](dialects.RedshiftDialect)
+DataModelGenerator.generate[Person](dialects.AvroSchemaDialect)
 ```
 
 ### H2 - not null
@@ -654,7 +654,7 @@ CREATE TABLE PersonWithNull(
 Convert table and column names for selected dialect to underscore convention.
 
 ```scala
-@underscore(dialect=dialects.H2)
+@underscore(dialect=dialects.H2Dialect)
 case class PersonWithUnderscore(
     personName: String,
     personAge: Int
@@ -677,7 +677,7 @@ CREATE TABLE person_with_underscore(
 @hiveExternalTable(location="hdfs:///data/people")
 case class Person(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.Hive)
+DataModelGenerator.generate[Person](dialects.HiveDialect)
 ```
 
 ```sql
@@ -694,7 +694,7 @@ LOCATION 'hdfs:///data/people';
 @hiveRowFormatSerde(format="org.apache.hadoop.hive.serde2.avro.AvroSerDe")
 case class Person(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.Hive)
+DataModelGenerator.generate[Person](dialects.HiveDialect)
 ```
 
 ```sql
@@ -711,7 +711,7 @@ ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe';
 @hiveStoredAs(format="PARQUET")
 case class Person(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.Hive)
+DataModelGenerator.generate[Person](dialects.HiveDialect)
 ```
 
 ```sql
@@ -730,7 +730,7 @@ STORED AS PARQUET;
 @hiveTableProperty("key3", "value3")
 case class Person(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.Hive)
+DataModelGenerator.generate[Person](dialects.HiveDialect)
 ```
 
 ```sql
@@ -751,7 +751,7 @@ TBLPROPERTIES(
 @hiveTableProperty("avro.schema.url", "hdfs:///metadata/person.avro")
 case class Person(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.Hive)
+DataModelGenerator.generate[Person](dialects.HiveDialect)
 ```
 
 If "avro.schema.url" table property is provided then generated data model doesn't have any columns definitions, because they are taken by Hive from avro schema.
@@ -778,7 +778,7 @@ case class ClicksPartitioned(
     day: Int
 )
 
-DataModelGenerator.generate[ClicksPartitioned](dialects.Hive)
+DataModelGenerator.generate[ClicksPartitioned](dialects.HiveDialect)
 ```
 
 ```sql
@@ -805,7 +805,7 @@ case class ClicksPartitioned(
     month: Int
 )
 
-DataModelGenerator.generate[ClicksPartitionedWithOrder](dialects.Hive)
+DataModelGenerator.generate[ClicksPartitionedWithOrder](dialects.HiveDialect)
 ```
 
 ```sql
@@ -843,7 +843,7 @@ case class ParquetTableWithManyAnnotations(
     month: Int
 )
 
-DataModelGenerator.generate[ParquetTableWithManyAnnotations](dialects.Hive)
+DataModelGenerator.generate[ParquetTableWithManyAnnotations](dialects.HiveDialect)
 ```
 
 ```sql
@@ -891,7 +891,7 @@ case class AvroTableWithManyAnnotations(
     month: Int
 )
 
-DataModelGenerator.generate[AvroTableWithManyAnnotations](dialects.Hive)
+DataModelGenerator.generate[AvroTableWithManyAnnotations](dialects.HiveDialect)
 ```
 
 ```sql
@@ -920,7 +920,7 @@ TBLPROPERTIES(
 @esSetting("codec", "best_compression")
 case class Person(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.Elasticsearch)
+DataModelGenerator.generate[Person](dialects.ElasticsearchDialect)
 ```
 
 ```json
@@ -952,7 +952,7 @@ case class Person(
     age: Int
 )
 
-DataModelGenerator.generate[Person](dialects.Elasticsearch)
+DataModelGenerator.generate[Person](dialects.ElasticsearchDialect)
 ```
 
 ```json
@@ -978,7 +978,7 @@ case class Person(
     @esFormat("yyyy-MM-dd") birthday: Date
 )
 
-DataModelGenerator.generate[Person](dialects.Elasticsearch)
+DataModelGenerator.generate[Person](dialects.ElasticsearchDialect)
 ```
 
 ```json
@@ -1002,7 +1002,7 @@ https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-template
 @esTemplate("people*")
 case class PersonWithEsTemplate(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.Elasticsearch)
+DataModelGenerator.generate[Person](dialects.ElasticsearchDialect)
 ```
 
 ```json
@@ -1035,7 +1035,7 @@ case class PersonWithMultipleEsAnnotations(
     birthday: Date
 )
 
-DataModelGenerator.generate[PersonWithMultipleEsAnnotations](dialects.Elasticsearch)
+DataModelGenerator.generate[PersonWithMultipleEsAnnotations](dialects.ElasticsearchDialect)
 ```
 
 ```json

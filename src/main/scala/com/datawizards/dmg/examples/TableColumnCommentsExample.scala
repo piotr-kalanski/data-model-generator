@@ -4,7 +4,7 @@ import com.datawizards.dmg.examples.TestModel.PersonWithComments
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 
 object TableColumnCommentsExample extends App {
-  println(DataModelGenerator.generate[PersonWithComments](dialects.H2))
-  println(DataModelGenerator.generate[PersonWithComments](dialects.AvroSchema))
-  println(DataModelGenerator.generate[PersonWithComments](dialects.Hive))
+  println(DataModelGenerator.generate[PersonWithComments](dialects.H2Dialect))
+  println(DataModelGenerator.generate[PersonWithComments](dialects.AvroSchemaDialect))
+  println(DataModelGenerator.generate[PersonWithComments](dialects.HiveDialect))
 }
