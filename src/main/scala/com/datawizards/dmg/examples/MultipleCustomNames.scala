@@ -4,9 +4,9 @@ import com.datawizards.dmg.{DataModelGenerator, dialects}
 import com.datawizards.dmg.examples.TestModel.PersonWithMultipleCustomNames
 
 object MultipleCustomNames extends App {
-  println(DataModelGenerator.generate[PersonWithMultipleCustomNames](dialects.H2))
-  println(DataModelGenerator.generate[PersonWithMultipleCustomNames](dialects.Hive))
-  println(DataModelGenerator.generate[PersonWithMultipleCustomNames](dialects.Redshift))
-  println(DataModelGenerator.generate[PersonWithMultipleCustomNames](dialects.AvroSchema))
-  println(DataModelGenerator.generate[PersonWithMultipleCustomNames](dialects.Elasticsearch))
+  println(DataModelGenerator.generate[PersonWithMultipleCustomNames](dialects.H2Dialect))
+  println(DataModelGenerator.generate[PersonWithMultipleCustomNames](dialects.HiveDialect))
+  println(DataModelGenerator.generate[PersonWithMultipleCustomNames](dialects.RedshiftDialect))
+  println(DataModelGenerator.generate[PersonWithMultipleCustomNames](dialects.AvroSchemaDialect))
+  println(DataModelGenerator.generate[PersonWithMultipleCustomNames](dialects.ElasticsearchDialect))
 }

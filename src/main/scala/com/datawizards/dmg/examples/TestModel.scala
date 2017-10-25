@@ -32,15 +32,15 @@ object TestModel {
     age: Int
   )
   @table("people")
-  @table("PEOPLE", dialects.H2)
-  @table("person", dialects.Elasticsearch)
+  @table("PEOPLE", dialects.H2Dialect)
+  @table("person", dialects.ElasticsearchDialect)
   case class PersonWithMultipleCustomNames(
-    @column("NAME", dialects.H2)
-    @column("personNameEs", dialects.Elasticsearch)
+    @column("NAME", dialects.H2Dialect)
+    @column("personNameEs", dialects.ElasticsearchDialect)
     name: String,
     @column("personAge")
-    @column("AGE", dialects.H2)
-    @column("personAgeEs", dialects.Elasticsearch)
+    @column("AGE", dialects.H2Dialect)
+    @column("personAgeEs", dialects.ElasticsearchDialect)
     age: Int
   )
   case class CV(skills: Seq[String])
