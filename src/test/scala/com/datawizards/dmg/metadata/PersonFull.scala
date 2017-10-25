@@ -1,8 +1,10 @@
 package com.datawizards.dmg.metadata
 
-import com.datawizards.dmg.annotations.column
+import com.datawizards.dmg.annotations.{column, table}
 import com.datawizards.dmg.dialects._
 
+@table("person_full")
+@table("person_full_es", ElasticsearchDialect)
 case class PersonFull(
   @column("person_name")
   @column("personName", ElasticsearchDialect)
