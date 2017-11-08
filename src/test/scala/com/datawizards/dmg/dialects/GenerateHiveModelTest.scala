@@ -227,7 +227,8 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |   'key1' = 'value1',
         |   'key2' = 'value2',
         |   'key3' = 'value3'
-        |);""".stripMargin
+        |);
+        |MSCK REPAIR TABLE CUSTOM_TABLE_NAME;""".stripMargin
 
     println(expected)
     println(DataModelGenerator.generate[ParquetTableWithManyAnnotations](HiveDialect))
@@ -250,7 +251,8 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |   'key1' = 'value1',
         |   'key2' = 'value2',
         |   'key3' = 'value3'
-        |);""".stripMargin
+        |);
+        |MSCK REPAIR TABLE CUSTOM_TABLE_NAME;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[AvroTableWithManyAnnotations](HiveDialect)
