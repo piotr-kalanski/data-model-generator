@@ -57,7 +57,12 @@ object HiveDialect extends DatabaseDialect {
     locationExpression(classTypeMetaData) +
     tablePropertiesExpression(classTypeMetaData)
 
-  override protected def additionalTableExpressions(classTypeMetaData: ClassTypeMetaData): String = ""
+  override protected def additionalTableExpressions(classTypeMetaData: ClassTypeMetaData): String = {
+    if(hiveExternalTableLocation(classTypeMetaData).isDefined && partitionedByExpression(classTypeMetaData).nonEmpty)
+      s"MSCK REPAIR TABLE ${classTypeMetaData.typeName};"
+    else
+      ""
+  }
 
   override protected def createTableExpression(classTypeMetaData: ClassTypeMetaData): String =
     s"CREATE ${if(hiveExternalTableLocation(classTypeMetaData).isDefined) "EXTERNAL " else ""}TABLE ${classTypeMetaData.typeName}"
@@ -90,26 +95,32 @@ object HiveDialect extends DatabaseDialect {
 
   private def partitionedByExpression(classTypeMetaData: ClassTypeMetaData): String =
   {
-    val partitionFields = classTypeMetaData.fields.filter(_.annotations.exists(_.name == HivePartitionColumn))
+    val partitionFields = getPartitionFields(classTypeMetaData)
     if(partitionFields.isEmpty)
       ""
     else {
       var fieldOrder = 0
       "\nPARTITIONED BY(" +
         partitionFields
-          .map(f => {
-            val partitionColumn = f.annotations.find(_.name == HivePartitionColumn).get
-            val order = Try(partitionColumn.attributes.find(_.name == "order").get.value.toInt).getOrElse(0)
-            fieldOrder += 1
-            (f, order, fieldOrder)
-          })
-          .toSeq
-          .sortWith{case (e1,e2) => e1._2 < e2._2 || (e1._2 == e2._2 && e1._3 < e2._3)}
-          .map(_._1)
           .map(f => s"${f.fieldName} ${generateTypeExpression(f.fieldType)}")
           .mkString(", ") +
         ")"
     }
+  }
+
+  private def getPartitionFields(classTypeMetaData: ClassTypeMetaData): Seq[ClassFieldMetaData] = {
+    val partitionFields = classTypeMetaData.fields.filter(_.annotations.exists(_.name == HivePartitionColumn))
+    var fieldOrder = 0
+    partitionFields
+      .map(f => {
+        val partitionColumn = f.annotations.find(_.name == HivePartitionColumn).get
+        val order = Try(partitionColumn.attributes.find(_.name == "order").get.value.toInt).getOrElse(0)
+        fieldOrder += 1
+        (f, order, fieldOrder)
+      })
+      .toSeq
+      .sortWith{case (e1,e2) => e1._2 < e2._2 || (e1._2 == e2._2 && e1._3 < e2._3)}
+      .map(_._1)
   }
 
   private def rowFormatSerdeExpression(classTypeMetaData: ClassTypeMetaData): String =
