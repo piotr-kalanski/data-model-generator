@@ -7,7 +7,7 @@ trait DatabaseDialect extends Dialect {
   override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
     createTableExpression(classTypeMetaData) +
     generateColumnsExpression(classTypeMetaData, fieldsExpressions) +
-    additionalTableProperties(classTypeMetaData) + ";" +
+    additionalTableProperties(classTypeMetaData) + ";\n" +
     additionalTableExpressions(classTypeMetaData)
 
   protected def createTableExpression(classTypeMetaData: ClassTypeMetaData): String =
