@@ -59,7 +59,7 @@ object HiveDialect extends DatabaseDialect {
 
   override protected def additionalTableExpressions(classTypeMetaData: ClassTypeMetaData): String = {
     if(hiveExternalTableLocation(classTypeMetaData).isDefined && partitionedByExpression(classTypeMetaData).nonEmpty)
-      s"MSCK REPAIR TABLE ${classTypeMetaData.typeName};"
+      s"MSCK REPAIR TABLE ${classTypeMetaData.typeName};\n"
     else
       ""
   }
