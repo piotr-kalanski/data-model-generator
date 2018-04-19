@@ -30,10 +30,14 @@ trait DatabaseDialect extends Dialect {
   private def generateFieldName(columnName: String): String =
     if(reservedKeywords.contains(columnName.toUpperCase))
       escapeColumnName(columnName)
-    else if(columnName.contains("-"))
+    else if(specialCharacters.exists(columnName.contains(_)))
       escapeColumnName(columnName)
     else
       columnName
+
+  protected val specialCharacters = Seq(
+    " ", "\\", "!", "@", "#", "%", "^", "&", "*", "(", ")", "-", "+", "=", "[", "]", "{", "}", ";", ":", "'", "\"", ",", ".", "<", ">", "/", "?", "|", "~"
+  )
 
   protected def reservedKeywords: Seq[String]
 
