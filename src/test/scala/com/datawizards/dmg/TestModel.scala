@@ -232,4 +232,12 @@ object TestModel {
                                       @notNull(dialect=dialects.MySQLDialect)
                                       anotherColumn: Integer
                                       )
+
+  @underscore
+  case class DefaultUnderscore(
+                              @length(123)
+                              @notNull
+                              @comment("asdf")
+                              someColumn: String
+                              )
 }

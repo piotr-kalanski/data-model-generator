@@ -58,6 +58,18 @@ class MultipleCustomNamesTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("DefaultUnderscore MySQL 2") {
+    val expected =
+      """CREATE TABLE default_underscore(
+        |   some_column VARCHAR(123) NOT NULL COMMENT 'asdf'
+        |);"""
+        .stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[DefaultUnderscore](MySQLDialect)
+    }
+  }
+
   test("Redshift") {
     val expected =
       """CREATE TABLE people(
