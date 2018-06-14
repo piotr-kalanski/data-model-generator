@@ -1,6 +1,6 @@
 package com.datawizards.dmg.service
 
-import com.datawizards.dmg.metadata.MetaDataExtractor
+import com.datawizards.dmg.dialects.MetaDataWithDialectExtractor
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 import org.apache.log4j.Logger
 
@@ -37,7 +37,7 @@ object HiveServiceImpl extends HiveService {
   }
 
   private def buildCreateTableTemplate[T: ClassTag: TypeTag](): String = {
-    val classTypeMetaData = MetaDataExtractor.extractClassMetaDataForDialect[T](Some(dialects.HiveDialect))
+    val classTypeMetaData = MetaDataWithDialectExtractor.extractClassMetaDataForDialect[T](Some(dialects.HiveDialect))
     val tableName = classTypeMetaData.typeName
     val createTableExpression = DataModelGenerator.generate[T](dialects.HiveDialect, classTypeMetaData)
     val dropTableExpression = s"DROP TABLE IF EXISTS $tableName;\n"

@@ -1,12 +1,13 @@
 package com.datawizards.dmg
 
-import com.datawizards.dmg.metadata.{MetaDataExtractor, PersonFull}
+import com.datawizards.dmg.dialects.MetaDataWithDialectExtractor
+import com.datawizards.dmg.metadata.PersonFull
 import org.scalatest.{FunSuite, Matchers}
 
 class ExtractClassMetaDataForDialectTest extends FunSuite with Matchers {
 
   test("PersonFull - Elasticsearch") {
-    val a = MetaDataExtractor.extractClassMetaDataForDialect[PersonFull](Some(com.datawizards.dmg.dialects.ElasticsearchDialect))
+    val a = MetaDataWithDialectExtractor.extractClassMetaDataForDialect[PersonFull](Some(com.datawizards.dmg.dialects.ElasticsearchDialect))
 
     println(a)
 
@@ -18,7 +19,7 @@ class ExtractClassMetaDataForDialectTest extends FunSuite with Matchers {
   }
 
   test("PersonFull - MySQL") {
-    val a = MetaDataExtractor.extractClassMetaDataForDialect[PersonFull](Some(com.datawizards.dmg.dialects.MySQLDialect))
+    val a = MetaDataWithDialectExtractor.extractClassMetaDataForDialect[PersonFull](Some(com.datawizards.dmg.dialects.MySQLDialect))
 
 
     println(a)
@@ -31,7 +32,7 @@ class ExtractClassMetaDataForDialectTest extends FunSuite with Matchers {
 
 
   test("PersonFull - None dialect") {
-    val a = MetaDataExtractor.extractClassMetaDataForDialect[PersonFull](None)
+    val a = MetaDataWithDialectExtractor.extractClassMetaDataForDialect[PersonFull](None)
 
     println(a)
 
