@@ -33,6 +33,43 @@ class MultipleCustomNamesTest extends DataModelGeneratorBaseTest {
     }
   }
 
+  test("Hive 2") {
+    val expected ="""CREATE TABLE class_with_multiple_dialects(
+                    |   some_column STRING COMMENT 'hive comment 2',
+                    |   another_column INT COMMENT 'general comment 3'
+                    |)COMMENT 'hive comment';"""
+      .stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithMultipleDialects](HiveDialect)
+    }
+  }
+
+  test("MySQL 2") {
+    val expected =
+      """CREATE TABLE ClassWithMultipleDialects(
+        |   someColumn VARCHAR(200) COMMENT 'mysql comment 2',
+        |   anotherColumn INT NOT NULL COMMENT 'mysql comment 3'
+        |)COMMENT = 'mysql comment';"""
+      .stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[ClassWithMultipleDialects](MySQLDialect)
+    }
+  }
+
+  test("DefaultUnderscore MySQL 2") {
+    val expected =
+      """CREATE TABLE default_underscore(
+        |   some_column VARCHAR(123) NOT NULL COMMENT 'asdf'
+        |);"""
+        .stripMargin
+
+    assertResultIgnoringNewLines(expected) {
+      DataModelGenerator.generate[DefaultUnderscore](MySQLDialect)
+    }
+  }
+
   test("Redshift") {
     val expected =
       """CREATE TABLE people(

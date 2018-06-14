@@ -25,17 +25,23 @@ package object annotations {
   /**
     * @param value documentation comment
     */
-  final class comment(val value: String) extends StaticAnnotation
+  final class comment(val value: String, val dialect: Dialect) extends StaticAnnotation {
+    def this(value: String) = this(value, null)
+  }
 
   /**
     * @param value column length
     */
-  final class length(val value: Int) extends StaticAnnotation
+  final class length(val value: Int, val dialect: Dialect) extends StaticAnnotation {
+    def this(value: Int) = this(value, null)
+  }
 
   /**
     * Not null field
     */
-  final class notNull extends StaticAnnotation
+  final class notNull(val dialect: Dialect) extends StaticAnnotation {
+    def this() = this(null)
+  }
 
   /**
     * Convert table name and column names to underscore.
@@ -44,5 +50,7 @@ package object annotations {
     *
     * @param dialect Dialect for which make conversion
     */
-  final class underscore(val dialect: Dialect) extends StaticAnnotation
+  final class underscore(val dialect: Dialect) extends StaticAnnotation {
+    def this() = this(null)
+  }
 }

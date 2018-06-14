@@ -43,11 +43,11 @@ trait Dialect {
   def bigDecimalType: String
   def bigIntegerType: String
 
-  def fieldLength(f: ClassFieldMetaData): Option[String] = f.getAnnotationValue(Length)
+  def fieldLength(f: ClassFieldMetaData): Option[String] = MetaDataWithDialectExtractor.getAnnotationForDialect(Length, Some(this), f).map(_.getValue)
 
-  def comment(a: HasAnnotations): Option[String] = a.getAnnotationValue(Comment)
+  def comment(a: HasAnnotations): Option[String] = MetaDataWithDialectExtractor.getAnnotationForDialect(Comment, Some(this), a).map(_.getValue)
 
-  def notNull(f: ClassFieldMetaData): Boolean = f.annotationExists(NotNull)
+  def notNull(f: ClassFieldMetaData): Boolean = MetaDataWithDialectExtractor.getAnnotationForDialect(NotNull, Some(this), f).nonEmpty
 
   def generateClassFieldExpression(f: ClassFieldMetaData): String =
     generateClassFieldExpression(f, 0)

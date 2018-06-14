@@ -2,7 +2,7 @@ name := "data-model-generator"
 
 organization := "com.github.piotr-kalanski"
 
-version := "0.7.6"
+version := "0.7.7"
 
 scalaVersion := "2.11.8"
 
