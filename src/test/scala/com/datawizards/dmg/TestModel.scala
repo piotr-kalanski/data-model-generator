@@ -240,4 +240,14 @@ object TestModel {
                               @comment("asdf")
                               someColumn: String
                               )
+
+
+  class NotSupportedType(val a: String) {
+    def b: Int = 1
+  }
+
+  case class NotSupportedTypes(aaa: NotSupportedType)
+
+
+  case class WithArrayType(aaa: Array[String])
 }
