@@ -1,6 +1,6 @@
 package com.datawizards.dmg
 
-import com.datawizards.dmg.dialects.Dialect
+import com.datawizards.dmg.dialects.{Dialect, MetaDataWithDialectExtractor}
 import com.datawizards.dmg.metadata._
 import org.apache.log4j.Logger
 
@@ -34,7 +34,7 @@ object DataModelGenerator {
   }
 
   private def getClassMetaData[T: ClassTag: TypeTag](dialect: Dialect): ClassTypeMetaData =
-    MetaDataExtractor.extractClassMetaDataForDialect[T](Some(dialect))
+    MetaDataWithDialectExtractor.extractClassMetaDataForDialect[T](Some(dialect))
 
   private def generateDataModel(dialect: Dialect, classTypeMetaData: ClassTypeMetaData): String = {
     dialect.generateDataModel(classTypeMetaData, generateFieldsExpressions(dialect, classTypeMetaData))

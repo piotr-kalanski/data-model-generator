@@ -45,7 +45,7 @@ Data model generator based on Scala case classes.
 Include dependency:
 
 ```scala
-"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.7.5"
+"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.7.7"
 ```
 
 or
@@ -54,7 +54,7 @@ or
 <dependency>
     <groupId>com.github.piotr-kalanski</groupId>
     <artifactId>data-model-generator_2.11</artifactId>
-    <version>0.7.5</version>
+    <version>0.7.7</version>
 </dependency>
 ```
 
@@ -355,9 +355,9 @@ HiveServiceImpl.createHiveTable[Person]()
 
 # Extracting class metadata
 
-To extract class metadata you can use method `MetaDataExtractor.extractClassMetaDataForDialect`. Example:
+To extract class metadata you can use method `MetaDataWithDialectExtractor.extractClassMetaDataForDialect`. Example:
 ```scala
-MetaDataExtractor.extractClassMetaDataForDialect[T](Some(dialects.HiveDialect))
+MetaDataWithDialectExtractor.extractClassMetaDataForDialect[T](Some(dialects.HiveDialect))
 ```
 
 # Customizations

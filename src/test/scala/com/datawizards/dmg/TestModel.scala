@@ -216,4 +216,20 @@ object TestModel {
   case class ClassWithArrayByte(arr: Array[Byte])
   case class ClassWithBigInteger(n1: BigInt)
   case class ClassWithBigDecimal(n1: BigDecimal)
+
+
+  @comment(value="mysql comment", dialect=dialects.MySQLDialect)
+  @comment(value="hive comment", dialect=dialects.HiveDialect)
+  @underscore(dialect=dialects.HiveDialect)
+  case class ClassWithMultipleDialects(
+                                      @comment(value="mysql comment 2", dialect=dialects.MySQLDialect)
+                                      @comment(value="hive comment 2", dialect=dialects.HiveDialect)
+                                      @length(value=200, dialect=dialects.MySQLDialect)
+                                      someColumn: String,
+
+                                      @comment(value="mysql comment 3", dialect=dialects.MySQLDialect)
+                                      @comment(value="general comment 3")
+                                      @notNull(dialect=dialects.MySQLDialect)
+                                      anotherColumn: Integer
+                                      )
 }

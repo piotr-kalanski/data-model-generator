@@ -3,17 +3,21 @@ package com.datawizards.dmg
 package object metadata {
   case class AnnotationAttributeMetaData(name: String, value: String)
 
-  case class AnnotationMetaData(name: String, attributes: Seq[AnnotationAttributeMetaData])
+  trait HasValueAttribute {
+    val attributes: Seq[AnnotationAttributeMetaData]
+
+    def getValue: String = {
+      attributes.head.value
+    }
+  }
+
+  case class AnnotationMetaData(name: String, attributes: Seq[AnnotationAttributeMetaData]) extends HasValueAttribute
 
   trait HasAnnotations {
     val annotations: Iterable[AnnotationMetaData]
 
     def getAnnotationValue(annotationName: String): Option[String] = {
-      val annotation = annotations.find(_.name == annotationName)
-      if(annotation.isDefined)
-        Some(annotation.get.attributes.head.value)
-      else
-        None
+      annotations.find(_.name == annotationName).map(_.getValue)
     }
 
     def annotationExists(annotationName: String): Boolean = {
