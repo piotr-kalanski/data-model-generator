@@ -7,7 +7,7 @@ import com.datawizards.esclient.dto.SearchResult
 import com.datawizards.esclient.repository.ElasticsearchRepository
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatestplus.junit.JUnitRunner
 
 import scala.collection.mutable
 import scala.reflect.ClassTag
