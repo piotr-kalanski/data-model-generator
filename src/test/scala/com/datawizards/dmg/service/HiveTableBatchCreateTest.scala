@@ -18,7 +18,9 @@ class HiveTableBatchCreateTest extends DataModelGeneratorBaseTest {
         |CREATE TABLE Person(
         |   name STRING,
         |   age INT
-        |);
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-203337385')
+        |;
         |
         |
         |DROP TABLE IF EXISTS person_partitioned_hehehe;
@@ -28,7 +30,9 @@ class HiveTableBatchCreateTest extends DataModelGeneratorBaseTest {
         |   title STRING
         |)
         |PARTITIONED BY(birthYear INT, birthMonth INT, birthDay INT)
-        |LOCATION 's3://some/path';
+        |LOCATION 's3://some/path'
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-538009580')
+        |;
         |MSCK REPAIR TABLE person_partitioned_hehehe;
         |
         |
@@ -37,8 +41,9 @@ class HiveTableBatchCreateTest extends DataModelGeneratorBaseTest {
         |   personName STRING,
         |   personAge INT,
         |   gender STRING
-        |);
-        |
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '1126877536')
+        |;
         |
         |""".stripMargin
 

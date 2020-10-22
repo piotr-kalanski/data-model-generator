@@ -13,7 +13,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
       """CREATE TABLE Person(
         |   name STRING,
         |   age INT
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '877255039')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[Person](HiveDialect)
@@ -33,7 +35,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |   byteVal TINYINT,
         |   dateVal DATE,
         |   timestampVal TIMESTAMP
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '1365831312')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithAllSimpleTypes](HiveDialect)
@@ -46,7 +50,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |   name STRING COMMENT 'Person name',
         |   age INT
         |)
-        |COMMENT 'People data';""".stripMargin
+        |COMMENT 'People data'
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-1417254351')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonWithComments](HiveDialect)
@@ -58,7 +64,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
       """CREATE TABLE PersonWithCustomLength(
         |   name STRING(1000),
         |   age INT
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '1216179897')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonWithCustomLength](HiveDialect)
@@ -70,7 +78,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
       """CREATE TABLE CV(
         |   skills ARRAY<STRING>,
         |   grades ARRAY<INT>
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-1979412102')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[CV](HiveDialect)
@@ -82,7 +92,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
       """CREATE TABLE NestedArray(
         |   nested ARRAY<ARRAY<STRING>>,
         |   nested3 ARRAY<ARRAY<ARRAY<INT>>>
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-1567724307')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[NestedArray](HiveDialect)
@@ -96,7 +108,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |   year INT,
         |   owner STRUCT<name : STRING, age : INT>,
         |   authors ARRAY<STRUCT<name : STRING, age : INT>>
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-1808548213')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[Book](HiveDialect)
@@ -109,7 +123,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |   name STRING,
         |   age INT
         |)
-        |LOCATION 'hdfs:///data/people';""".stripMargin
+        |LOCATION 'hdfs:///data/people'
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-1960062525')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonExternalTable](HiveDialect)
@@ -122,7 +138,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |   name STRING,
         |   age INT
         |)
-        |STORED AS PARQUET;""".stripMargin
+        |STORED AS PARQUET
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-1929236886')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonStoredAsParquet](HiveDialect)
@@ -135,7 +153,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |   name STRING,
         |   age INT
         |)
-        |STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat';""".stripMargin
+        |STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-783212951')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonStoredAsAvro](HiveDialect)
@@ -148,7 +168,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |   name STRING,
         |   age INT
         |)
-        |ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe';""".stripMargin
+        |ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '1622708839')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonRowFormatSerde](HiveDialect)
@@ -164,7 +186,8 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |TBLPROPERTIES(
         |   'key1' = 'value1',
         |   'key2' = 'value2',
-        |   'key3' = 'value3'
+        |   'key3' = 'value3',
+        |   'MODEL_GENERATOR_METADATA_HASH' = '-1234842788'
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
@@ -176,7 +199,8 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     val expected =
       """CREATE TABLE PersonAvroSchemaURL
         |TBLPROPERTIES(
-        |   'avro.schema.url' = 'hdfs:///metadata/person.avro'
+        |   'avro.schema.url' = 'hdfs:///metadata/person.avro',
+        |   'MODEL_GENERATOR_METADATA_HASH' = '562021204'
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
@@ -191,7 +215,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |   event STRING,
         |   `user` STRING
         |)
-        |PARTITIONED BY(year INT, month INT, day INT);""".stripMargin
+        |PARTITIONED BY(year INT, month INT, day INT)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '2114508592')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClicksPartitioned](HiveDialect)
@@ -205,7 +231,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |   event STRING,
         |   `user` STRING
         |)
-        |PARTITIONED BY(year INT, month INT, day INT);""".stripMargin
+        |PARTITIONED BY(year INT, month INT, day INT)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '505990335')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClicksPartitionedWithOrder](HiveDialect)
@@ -226,7 +254,8 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |TBLPROPERTIES(
         |   'key1' = 'value1',
         |   'key2' = 'value2',
-        |   'key3' = 'value3'
+        |   'key3' = 'value3',
+        |   'MODEL_GENERATOR_METADATA_HASH' = '1664459034'
         |);
         |MSCK REPAIR TABLE CUSTOM_TABLE_NAME;""".stripMargin
 
@@ -250,7 +279,8 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |   'avro.schema.url' = 'hdfs:///metadata/table.avro',
         |   'key1' = 'value1',
         |   'key2' = 'value2',
-        |   'key3' = 'value3'
+        |   'key3' = 'value3',
+        |   'MODEL_GENERATOR_METADATA_HASH' = '-1271021230'
         |);
         |MSCK REPAIR TABLE CUSTOM_TABLE_NAME;""".stripMargin
 
@@ -263,7 +293,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     val expected =
       """CREATE TABLE ClassWithMap(
         |   map MAP<INT, BOOLEAN>
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-1678449248')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithMap](HiveDialect)
@@ -274,7 +306,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     val expected =
       """CREATE TABLE ClassWithDash(
         |   `add-id` STRING
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-81720190')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithDash](HiveDialect)
@@ -286,7 +320,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
       """CREATE TABLE ClassWithReservedKeywords(
         |   `select` STRING,
         |   `where` STRING
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-1541439265')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithReservedKeywords](HiveDialect)
@@ -297,7 +333,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     val expected =
       """CREATE TABLE ClassWithArrayByte(
         |   arr BINARY
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-639278055')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithArrayByte](HiveDialect)
@@ -308,7 +346,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     val expected =
       """CREATE TABLE ClassWithBigInteger(
         |   n1 BIGINT
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-1893068753')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithBigInteger](HiveDialect)
@@ -319,7 +359,9 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
     val expected =
       """CREATE TABLE ClassWithBigDecimal(
         |   n1 DECIMAL(38,18)
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '482231622')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[ClassWithBigDecimal](HiveDialect)

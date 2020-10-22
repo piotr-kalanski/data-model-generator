@@ -70,6 +70,38 @@ object HiveDialect extends DatabaseDialect {
   override def generateColumn(f: ClassFieldMetaData): Boolean =
     !isPartitionField(f)
 
+  /**
+    * This property is added to table DDL, in TBLPROPERTIES statement.
+    * It contains hash of metadata of a case class from which DDL was generated.
+    * This serves as a mechanism for checking if case class (or table definition) has been modified.
+    * Different hashes mean that case class has been changed, so DROP TABLE and CREATE TABLE must be run.
+    * Same hashes mean that table will not be dropped and created. This saves expensive operations on Glue dropping and creating partitions.
+    */
+  val tableDefinitionHashPropertyName = "MODEL_GENERATOR_METADATA_HASH"
+
+  def shouldTableBeReCreated(classTypeMetaData: ClassTypeMetaData):Boolean = {
+    getTableDefinitionHash(classTypeMetaData).forall(_ == getClassTypeMetaDataHash(classTypeMetaData))
+  }
+
+  var getTableDefinitionHash: ((ClassTypeMetaData) => Option[Long]) = (metadata: ClassTypeMetaData) => {
+    None
+  }
+
+  def getClassTypeMetaDataHash(classTypeMetaData: ClassTypeMetaData):Long = {
+    println(classTypeMetaData)
+    classTypeMetaData.hashCode()
+  }
+
+  override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String = {
+    if(shouldTableBeReCreated(classTypeMetaData)){
+      super.generateDataModel(classTypeMetaData, fieldsExpressions)
+    } else{
+      s"/* Not re-creating table for class ${classTypeMetaData.originalTypeName} because it was not modified. \n" +
+      super.generateDataModel(classTypeMetaData, fieldsExpressions) +
+      "\n*/\n"
+    }
+  }
+
   private val HivePartitionColumn: String = "com.datawizards.dmg.annotations.hive.hivePartitionColumn"
   private val HiveRowFormatSerde: String = "com.datawizards.dmg.annotations.hive.hiveRowFormatSerde"
   private val HiveTableProperty: String = "com.datawizards.dmg.annotations.hive.hiveTableProperty"
@@ -153,18 +185,16 @@ object HiveDialect extends DatabaseDialect {
   private def tablePropertiesExpression(classTypeMetaData: ClassTypeMetaData): String =
   {
     val tableProperties = classTypeMetaData.annotations.filter(_.name == HiveTableProperty)
-    if(tableProperties.isEmpty)
-      ""
-    else
-      "\nTBLPROPERTIES(\n   " +
-      tableProperties
-        .map(a => {
-          val key = a.attributes.find(_.name == "key").get.value
-          val value = a.attributes.find(_.name == "value").get.value
-          s"'$key' = '$value'"
-        })
-      .mkString(",\n   ") +
-      "\n)"
+    val kvItems: Iterable[(String, String)] = tableProperties.map(a => {
+        val key = a.attributes.find(_.name == "key").get.value
+        val value = a.attributes.find(_.name == "value").get.value
+        (key, value)
+      }).toList ++ List((tableDefinitionHashPropertyName, s"${getClassTypeMetaDataHash(classTypeMetaData)}"))
+
+    "\nTBLPROPERTIES(\n   " +
+      kvItems.map(a => s"'${a._1}' = '${a._2}'")
+    .mkString(",\n   ") +
+    "\n)"
   }
 
   private def hiveExternalTableLocation(classTypeMetaData: ClassTypeMetaData): Option[String] =

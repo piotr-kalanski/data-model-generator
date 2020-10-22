@@ -26,7 +26,9 @@ class MultipleCustomNamesTest extends DataModelGeneratorBaseTest {
       """CREATE TABLE people(
         |   name STRING,
         |   personAge INT
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '2110356556')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonWithMultipleCustomNames](HiveDialect)
@@ -37,7 +39,9 @@ class MultipleCustomNamesTest extends DataModelGeneratorBaseTest {
     val expected ="""CREATE TABLE class_with_multiple_dialects(
                     |   some_column STRING COMMENT 'hive comment 2',
                     |   another_column INT COMMENT 'general comment 3'
-                    |)COMMENT 'hive comment';"""
+                    |)COMMENT 'hive comment'
+                    |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '-885999637')
+                    |;"""
       .stripMargin
 
     assertResultIgnoringNewLines(expected) {

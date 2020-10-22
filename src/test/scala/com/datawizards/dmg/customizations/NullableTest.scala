@@ -26,7 +26,9 @@ class NullableTest extends DataModelGeneratorBaseTest {
       """CREATE TABLE PersonWithNull(
         |   name STRING,
         |   age INT
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '2114803015')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonWithNull](HiveDialect)

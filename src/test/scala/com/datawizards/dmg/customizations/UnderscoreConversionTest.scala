@@ -26,7 +26,9 @@ class UnderscoreConversionTest extends DataModelGeneratorBaseTest {
       """CREATE TABLE PEOPLE(
         |   name STRING,
         |   person_age INT
-        |);""".stripMargin
+        |)
+        |TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '1071146412')
+        |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
       DataModelGenerator.generate[PersonWithUnderscoreWithMultipleNames](HiveDialect)
