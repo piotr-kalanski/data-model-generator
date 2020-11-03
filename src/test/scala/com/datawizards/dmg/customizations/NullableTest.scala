@@ -2,6 +2,7 @@ package com.datawizards.dmg.customizations
 
 import com.datawizards.dmg.TestModel._
 import com.datawizards.dmg.dialects._
+import com.datawizards.dmg.generator.HiveGenerator
 import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -31,7 +32,7 @@ class NullableTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonWithNull](HiveDialect)
+      DataModelGenerator.generate[PersonWithNull](new HiveGenerator)
     }
   }
 

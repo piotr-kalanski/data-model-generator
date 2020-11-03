@@ -1,8 +1,11 @@
 package com.datawizards.dmg.dialects
 
+import com.datawizards.dmg.generator.Generator
 import com.datawizards.dmg.metadata._
 
-object JavaDialect extends Dialect {
+object JavaDialect extends Dialect with Generator {
+
+  def getSupportedDialect(): Dialect = this
 
   override def intType: String = "Integer"
 
@@ -38,8 +41,6 @@ object JavaDialect extends Dialect {
 
   override def generateClassTypeExpression(classTypeMetaData: ClassTypeMetaData, fieldNamesWithExpressions: Iterable[(String, String)]): String =
     classTypeMetaData.packageName + "." + classTypeMetaData.typeName
-
-  override def toString: String = "JavaDialect"
 
   override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
     s"""public class ${classTypeMetaData.typeName} {

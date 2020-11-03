@@ -1,8 +1,11 @@
 package com.datawizards.dmg.dialects
 
+import com.datawizards.dmg.generator.Generator
 import com.datawizards.dmg.metadata._
 
-object AvroSchemaDialect extends Dialect {
+object AvroSchemaDialect extends Dialect with Generator {
+
+  def getSupportedDialect(): Dialect = this
 
   override def intType: String = "int"
 
@@ -42,8 +45,6 @@ object AvroSchemaDialect extends Dialect {
 
   override def generateMapTypeExpression(keyExpression: String, valueExpression: String): String =
     s""""map", "values": $valueExpression"""
-
-  override def toString: String = "AvroSchemaDialect"
 
   override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String = {
     val fieldsExpression = fieldsExpressions.mkString(",\n      ")

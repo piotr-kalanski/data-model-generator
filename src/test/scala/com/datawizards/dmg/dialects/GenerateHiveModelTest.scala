@@ -2,6 +2,7 @@ package com.datawizards.dmg.dialects
 
 import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
 import com.datawizards.dmg.TestModel._
+import com.datawizards.dmg.generator.HiveGenerator
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -18,7 +19,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[Person](HiveDialect)
+      DataModelGenerator.generate[Person](new HiveGenerator)
     }
   }
 
@@ -40,7 +41,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ClassWithAllSimpleTypes](HiveDialect)
+      DataModelGenerator.generate[ClassWithAllSimpleTypes](new HiveGenerator)
     }
   }
 
@@ -55,7 +56,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonWithComments](HiveDialect)
+      DataModelGenerator.generate[PersonWithComments](new HiveGenerator)
     }
   }
 
@@ -69,7 +70,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonWithCustomLength](HiveDialect)
+      DataModelGenerator.generate[PersonWithCustomLength](new HiveGenerator)
     }
   }
 
@@ -83,7 +84,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[CV](HiveDialect)
+      DataModelGenerator.generate[CV](new HiveGenerator)
     }
   }
 
@@ -97,7 +98,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[NestedArray](HiveDialect)
+      DataModelGenerator.generate[NestedArray](new HiveGenerator)
     }
   }
 
@@ -113,13 +114,14 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[Book](HiveDialect)
+      DataModelGenerator.generate[Book](new HiveGenerator)
     }
   }
 
   test("External table") {
     val expected =
-      """CREATE EXTERNAL TABLE PersonExternalTable(
+      """DROP TABLE IF EXISTS PersonExternalTable;
+        |CREATE EXTERNAL TABLE PersonExternalTable(
         |   name STRING,
         |   age INT
         |)
@@ -128,7 +130,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonExternalTable](HiveDialect)
+      DataModelGenerator.generate[PersonExternalTable](new HiveGenerator)
     }
   }
 
@@ -143,7 +145,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonStoredAsParquet](HiveDialect)
+      DataModelGenerator.generate[PersonStoredAsParquet](new HiveGenerator)
     }
   }
 
@@ -158,7 +160,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonStoredAsAvro](HiveDialect)
+      DataModelGenerator.generate[PersonStoredAsAvro](new HiveGenerator)
     }
   }
 
@@ -173,7 +175,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonRowFormatSerde](HiveDialect)
+      DataModelGenerator.generate[PersonRowFormatSerde](new HiveGenerator)
     }
   }
 
@@ -191,7 +193,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonMultipleTableProperties](HiveDialect)
+      DataModelGenerator.generate[PersonMultipleTableProperties](new HiveGenerator)
     }
   }
 
@@ -204,7 +206,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |);""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonAvroSchemaURL](HiveDialect)
+      DataModelGenerator.generate[PersonAvroSchemaURL](new HiveGenerator)
     }
   }
 
@@ -220,7 +222,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ClicksPartitioned](HiveDialect)
+      DataModelGenerator.generate[ClicksPartitioned](new HiveGenerator)
     }
   }
 
@@ -236,13 +238,14 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ClicksPartitionedWithOrder](HiveDialect)
+      DataModelGenerator.generate[ClicksPartitionedWithOrder](new HiveGenerator)
     }
   }
 
   test("ParquetTableWithManyAnnotations") {
     val expected =
-      """CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME(
+      """DROP TABLE IF EXISTS CUSTOM_TABLE_NAME;
+        |CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME(
         |   eventTime TIMESTAMP COMMENT 'Event time',
         |   event STRING COMMENT 'Event name',
         |   `user` STRING COMMENT 'User id'
@@ -260,16 +263,17 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |MSCK REPAIR TABLE CUSTOM_TABLE_NAME;""".stripMargin
 
     println(expected)
-    println(DataModelGenerator.generate[ParquetTableWithManyAnnotations](HiveDialect))
+    println(DataModelGenerator.generate[ParquetTableWithManyAnnotations](new HiveGenerator))
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ParquetTableWithManyAnnotations](HiveDialect)
+      DataModelGenerator.generate[ParquetTableWithManyAnnotations](new HiveGenerator)
     }
   }
 
   test("AvroTableWithManyAnnotations") {
     val expected =
-      """CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME
+      """DROP TABLE IF EXISTS CUSTOM_TABLE_NAME;
+        |CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME
         |COMMENT 'Table comment'
         |PARTITIONED BY(year INT, month INT, day INT)
         |ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
@@ -285,7 +289,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |MSCK REPAIR TABLE CUSTOM_TABLE_NAME;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[AvroTableWithManyAnnotations](HiveDialect)
+      DataModelGenerator.generate[AvroTableWithManyAnnotations](new HiveGenerator)
     }
   }
 
@@ -298,7 +302,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ClassWithMap](HiveDialect)
+      DataModelGenerator.generate[ClassWithMap](new HiveGenerator)
     }
   }
 
@@ -311,7 +315,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ClassWithDash](HiveDialect)
+      DataModelGenerator.generate[ClassWithDash](new HiveGenerator)
     }
   }
 
@@ -325,7 +329,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ClassWithReservedKeywords](HiveDialect)
+      DataModelGenerator.generate[ClassWithReservedKeywords](new HiveGenerator)
     }
   }
 
@@ -338,7 +342,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ClassWithArrayByte](HiveDialect)
+      DataModelGenerator.generate[ClassWithArrayByte](new HiveGenerator)
     }
   }
 
@@ -351,7 +355,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ClassWithBigInteger](HiveDialect)
+      DataModelGenerator.generate[ClassWithBigInteger](new HiveGenerator)
     }
   }
 
@@ -364,7 +368,7 @@ class GenerateHiveModelTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[ClassWithBigDecimal](HiveDialect)
+      DataModelGenerator.generate[ClassWithBigDecimal](new HiveGenerator)
     }
   }
 

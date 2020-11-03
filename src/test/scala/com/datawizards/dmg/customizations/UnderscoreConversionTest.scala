@@ -2,6 +2,7 @@ package com.datawizards.dmg.customizations
 
 import com.datawizards.dmg.TestModel._
 import com.datawizards.dmg.dialects.{H2Dialect, HiveDialect, MySQLDialect, RedshiftDialect}
+import com.datawizards.dmg.generator.HiveGenerator
 import com.datawizards.dmg.{DataModelGenerator, DataModelGeneratorBaseTest}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -31,7 +32,7 @@ class UnderscoreConversionTest extends DataModelGeneratorBaseTest {
         |;""".stripMargin
 
     assertResultIgnoringNewLines(expected) {
-      DataModelGenerator.generate[PersonWithUnderscoreWithMultipleNames](HiveDialect)
+      DataModelGenerator.generate[PersonWithUnderscoreWithMultipleNames](new HiveGenerator)
     }
   }
 
