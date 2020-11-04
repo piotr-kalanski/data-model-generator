@@ -121,9 +121,10 @@ class HiveGenerator(dropAndCreateTable: DropAndCreateTable=DropAndCreateTable.On
     if(shouldTableBeReCreated(classTypeMetaData)){
       super.generateDataModel(classTypeMetaData, fieldsExpressions)
     } else{
-      s"/* Not re-creating table for class ${classTypeMetaData.originalTypeName} because it was not modified. \n" +
-        super.generateDataModel(classTypeMetaData, fieldsExpressions) +
-        "\n*/\n"
+      s"--Not re-creating table for class ${classTypeMetaData.originalTypeName} because it was not modified.\n" +
+        "--" +
+        super.generateDataModel(classTypeMetaData, fieldsExpressions).split("(\n|\r\n|\r)+").mkString("\n--") +
+        "\n"
     }
   }
 
