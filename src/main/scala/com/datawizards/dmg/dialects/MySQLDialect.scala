@@ -1,8 +1,12 @@
 package com.datawizards.dmg.dialects
 
+import com.datawizards.dmg.generator.DatabaseGenerator
 import com.datawizards.dmg.metadata._
 
-object MySQLDialect extends DatabaseDialect {
+object MySQLDialect extends DatabaseGenerator with Dialect {
+
+  def getSupportedDialect(): Dialect = this
+
   override def intType: String = "INT"
 
   override def stringType: String = "VARCHAR"
@@ -43,8 +47,6 @@ object MySQLDialect extends DatabaseDialect {
     log.warn("MySQL doesn't support Map type. Column converted to JSON")
     "JSON"
   }
-
-  override def toString: String = "MySQLDialect"
 
   override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String =
     notNullExpression(f) +

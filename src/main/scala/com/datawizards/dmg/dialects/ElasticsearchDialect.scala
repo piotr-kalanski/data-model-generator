@@ -1,8 +1,11 @@
 package com.datawizards.dmg.dialects
 
+import com.datawizards.dmg.generator.Generator
 import com.datawizards.dmg.metadata._
 
-object ElasticsearchDialect extends Dialect {
+object ElasticsearchDialect extends Dialect with Generator {
+
+  def getSupportedDialect(): Dialect = this
 
   override def intType: String = "integer"
 
@@ -29,8 +32,6 @@ object ElasticsearchDialect extends Dialect {
   override def bigDecimalType: String = "double"
 
   override def bigIntegerType: String = "double"
-
-  override def toString: String = "ElasticsearchDialect"
 
   override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
     "{\n" +

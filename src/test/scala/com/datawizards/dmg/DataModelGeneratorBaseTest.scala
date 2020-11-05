@@ -7,4 +7,6 @@ trait DataModelGeneratorBaseTest extends FunSuite with Matchers {
     stripNewLines(result) should equal(stripNewLines(expected))
 
   private def stripNewLines(v: String): String = v.replace("\n", "").replace("\r", "")
+
+  def alignWhitespace(v: String): String = v.replaceAll("\\s+", " ")
 }

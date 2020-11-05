@@ -1,8 +1,12 @@
 package com.datawizards.dmg.dialects
 
+import com.datawizards.dmg.generator.DatabaseGenerator
 import com.datawizards.dmg.metadata._
 
-object RedshiftDialect extends DatabaseDialect {
+object RedshiftDialect extends DatabaseGenerator with Dialect {
+
+  def getSupportedDialect(): Dialect = this
+
   override def intType: String = "INTEGER"
 
   override def stringType: String = "VARCHAR"
@@ -43,8 +47,6 @@ object RedshiftDialect extends DatabaseDialect {
     log.warn("Redshift doesn't support Map type. Column converted to VARCHAR")
     "VARCHAR"
   }
-
-  override def toString: String = "RedshiftDialect"
 
   override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String =
     notNullExpression(f)

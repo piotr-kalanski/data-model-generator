@@ -1,8 +1,8 @@
-package com.datawizards.dmg.dialects
+package com.datawizards.dmg.generator
 
-import com.datawizards.dmg.metadata._
+import com.datawizards.dmg.metadata.{ClassFieldMetaData, ClassTypeMetaData}
 
-trait DatabaseDialect extends Dialect {
+trait DatabaseGenerator extends Generator {
 
   override def generateDataModel(classTypeMetaData: ClassTypeMetaData, fieldsExpressions: Iterable[String]): String =
     createTableExpression(classTypeMetaData) +

@@ -58,7 +58,7 @@ object MetaDataWithDialectExtractor {
 
   def getAnnotationForDialect(annotationName: String, dialect: Option[Dialect], hasAnnotations: HasAnnotations): Option[AnnotationMetaData] = {
     if(dialect.isDefined){
-      val dialectName = dialect.get.toString
+      val dialectName = dialect.get.getClass.getSimpleName.stripSuffix("$")
       val annotationsFiltered: Iterable[AnnotationMetaData] = hasAnnotations.annotations
         .filter(a => a.name == annotationName)
 

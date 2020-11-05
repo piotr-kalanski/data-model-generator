@@ -1,7 +1,11 @@
 package com.datawizards.dmg.dialects
+import com.datawizards.dmg.generator.DatabaseGenerator
 import com.datawizards.dmg.metadata._
 
-object H2Dialect extends DatabaseDialect {
+object H2Dialect extends DatabaseGenerator with Dialect {
+
+  def getSupportedDialect(): Dialect = this
+
   override def intType: String = "INT"
 
   override def stringType: String = "VARCHAR"
@@ -36,8 +40,6 @@ object H2Dialect extends DatabaseDialect {
     log.warn("H2 doesn't support Map type. Column converted to VARCHAR")
     "VARCHAR"
   }
-
-  override def toString: String = "H2Dialect"
 
   override protected def fieldAdditionalExpressions(f: ClassFieldMetaData): String =
     notNullExpression(f) +

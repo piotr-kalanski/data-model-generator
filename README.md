@@ -45,7 +45,7 @@ Data model generator based on Scala case classes.
 Include dependency:
 
 ```scala
-"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.7.7"
+"com.github.piotr-kalanski" % "data-model-generator_2.11" % "0.8.1"
 ```
 
 or
@@ -54,7 +54,7 @@ or
 <dependency>
     <groupId>com.github.piotr-kalanski</groupId>
     <artifactId>data-model-generator_2.11</artifactId>
-    <version>0.7.7</version>
+    <version>0.8.1</version>
 </dependency>
 ```
 
@@ -85,13 +85,14 @@ CREATE TABLE Book(
 ## Hive dialect
 
 ```scala
+import com.datawizards.dmg.generator.HiveGenerator
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 
 case class Person(name: String, age: Int)
 case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
 
 object HiveExample extends App {
-  println(DataModelGenerator.generate[Book](dialects.HiveDialect))
+  println(DataModelGenerator.generate[Book](new HiveGenerator()))
 }
 ```
 
@@ -153,6 +154,7 @@ CREATE TABLE Book(
 ### Avro schema
 
 ```scala
+import com.datawizards.dmg.{DataModelGenerator, dialects}
 
 case class Person(name: String, age: Int)
 case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
@@ -177,6 +179,7 @@ DataModelGenerator.generate[Book](dialects.AvroSchemaDialect)
 ### Avro schema for Avro Schema Registry
 
 ```scala
+import com.datawizards.dmg.{DataModelGenerator, dialects}
 
 case class Person(name: String, age: Int, skills: Seq[String])
 
@@ -201,6 +204,7 @@ DataModelGenerator.generate[Person](dialects.AvroSchemaRegistryDialect)
 ## Elasticsearch dialect
 
 ```scala
+import com.datawizards.dmg.{DataModelGenerator, dialects}
 
 case class Person(name: String, age: Int)
 case class Book(title: String, year: Int, owner: Person, authors: Seq[Person])
@@ -236,9 +240,11 @@ DataModelGenerator.generate[Book](dialects.ElasticsearchDialect)
 ## Java dialect
 
 ```scala
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 case class Person(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.Java)
+DataModelGenerator.generate[Person](dialects.JavaDialect)
 ```
 
 ```java
@@ -350,6 +356,8 @@ object CreateElasticsearchTemplate extends App {
 ```scala
 import com.datawizards.dmg.service.HiveServiceImpl
 
+case class Person(name: String, age: Int)
+
 HiveServiceImpl.createHiveTable[Person]()
 ```
 
@@ -357,7 +365,12 @@ HiveServiceImpl.createHiveTable[Person]()
 
 To extract class metadata you can use method `MetaDataWithDialectExtractor.extractClassMetaDataForDialect`. Example:
 ```scala
-MetaDataWithDialectExtractor.extractClassMetaDataForDialect[T](Some(dialects.HiveDialect))
+import com.datawizards.dmg.dialects
+import com.datawizards.dmg.dialects.MetaDataWithDialectExtractor
+
+case class Person(name: String, age: Int)
+
+MetaDataWithDialectExtractor.extractClassMetaDataForDialect[Person](Some(dialects.HiveDialect))
 ```
 
 # Customizations
@@ -366,6 +379,7 @@ MetaDataWithDialectExtractor.extractClassMetaDataForDialect[T](Some(dialects.Hiv
 
 ```scala
 import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
 
 case class Person(
   @column(name="personName")
@@ -387,6 +401,7 @@ CREATE TABLE Person(
 
 ```scala
 import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
 
 case class Person(
   @column(name="NAME")
@@ -423,6 +438,7 @@ CREATE TABLE PEOPLE(
 
 ```scala
 import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
 
 @table("PEOPLE")
 case class Person(
@@ -444,6 +460,7 @@ CREATE TABLE PEOPLE(
 
 ```scala
 import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
 
 @table("PEOPLE")
 @table("person", dialects.ElasticsearchDialect)
@@ -483,24 +500,28 @@ Example use case for placeholder variables is to use them for generating table n
 For example, each environment has dedicated DB schema e.g. development, uat, production.
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.service.TemplateHandler
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 @table("${environment}.people")
 case class Person(
     name: String,
     age: Int
 )
 
-TemplateHandler.inflate(DataModelGenerator.generate[Person](H2Dialect), Map("environment" -> "development"))
+TemplateHandler.inflate(DataModelGenerator.generate[Person](dialects.H2Dialect), Map("environment" -> "development"))
+
+TemplateHandler.inflate(DataModelGenerator.generate[Person](dialects.H2Dialect), Map("environment" -> "production"))
 ```
+
+Generates:
 
 ```sql
 CREATE TABLE development.people(
    name VARCHAR,
    age INT
 );
-```
-
-```scala
-TemplateHandler.inflate(DataModelGenerator.generate[Person](H2Dialect), Map("environment" -> "production"))
 ```
 
 ```sql
@@ -513,6 +534,8 @@ CREATE TABLE production.people(
 ## Documentation comments
 
 ```scala
+import com.datawizards.dmg.annotations._
+
 @comment("People data")
 case class PersonWithComments(
     @comment("Person name") name: String,
@@ -523,6 +546,9 @@ case class PersonWithComments(
 ### H2
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 DataModelGenerator.generate[PersonWithComments](dialects.H2Dialect)
 ```
 
@@ -537,7 +563,11 @@ COMMENT ON TABLE PersonWithComments IS 'People data';
 ### Hive
 
 ```scala
-DataModelGenerator.generate[PersonWithComments](dialects.HiveDialect)
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.generator.HiveGenerator
+import com.datawizards.dmg.DataModelGenerator
+
+DataModelGenerator.generate[PersonWithComments](new HiveGenerator)
 ```
 
 ```sql
@@ -551,6 +581,9 @@ COMMENT 'People data';
 ### Redshift
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 DataModelGenerator.generate[PersonWithComments](dialects.RedshiftDialect)
 ```
 
@@ -566,6 +599,9 @@ COMMENT ON COLUMN PersonWithComments.name IS 'Person name';
 ### Avro schema
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 DataModelGenerator.generate[PersonWithComments](dialects.AvroSchemaDialect)
 ```
 
@@ -586,6 +622,8 @@ DataModelGenerator.generate[PersonWithComments](dialects.AvroSchemaDialect)
 
 ```scala
 import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 
 case class Person(
   @length(1000) name: String,
@@ -606,6 +644,7 @@ CREATE TABLE PEOPLE(
 
 ```scala
 import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
 
 case class Person(
   @notNull name: String,
@@ -654,6 +693,9 @@ CREATE TABLE PersonWithNull(
 Convert table and column names for selected dialect to underscore convention.
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 @underscore(dialect=dialects.H2Dialect)
 case class PersonWithUnderscore(
     personName: String,
@@ -673,11 +715,15 @@ CREATE TABLE person_with_underscore(
 ### Hive external table
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.hive._
+import com.datawizards.dmg.generator.HiveGenerator
+import com.datawizards.dmg.{DataModelGenerator, dialects}
 
 @hiveExternalTable(location="hdfs:///data/people")
 case class Person(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.HiveDialect)
+DataModelGenerator.generate[Person](new HiveGenerator)
 ```
 
 ```sql
@@ -691,10 +737,15 @@ LOCATION 'hdfs:///data/people';
 ### Hive ROW FORMAT SERDE
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.hive._
+import com.datawizards.dmg.generator.HiveGenerator
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 @hiveRowFormatSerde(format="org.apache.hadoop.hive.serde2.avro.AvroSerDe")
 case class Person(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.HiveDialect)
+DataModelGenerator.generate[Person](new HiveGenerator)
 ```
 
 ```sql
@@ -708,10 +759,15 @@ ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe';
 ### Hive STORED AS
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.hive._
+import com.datawizards.dmg.generator.HiveGenerator
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 @hiveStoredAs(format="PARQUET")
 case class Person(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.HiveDialect)
+DataModelGenerator.generate[Person](new HiveGenerator)
 ```
 
 ```sql
@@ -725,12 +781,17 @@ STORED AS PARQUET;
 ### Hive TABLE PROPERTIES
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.hive._
+import com.datawizards.dmg.generator.HiveGenerator
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 @hiveTableProperty("key1", "value1")
 @hiveTableProperty("key2", "value2")
 @hiveTableProperty("key3", "value3")
 case class Person(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.HiveDialect)
+DataModelGenerator.generate[Person](new HiveGenerator)
 ```
 
 ```sql
@@ -748,10 +809,15 @@ TBLPROPERTIES(
 ### Hive avro schema url property
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.hive._
+import com.datawizards.dmg.generator.HiveGenerator
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 @hiveTableProperty("avro.schema.url", "hdfs:///metadata/person.avro")
 case class Person(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.HiveDialect)
+DataModelGenerator.generate[Person](new HiveGenerator)
 ```
 
 If "avro.schema.url" table property is provided then generated data model doesn't have any columns definitions, because they are taken by Hive from avro schema.
@@ -766,8 +832,13 @@ TBLPROPERTIES(
 ### Hive partition columns
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.hive._
+import com.datawizards.dmg.generator.HiveGenerator
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 case class ClicksPartitioned(
-    time: Timestamp,
+    time: java.sql.Timestamp,
     event: String,
     user: String,
     @hivePartitionColumn
@@ -778,7 +849,7 @@ case class ClicksPartitioned(
     day: Int
 )
 
-DataModelGenerator.generate[ClicksPartitioned](dialects.HiveDialect)
+DataModelGenerator.generate[ClicksPartitioned](new HiveGenerator)
 ```
 
 ```sql
@@ -793,8 +864,13 @@ PARTITIONED BY(year INT, month INT, day INT);
 ### Hive partition columns - order
 
 ```scala
-case class ClicksPartitioned(
-    time: Timestamp,
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.hive._
+import com.datawizards.dmg.generator.HiveGenerator
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
+case class ClicksPartitionedWithOrder(
+    time: java.sql.Timestamp,
     event: String,
     user: String,
     @hivePartitionColumn(order=3)
@@ -805,7 +881,7 @@ case class ClicksPartitioned(
     month: Int
 )
 
-DataModelGenerator.generate[ClicksPartitionedWithOrder](dialects.HiveDialect)
+DataModelGenerator.generate[ClicksPartitionedWithOrder](new HiveGenerator)
 ```
 
 ```sql
@@ -820,6 +896,11 @@ PARTITIONED BY(year INT, month INT, day INT);
 ### Hive Parquet table with many annotations
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.hive._
+import com.datawizards.dmg.generator.HiveGenerator
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 @table("CUSTOM_TABLE_NAME")
 @comment("Table comment")
 @hiveStoredAs(format="PARQUET")
@@ -830,7 +911,7 @@ PARTITIONED BY(year INT, month INT, day INT);
 case class ParquetTableWithManyAnnotations(
     @column("eventTime")
     @comment("Event time")
-    time: Timestamp,
+    time: java.sql.Timestamp,
     @comment("Event name")
     event: String,
     @comment("User id")
@@ -843,10 +924,11 @@ case class ParquetTableWithManyAnnotations(
     month: Int
 )
 
-DataModelGenerator.generate[ParquetTableWithManyAnnotations](dialects.HiveDialect)
+DataModelGenerator.generate[ParquetTableWithManyAnnotations](new HiveGenerator)
 ```
 
 ```sql
+DROP TABLE IF EXISTS CUSTOM_TABLE_NAME;
 CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME(
    eventTime TIMESTAMP COMMENT 'Event time',
    event STRING COMMENT 'Event name',
@@ -866,6 +948,11 @@ TBLPROPERTIES(
 ### Hive Avro table with many annotations
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.hive._
+import com.datawizards.dmg.generator.HiveGenerator
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 @table("CUSTOM_TABLE_NAME")
 @comment("Table comment")
 @hiveRowFormatSerde(format="org.apache.hadoop.hive.serde2.avro.AvroSerDe")
@@ -878,7 +965,7 @@ TBLPROPERTIES(
 case class AvroTableWithManyAnnotations(
     @column("eventTime")
     @comment("Event time")
-    time: Timestamp,
+    time: java.sql.Timestamp,
     @comment("Event name")
     event: String,
     @comment("User id")
@@ -891,10 +978,11 @@ case class AvroTableWithManyAnnotations(
     month: Int
 )
 
-DataModelGenerator.generate[AvroTableWithManyAnnotations](dialects.HiveDialect)
+DataModelGenerator.generate[AvroTableWithManyAnnotations](new HiveGenerator)
 ```
 
 ```sql
+DROP TABLE IF EXISTS CUSTOM_TABLE_NAME;
 CREATE EXTERNAL TABLE CUSTOM_TABLE_NAME
 COMMENT 'Table comment'
 PARTITIONED BY(year INT, month INT, day INT)
@@ -909,11 +997,66 @@ TBLPROPERTIES(
 );
 ```
 
+### Skip table generation if it is unchanged
+
+Sometimes a case class (one of many case classes) is not modified. 
+Also it takes long to drop that table and re-create it (because it contains many partitions and many files).
+In such case we can override `HiveGenerator` and add custom logic that fetches table property from Hive metastore.
+Then, that property is compared against a hash calculated from case class metadata.
+This guaranetees that once any property is changed, table is re-created.
+If case class remains unchanged from previous table creation, then the code generated is being commented out.
+
+```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.hive._
+import com.datawizards.dmg.generator.HiveGenerator
+import com.datawizards.dmg.metadata.ClassTypeMetaData
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
+case class Person(name: String, age: Int)
+
+DataModelGenerator.generate[Person](new HiveGenerator(){
+        override def getHashFromTableDefinition(metadata: ClassTypeMetaData): Option[Long] = {
+          // TODO: connect to Hive and fetch table property named MODEL_GENERATOR_METADATA_HASH
+          Some(877255039)
+        }
+      })
+```
+
+In case `getHashFromTableDefinition` returns `877255039`, code generated by this is:
+
+```sql
+--Not re-creating table for class Person because it was not modified.
+--CREATE TABLE Person(
+--  name STRING,
+--  age INT
+--)
+--TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '877255039')
+--;
+
+```
+
+In case `getHashFromTableDefinition` returns something different than `877255039`, code generated by this is (so not re-creating the table):
+
+```sql
+ CREATE TABLE Person(
+   name STRING,
+   age INT
+)
+TBLPROPERTIES(   'MODEL_GENERATOR_METADATA_HASH' = '877255039')
+;
+```
+
 ## Elasticsearch customizations
 
 ### index settings
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.es._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
+
 @esSetting("number_of_shards", 1)
 @esSetting("number_of_replicas", 3)
 @esSetting("blocks.read_only", true)
@@ -947,6 +1090,10 @@ DataModelGenerator.generate[Person](dialects.ElasticsearchDialect)
 Index parameter: https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-index.html
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.es._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 case class Person(
     @esIndex("not_analyzed") name: String,
     age: Int
@@ -973,6 +1120,10 @@ DataModelGenerator.generate[Person](dialects.ElasticsearchDialect)
 Date format parameter: https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.es._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 case class Person(
     name: String,
     @esFormat("yyyy-MM-dd") birthday: Date
@@ -999,10 +1150,14 @@ DataModelGenerator.generate[Person](dialects.ElasticsearchDialect)
 https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates.html
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.es._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 @esTemplate("people*")
 case class PersonWithEsTemplate(name: String, age: Int)
 
-DataModelGenerator.generate[Person](dialects.ElasticsearchDialect)
+DataModelGenerator.generate[PersonWithEsTemplate](dialects.ElasticsearchDialect)
 ```
 
 ```json
@@ -1022,6 +1177,10 @@ DataModelGenerator.generate[Person](dialects.ElasticsearchDialect)
 ## Elasticsearch multiple annotations
 
 ```scala
+import com.datawizards.dmg.annotations._
+import com.datawizards.dmg.annotations.es._
+import com.datawizards.dmg.{DataModelGenerator, dialects}
+
 @table("people")
 @esTemplate("people*")
 @esSetting("number_of_shards", 1)
@@ -1032,7 +1191,7 @@ case class PersonWithMultipleEsAnnotations(
     name: String,
     @column("personBirthday")
     @esFormat("yyyy-MM-dd")
-    birthday: Date
+    birthday: java.sql.Date
 )
 
 DataModelGenerator.generate[PersonWithMultipleEsAnnotations](dialects.ElasticsearchDialect)

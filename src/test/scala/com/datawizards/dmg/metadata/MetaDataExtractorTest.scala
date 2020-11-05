@@ -1,11 +1,12 @@
 package com.datawizards.dmg.metadata
 
+import com.datawizards.dmg.TestModel.{NotSupportedTypes, WithArrayType}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.{FunSuite, Matchers}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class MetaDataExtractorTest extends FunSuite {
+class MetaDataExtractorTest extends FunSuite with Matchers {
 
   def personTypeMetaData = ClassTypeMetaData(
     packageName = "com.datawizards.dmg.metadata"
@@ -206,5 +207,18 @@ class MetaDataExtractorTest extends FunSuite {
     val result = MetaDataExtractor.extractTypeMetaData[CV]()
 
     assertResult(expected)(result)
+  }
+
+
+  test("Not supported should throw"){
+    an [UnsupportedOperationException] should be thrownBy MetaDataExtractor.extractClassMetaData[StringBuilder]()
+  }
+
+  test("Not supported should throw 2"){
+    an [UnsupportedOperationException] should be thrownBy MetaDataExtractor.extractTypeMetaData[NotSupportedTypes]()
+  }
+
+  test("Array type "){
+    MetaDataExtractor.extractTypeMetaData[WithArrayType]()
   }
 }

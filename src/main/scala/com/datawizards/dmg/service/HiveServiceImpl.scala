@@ -1,6 +1,7 @@
 package com.datawizards.dmg.service
 
 import com.datawizards.dmg.dialects.MetaDataWithDialectExtractor
+import com.datawizards.dmg.generator.HiveGenerator
 import com.datawizards.dmg.{DataModelGenerator, dialects}
 import org.apache.log4j.Logger
 
@@ -10,10 +11,10 @@ import scala.reflect.runtime.universe.TypeTag
 object HiveServiceImpl extends HiveService {
   private val log = Logger.getLogger(getClass.getName)
 
-  class BatchCreateTable {
+  class BatchCreateTable(val hiveGenerator: HiveGenerator) {
     val sqlScriptBuilder = new StringBuilder
     def createTable[T: ClassTag: TypeTag]: BatchCreateTable = {
-      sqlScriptBuilder ++= buildCreateTableTemplate[T]()
+      sqlScriptBuilder ++= buildCreateTableTemplate[T](hiveGenerator)
       sqlScriptBuilder ++= "\n\n"
       this
     }
@@ -25,23 +26,15 @@ object HiveServiceImpl extends HiveService {
     }
   }
 
-  def batchCreateTable(): BatchCreateTable = new BatchCreateTable()
+  def batchCreateTable()(implicit hiveGenerator: HiveGenerator): BatchCreateTable = new BatchCreateTable(hiveGenerator)
 
-  override def createHiveTable[T: ClassTag: TypeTag](variables: Map[String, String] = Map.empty): Unit = {
-    executeHiveScript(TemplateHandler.inflate(buildCreateTableTemplate[T](), variables))
+  override def createHiveTable[T: ClassTag: TypeTag](variables: Map[String, String] = Map.empty)(implicit hiveGenerator: HiveGenerator): Unit = {
+    executeHiveScript(TemplateHandler.inflate(buildCreateTableTemplate[T](hiveGenerator), variables))
   }
 
-  override def createHiveTableIfNotExists[T: ClassTag: TypeTag](variables: Map[String, String] = Map.empty): Unit = {
-    val createTableExpression = DataModelGenerator.generate[T](dialects.HiveDialect)
-    executeHiveScript(TemplateHandler.inflate(createTableExpression, variables))
-  }
-
-  private def buildCreateTableTemplate[T: ClassTag: TypeTag](): String = {
+  private def buildCreateTableTemplate[T: ClassTag: TypeTag](hiveGenerator: HiveGenerator): String = {
     val classTypeMetaData = MetaDataWithDialectExtractor.extractClassMetaDataForDialect[T](Some(dialects.HiveDialect))
-    val tableName = classTypeMetaData.typeName
-    val createTableExpression = DataModelGenerator.generate[T](dialects.HiveDialect, classTypeMetaData)
-    val dropTableExpression = s"DROP TABLE IF EXISTS $tableName;\n"
-    dropTableExpression + createTableExpression
+    DataModelGenerator.generate[T](hiveGenerator, classTypeMetaData)
   }
 
   private def executeHiveScript(sql: String): Unit = {
